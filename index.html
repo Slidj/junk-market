@@ -3,31 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Game Volume Market</title>
+    <title>Cosmic Market</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-dark: #0a0a12;
-            --bg-light: #151520;
-            --accent: #00f2ff; /* Неоновий блакитний */
-            --accent-secondary: #7b00ff; /* Фіолетовий */
-            --text-primary: #ffffff;
-            --card-radius: 20px;
+            /* --- ПАЛІТРА "COSMIC DEEP" --- */
+            --bg-deep: #0f0c29;
+            --bg-gradient: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+            
+            /* Картки - напівпрозорий темний */
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            
+            /* Акценти */
+            --accent-primary: #f80759; /* Hot Pink */
+            --accent-secondary: #bc4e9c; /* Violet */
+            --gold-star: #FFD700;
+            
+            --text-main: #ffffff;
+            --text-secondary: #b8b8d9;
         }
 
         body {
             margin: 0;
             padding: 0;
-            background: radial-gradient(circle at top, #1a1a2e, var(--bg-dark));
-            color: var(--text-primary);
-            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-gradient); /* Космічний фон */
+            background-attachment: fixed; /* Фон не рухається при скролі */
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif; /* Сучасний округлий шрифт */
             padding-bottom: 100px;
             min-height: 100vh;
         }
 
-        /* --- Header з ефектом скла --- */
+        /* --- Header (Скло) --- */
         .header {
             display: flex;
             justify-content: space-between;
@@ -36,181 +46,166 @@
             position: sticky;
             top: 0;
             z-index: 50;
-            /* Ефект матового об'ємного скла */
-            background: rgba(21, 21, 32, 0.7);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            background: rgba(15, 12, 41, 0.7);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
         }
 
         .logo {
             font-weight: 900;
-            font-size: 20px;
-            text-transform: uppercase;
-            /* Градієнтний текст */
-            background: linear-gradient(45deg, var(--accent), var(--accent-secondary));
+            font-size: 24px;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #fff, var(--accent-secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
 
-        /* Об'ємний баланс */
+        /* Баланс - виглядає як кнопка інтерфейсу зорельота */
         .balance-pill {
-            background: linear-gradient(145deg, #1a1a2e, #0d0d14);
-            padding: 8px 16px;
-            border-radius: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--accent-secondary);
+            padding: 6px 14px;
+            border-radius: 12px;
             font-weight: 700;
-            font-size: 14px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            /* Внутрішнє світіння та зовнішня тінь для об'єму */
-            box-shadow: 
-                inset 0 2px 5px rgba(255,255,255,0.1),
-                0 5px 15px rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #FFD700;
+            gap: 6px;
+            box-shadow: 0 0 10px rgba(188, 78, 156, 0.2);
         }
 
         .section-title {
             padding: 25px 20px 10px;
-            font-size: 14px;
+            font-size: 13px;
             text-transform: uppercase;
+            color: var(--text-secondary);
             font-weight: 700;
-            opacity: 0.7;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
         }
 
         /* --- Grid --- */
         .grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            gap: 16px;
             padding: 20px;
         }
 
-        /* --- ОБ'ЄМНА КАРТКА ТОВАРУ --- */
+        /* --- Об'ємна картка (Glassmorphism) --- */
         .game-card {
-            position: relative;
-            border-radius: var(--card-radius);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
             overflow: hidden;
-            /* Складний фон і тіні для 3D ефекту */
-            background: linear-gradient(160deg, #1e1e2f 0%, #12121a 100%);
-            box-shadow: 
-                0 10px 20px rgba(0,0,0,0.5), /* Глибока тінь знизу */
-                inset 0 2px 3px rgba(255,255,255,0.1); /* Верхній блік */
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.2s ease;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+            /* Тінь створює глибину */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        /* Ефект натискання - картка "вдавлюється" */
         .game-card:active {
-            transform: scale(0.97);
-            box-shadow: 0 5px 10px rgba(0,0,0,0.6);
+            transform: scale(0.96);
         }
 
         .img-container {
-            height: 150px;
+            height: 160px;
             width: 100%;
             position: relative;
-            /* Внутрішня тінь на фото, ніби воно втоплене в картку */
-            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.8);
         }
 
         .game-card img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: var(--card-radius) var(--card-radius) 0 0;
+            /* Легке затемнення знизу фото, щоб плавно переходило в картку */
+            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
         }
 
         .card-info {
-            padding: 15px;
+            padding: 10px 15px 15px;
+            position: relative;
+            z-index: 2;
         }
 
         .card-title {
             font-weight: 700;
-            font-size: 13px;
-            margin-bottom: 10px;
+            font-size: 14px;
+            margin-bottom: 8px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        /* Об'ємна кнопка ціни */
-        .price-btn {
-            background: linear-gradient(90deg, var(--accent-secondary), var(--accent));
-            padding: 8px 12px;
-            border-radius: 12px;
-            font-weight: 900;
-            font-size: 14px;
-            text-align: center;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-            box-shadow: 0 4px 15px rgba(0, 242, 255, 0.3); /* Неонове світіння */
-            display: flex;
+        /* Ціна - яскрава кнопка */
+        .price-tag {
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 5px;
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--gold-star);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); /* Золоте світіння */
+        }
+        
+        .fiat-price {
+            display: block;
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 2px;
         }
 
-        /* --- Bottom Nav (Плаваюча панель) --- */
+        /* --- Floating Nav --- */
         .nav-container {
             position: fixed;
-            bottom: 20px;
+            bottom: 25px;
             left: 50%;
             transform: translateX(-50%);
             width: 85%;
-            height: 70px;
-            /* Дуже об'ємна панель */
-            background: rgba(21, 21, 32, 0.8);
+            height: 65px;
+            /* Скляна панель */
+            background: rgba(48, 43, 99, 0.6);
             backdrop-filter: blur(20px);
-            border-radius: 35px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.15);
             display: flex;
             justify-content: space-evenly;
             align-items: center;
-            box-shadow: 
-                0 10px 25px rgba(0,0,0,0.6),
-                inset 0 2px 5px rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             z-index: 100;
         }
 
         .nav-icon {
-            font-size: 24px;
-            opacity: 0.5;
+            font-size: 22px;
+            color: var(--text-secondary);
+            opacity: 0.7;
             transition: 0.3s;
-            /* Іконки теж мають об'єм */
-            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
         }
 
         .nav-icon.active {
+            color: #fff;
             opacity: 1;
-            color: var(--accent);
-            filter: drop-shadow(0 0 10px var(--accent));
+            text-shadow: 0 0 10px #fff;
         }
 
-        /* Центральна кнопка "+" (Найбільш об'ємна) */
-        .add-btn-game {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+        /* Головна кнопка "+" (Градієнтна крапля) */
+        .add-btn {
+            width: 55px;
+            height: 55px;
+            /* Яскравий градієнт */
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 32px;
-            font-weight: 300;
-            color: #fff;
-            box-shadow: 
-                0 8px 20px rgba(0, 242, 255, 0.4),
-                inset 0 3px 5px rgba(255,255,255,0.3);
-            transform: translateY(-15px); /* Піднята над меню */
-            border: 2px solid rgba(255,255,255,0.2);
+            font-size: 30px;
+            color: white;
+            box-shadow: 0 5px 20px rgba(248, 7, 89, 0.5); /* Рожеве світіння */
+            transform: translateY(-20px);
+            border: 3px solid rgba(255,255,255,0.1);
         }
         
-        .add-btn-game:active {
-            transform: translateY(-12px) scale(0.95);
-            box-shadow: 0 4px 10px rgba(0, 242, 255, 0.4);
+        .add-btn:active {
+            transform: translateY(-18px) scale(0.95);
         }
 
     </style>
@@ -218,60 +213,64 @@
 <body>
 
     <header class="header">
-        <div class="logo">GameMarket</div>
+        <div class="logo">StarMarket</div>
         <div class="balance-pill">
-            <span>⭐️</span> 150
+            <span style="color: var(--gold-star);">★</span> 150
         </div>
     </header>
 
-    <div class="section-title">Тренди сезону</div>
+    <div class="section-title">Fresh Loot 📦</div>
 
     <main class="grid">
         <div class="game-card">
             <div class="img-container">
-                <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500" alt="iPhone">
+                <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500">
             </div>
             <div class="card-info">
-                <div class="card-title">iPhone 12 Mini Pro Gamer Edition</div>
-                <div class="price-btn">⭐️ 10,000</div>
+                <div class="card-title">iPhone 12 Mini</div>
+                <div class="price-tag">★ 10,000</div>
+                <span class="fiat-price">≈ 6,000 UAH</span>
             </div>
         </div>
 
         <div class="game-card">
             <div class="img-container">
-                <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=500" alt="Gamepad">
+                <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=500">
             </div>
             <div class="card-info">
-                <div class="card-title">Sony DualSense X</div>
-                <div class="price-btn">⭐️ 3,500</div>
+                <div class="card-title">Sony DualSense</div>
+                <div class="price-tag">★ 3,500</div>
+                <span class="fiat-price">≈ 2,100 UAH</span>
             </div>
         </div>
 
         <div class="game-card">
             <div class="img-container">
-                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500" alt="Sneakers">
+                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500">
             </div>
             <div class="card-info">
-                <div class="card-title">Nike Cyber Max</div>
-                <div class="price-btn">⭐️ 2,500</div>
+                <div class="card-title">Nike Air Max</div>
+                <div class="price-tag">★ 2,500</div>
+                <span class="fiat-price">≈ 1,500 UAH</span>
             </div>
         </div>
 
         <div class="game-card">
             <div class="img-container">
-                <img src="https://images.unsplash.com/photo-1616348436168-de43ad0db179?w=500" alt="Phone">
+                <img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500">
             </div>
             <div class="card-info">
-                <div class="card-title">iPhone 13 Obsidian</div>
-                <div class="price-btn">⭐️ 15,000</div>
+                <div class="card-title">Polaroid Retro</div>
+                <div class="price-tag">★ 1,200</div>
+                <span class="fiat-price">≈ 720 UAH</span>
             </div>
         </div>
     </main>
 
     <nav class="nav-container">
         <div class="nav-icon active">🏠</div>
-        <div class="nav-icon">🔥</div>
-        <div class="add-btn-game" onclick="alert('Відкрити меню продажу')">+</div>
+        <div class="nav-icon">🔍</div>
+        <div class="add-btn" onclick="alert('Sell Item')">+</div>
         <div class="nav-icon">🛒</div>
         <div class="nav-icon">👤</div>
     </nav>
@@ -279,8 +278,7 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        // Встановлюємо колір хедера під наш темний фон
-        tg.setHeaderColor('#0a0a12'); 
+        tg.setHeaderColor('#0f0c29'); // Колір під фон
     </script>
 </body>
 </html>
