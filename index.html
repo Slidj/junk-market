@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Marketplace</title>
+    <title>Netflix Market</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -20,7 +20,7 @@
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            padding-bottom: 70px;
+            padding-bottom: 80px;
         }
 
         /* --- Header --- */
@@ -44,7 +44,6 @@
             text-transform: uppercase;
         }
 
-        /* Баланс користувача */
         .balance-box {
             background: rgba(255, 255, 255, 0.1);
             padding: 5px 12px;
@@ -72,18 +71,18 @@
 
         .movie-card {
             position: relative;
-            aspect-ratio: 2 / 3.2; /* Трохи вищі картки */
+            aspect-ratio: 2 / 3.2; 
             border-radius: 6px;
             overflow: hidden;
             background-color: var(--secondary-bg);
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
         }
 
         .movie-card img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            opacity: 0.9;
         }
 
         .card-overlay {
@@ -94,29 +93,15 @@
             padding: 10px 8px;
             box-sizing: border-box;
             background: linear-gradient(to top, rgba(0,0,0,1) 10%, rgba(0,0,0,0.6) 60%, transparent 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
         }
 
         .card-title {
             color: white;
             font-size: 12px;
             font-weight: 600;
-            margin-bottom: 4px;
-            line-height: 1.2;
-            display: -webkit-box;
-            -webkit-line-clamp: 2; /* Обмеження до 2 рядків тексту */
-            -webkit-box-orient: vertical;
+            white-space: nowrap;
             overflow: hidden;
-        }
-
-        /* Стиль ціни */
-        .price-row {
-            display: flex;
-            align-items: baseline; /* Вирівнювання по базовій лінії тексту */
-            gap: 4px;
-            flex-wrap: wrap;
+            text-overflow: ellipsis;
         }
 
         .stars-price {
@@ -125,17 +110,109 @@
             font-weight: 800;
             display: flex;
             align-items: center;
-            gap: 2px;
-        }
-        
-        .real-price {
-            font-size: 10px;
-            color: #ccc;
-            font-weight: 400;
+            gap: 3px;
         }
 
-        .star-icon {
-            width: 12px; height: 12px; fill: var(--star-color);
+        .star-icon { width: 12px; height: 12px; fill: var(--star-color); }
+
+        /* --- Modal (Вікно товару) --- */
+        .modal {
+            display: none; /* Спочатку приховане */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            z-index: 200;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-img-container {
+            position: relative;
+            width: 100%;
+            height: 50vh; /* Половина екрану - фото */
+        }
+
+        .modal-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            padding: 20px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        .modal-price-block {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .modal-stars {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--star-color);
+        }
+
+        .modal-fiat {
+            font-size: 16px;
+            color: #888;
+        }
+
+        .buy-btn {
+            width: 100%;
+            background-color: var(--button-color);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+        }
+
+        .desc-text {
+            color: #ccc;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            font-size: 14px;
         }
 
         /* --- Bottom Nav --- */
@@ -148,7 +225,7 @@
             height: 60px;
             background-color: rgba(30, 30, 30, 0.95);
             backdrop-filter: blur(15px);
-            border-radius: 30px; /* Плаваюче меню-капсула */
+            border-radius: 30px;
             display: flex;
             justify-content: space-evenly;
             align-items: center;
@@ -160,29 +237,11 @@
         .nav-icon {
             font-size: 24px;
             opacity: 0.6;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
+            width: 40px; height: 40px;
+            display: flex; justify-content: center; align-items: center;
         }
-
-        .nav-icon.active {
-            opacity: 1;
-            color: white;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-        }
-        
-        .add-btn {
-            background: var(--button-color);
-            border-radius: 50%;
-            color: white;
-            opacity: 1;
-            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
-            transform: translateY(-5px); /* Трохи піднята */
-        }
+        .nav-icon.active { opacity: 1; color: white; background: rgba(255,255,255,0.1); border-radius: 50%; }
+        .add-btn { background: var(--button-color); border-radius: 50%; color: white; opacity: 1; transform: translateY(-5px); }
 
     </style>
 </head>
@@ -190,86 +249,76 @@
 
     <div class="header">
         <div class="logo">BARAHOLKA</div>
-        <div class="balance-box">
-            <svg class="star-icon" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-            <span>150</span>
-        </div>
+        <div class="balance-box">⭐️ 150</div>
     </div>
 
     <div class="grid-title">Свіжі оголошення</div>
 
     <div class="grid" id="grid">
-        <div class="movie-card">
+        <div class="movie-card" onclick="openProduct('iPhone 12 Mini', 10000, 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500', 'Телефон у чудовому стані, без подряпин. Батарея 85%.')">
             <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500">
             <div class="card-overlay">
-                <div class="card-title">iPhone 12 Mini (Б/У)</div>
-                <div class="price-row">
-                    <div class="stars-price">⭐️ 10,000</div>
-                    <div class="real-price">≈ 6000 ₴</div>
-                </div>
+                <div class="card-title">iPhone 12 Mini</div>
+                <div class="stars-price">⭐️ 10,000</div>
             </div>
         </div>
         
-        <div class="movie-card">
+        <div class="movie-card" onclick="openProduct('Nike Air Max 90', 2500, 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500', 'Оригінал, розмір 42. Носилися один сезон. Є коробка.')">
             <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500">
             <div class="card-overlay">
                 <div class="card-title">Nike Air Max 90</div>
-                <div class="price-row">
-                    <div class="stars-price">⭐️ 2,500</div>
-                    <div class="real-price">≈ 1500 ₴</div>
-                </div>
+                <div class="stars-price">⭐️ 2,500</div>
             </div>
         </div>
 
-        <div class="movie-card">
+        <div class="movie-card" onclick="openProduct('Sony Headphones', 3000, 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500', 'Шумоподавлення працює ідеально. Повний комплект.')">
             <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500">
             <div class="card-overlay">
                 <div class="card-title">Sony Headphones</div>
-                <div class="price-row">
-                    <div class="stars-price">⭐️ 3,000</div>
-                    <div class="real-price">≈ 1800 ₴</div>
-                </div>
+                <div class="stars-price">⭐️ 3,000</div>
             </div>
         </div>
 
-        <div class="movie-card">
+        <div class="movie-card" onclick="openProduct('Polaroid Camera', 1200, 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500', 'Вінтажна камера. Працює, але треба купити касети.')">
             <img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500">
             <div class="card-overlay">
                 <div class="card-title">Polaroid Camera</div>
-                <div class="price-row">
-                    <div class="stars-price">⭐️ 1,200</div>
-                    <div class="real-price">≈ 750 ₴</div>
-                </div>
+                <div class="stars-price">⭐️ 1,200</div>
             </div>
         </div>
 
-         <div class="movie-card">
+        <div class="movie-card" onclick="openProduct('RayBan Glasses', 800, 'https://images.unsplash.com/photo-1585336261022-680e295ce3fe?w=500', 'Оригінальні окуляри, є чохол.')">
             <img src="https://images.unsplash.com/photo-1585336261022-680e295ce3fe?w=500">
             <div class="card-overlay">
-                <div class="card-title">Окуляри RayBan</div>
-                <div class="price-row">
-                    <div class="stars-price">⭐️ 800</div>
-                    <div class="real-price">≈ 480 ₴</div>
-                </div>
+                <div class="card-title">RayBan Glasses</div>
+                <div class="stars-price">⭐️ 800</div>
             </div>
         </div>
+    </div>
 
-         <div class="movie-card">
-            <img src="https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=500">
-            <div class="card-overlay">
-                <div class="card-title">Мишка Logitech</div>
-                <div class="price-row">
-                    <div class="stars-price">⭐️ 500</div>
-                    <div class="real-price">≈ 300 ₴</div>
-                </div>
+    <div id="product-modal" class="modal">
+        <div class="modal-img-container">
+            <img id="modal-img" src="" class="modal-img">
+            <div class="close-btn" onclick="closeProduct()">✕</div>
+        </div>
+        <div class="modal-content">
+            <h2 id="modal-title" class="modal-title">Назва товару</h2>
+            
+            <div class="modal-price-block">
+                <div id="modal-stars" class="modal-stars">⭐️ 0</div>
+                <div id="modal-fiat" class="modal-fiat">≈ 0 грн</div>
             </div>
+
+            <p id="modal-desc" class="desc-text">Опис товару...</p>
+
+            <button class="buy-btn" onclick="alert('Переходимо до оплати...')">Купити зараз</button>
         </div>
     </div>
 
     <div class="bottom-nav">
         <div class="nav-icon active">🏠</div>
         <div class="nav-icon">🔍</div>
-        <div class="nav-icon add-btn" onclick="openSellModal()">＋</div>
+        <div class="nav-icon add-btn">＋</div>
         <div class="nav-icon">🛒</div>
         <div class="nav-icon">👤</div>
     </div>
@@ -277,14 +326,43 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        
-        // Функція для імітації відкриття вікна продажу
-        function openSellModal() {
-            tg.showPopup({
-                title: 'Продати товар',
-                message: 'Введіть ціну в гривнях, і ми конвертуємо її в Stars.',
-                buttons: [{type: 'ok', text: 'Зрозуміло'}]
-            });
+
+        // --- НАЛАШТУВАННЯ КУРСУ ---
+        // Тут ми задаємо, скільки гривень коштує 1 зірка
+        const EXCHANGE_RATE = 0.60; // 1 Star = 0.60 UAH
+
+        // Елементи модального вікна
+        const modal = document.getElementById('product-modal');
+        const modalImg = document.getElementById('modal-img');
+        const modalTitle = document.getElementById('modal-title');
+        const modalStars = document.getElementById('modal-stars');
+        const modalFiat = document.getElementById('modal-fiat');
+        const modalDesc = document.getElementById('modal-desc');
+
+        // Функція відкриття товару
+        function openProduct(title, stars, imageSrc, description) {
+            // Заповнюємо дані
+            modalTitle.innerText = title;
+            modalImg.src = imageSrc;
+            modalStars.innerText = "⭐️ " + stars.toLocaleString();
+            modalDesc.innerText = description;
+
+            // Конвертуємо ціну в гривні
+            const fiatPrice = Math.round(stars * EXCHANGE_RATE);
+            modalFiat.innerText = "≈ " + fiatPrice.toLocaleString() + " грн";
+
+            // Показуємо вікно
+            modal.style.display = 'block';
+            
+            // Ховаємо нижнє меню, щоб не заважало
+            document.querySelector('.bottom-nav').style.display = 'none';
+        }
+
+        // Функція закриття товару
+        function closeProduct() {
+            modal.style.display = 'none';
+            // Повертаємо меню
+            document.querySelector('.bottom-nav').style.display = 'flex';
         }
     </script>
 </body>
