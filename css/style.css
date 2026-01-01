@@ -67,8 +67,8 @@ body {
 /* --- CATEGORIES BAR --- */
 .categories-bar {
     position: fixed;
-    /* Опускаємо ще нижче, щоб точно не різало */
-    top: 150px; 
+    /* БУЛО 150px -> СТАЛО 120px (Підняли вище) */
+    top: 120px; 
     left: 0;
     width: 100%;
     height: 60px;
@@ -101,12 +101,12 @@ body {
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     -webkit-tap-highlight-color: transparent;
-    display: flex; align-items: center; gap: 8px; /* Відступ між іконкою і текстом */
+    display: flex; align-items: center; gap: 8px;
 }
 
 /* Стиль іконок у категоріях */
 .category-icon {
-    font-size: 18px; /* Трохи менші за основні */
+    font-size: 18px;
 }
 
 .category-chip:active { transform: scale(0.9); }
@@ -129,8 +129,8 @@ body {
 .grid {
     display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
     padding: 0 16px 16px 16px; 
-    /* Відступ ще більший, щоб компенсувати і хедер, і категорії */
-    margin-top: 240px; 
+    /* БУЛО 240px -> СТАЛО 190px (Підтягнули вгору) */
+    margin-top: 190px; 
 }
 
 /* --- Card Styles --- */
