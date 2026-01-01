@@ -3,282 +3,325 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cosmic Market</title>
+    <title>Material You Market</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+
     <style>
         :root {
-            /* --- ПАЛІТРА "COSMIC DEEP" --- */
-            --bg-deep: #0f0c29;
-            --bg-gradient: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+            /* --- Material 3 Dark Palette --- */
+            --md-sys-color-background: #141218;
+            --md-sys-color-surface: #1D1B20;
+            --md-sys-color-surface-variant: #49454F;
             
-            /* Картки - напівпрозорий темний */
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            /* Primary (Акцент - Лаванда/Фіолетовий) */
+            --md-sys-color-primary: #D0BCFF;
+            --md-sys-color-on-primary: #381E72;
+            --md-sys-color-primary-container: #4F378B;
+            --md-sys-color-on-primary-container: #EADDFF;
             
-            /* Акценти */
-            --accent-primary: #f80759; /* Hot Pink */
-            --accent-secondary: #bc4e9c; /* Violet */
-            --gold-star: #FFD700;
+            /* Secondary */
+            --md-sys-color-secondary-container: #4A4458;
             
-            --text-main: #ffffff;
-            --text-secondary: #b8b8d9;
+            /* Text */
+            --md-sys-color-on-surface: #E6E1E5;
+            --md-sys-color-on-surface-variant: #CAC4D0;
+
+            /* Stars Gold */
+            --star-gold: #FFD700;
         }
 
         body {
             margin: 0;
             padding: 0;
-            background: var(--bg-gradient); /* Космічний фон */
-            background-attachment: fixed; /* Фон не рухається при скролі */
-            color: var(--text-main);
-            font-family: 'Outfit', sans-serif; /* Сучасний округлий шрифт */
-            padding-bottom: 100px;
-            min-height: 100vh;
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-surface);
+            font-family: 'Roboto', sans-serif;
+            padding-bottom: 100px; /* Місце для високого меню */
         }
 
-        /* --- Header (Скло) --- */
-        .header {
+        /* --- Top App Bar --- */
+        .top-app-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 20px;
+            padding: 20px 16px;
+            background-color: var(--md-sys-color-background);
             position: sticky;
             top: 0;
-            z-index: 50;
-            background: rgba(15, 12, 41, 0.7);
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid var(--glass-border);
+            z-index: 10;
         }
 
-        .logo {
-            font-weight: 900;
-            font-size: 24px;
-            letter-spacing: 1px;
-            background: linear-gradient(90deg, #fff, var(--accent-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .headline {
+            font-size: 22px;
+            font-weight: 400; /* Regular у Material 3 */
+            color: var(--md-sys-color-on-surface);
         }
 
-        /* Баланс - виглядає як кнопка інтерфейсу зорельота */
-        .balance-pill {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--accent-secondary);
-            padding: 6px 14px;
-            border-radius: 12px;
-            font-weight: 700;
+        /* Chip балансу */
+        .balance-chip {
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface);
+            padding: 6px 12px;
+            border-radius: 8px; /* Менші заокруглення для чіпів */
+            font-size: 14px;
+            font-weight: 500;
             display: flex;
             align-items: center;
             gap: 6px;
-            box-shadow: 0 0 10px rgba(188, 78, 156, 0.2);
         }
 
-        .section-title {
-            padding: 25px 20px 10px;
-            font-size: 13px;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-            font-weight: 700;
-            letter-spacing: 1.5px;
-        }
-
-        /* --- Grid --- */
+        /* --- Content Grid --- */
         .grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            padding: 20px;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 0 16px 16px 16px;
         }
 
-        /* --- Об'ємна картка (Glassmorphism) --- */
-        .game-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
+        /* --- Material Card --- */
+        .md-card {
+            background-color: var(--md-sys-color-surface);
+            border-radius: 16px; /* Стандарт Material 3 */
             overflow: hidden;
-            position: relative;
-            transition: transform 0.2s, box-shadow 0.2s;
-            /* Тінь створює глибину */
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            /* Немає рамок, тільки колір поверхні */
+            transition: background-color 0.2s;
+            display: flex;
+            flex-direction: column;
         }
 
-        .game-card:active {
-            transform: scale(0.96);
+        /* Ефект наведення (State Layer) */
+        .md-card:active {
+            background-color: #2B2930; 
         }
 
-        .img-container {
-            height: 160px;
+        .card-image-container {
             width: 100%;
+            height: 150px;
             position: relative;
         }
 
-        .game-card img {
+        .card-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            /* Легке затемнення знизу фото, щоб плавно переходило в картку */
-            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
         }
 
-        .card-info {
-            padding: 10px 15px 15px;
-            position: relative;
-            z-index: 2;
+        .card-content {
+            padding: 12px 16px;
         }
 
         .card-title {
-            font-weight: 700;
-            font-size: 14px;
-            margin-bottom: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: var(--md-sys-color-on-surface);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        /* Ціна - яскрава кнопка */
-        .price-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 16px;
-            font-weight: 900;
-            color: var(--gold-star);
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); /* Золоте світіння */
-        }
-        
-        .fiat-price {
-            display: block;
-            font-size: 10px;
-            color: var(--text-secondary);
-            margin-top: 2px;
+        .card-subhead {
+            font-size: 12px;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 12px;
         }
 
-        /* --- Floating Nav --- */
-        .nav-container {
-            position: fixed;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 85%;
-            height: 65px;
-            /* Скляна панель */
-            background: rgba(48, 43, 99, 0.6);
-            backdrop-filter: blur(20px);
-            border-radius: 30px;
-            border: 1px solid rgba(255,255,255,0.15);
+        /* Ціна у вигляді зафарбованої кнопки (Filled Tonal Button) */
+        .price-container {
             display: flex;
-            justify-content: space-evenly;
+            justify-content: space-between;
             align-items: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            z-index: 100;
         }
 
-        .nav-icon {
-            font-size: 22px;
-            color: var(--text-secondary);
-            opacity: 0.7;
-            transition: 0.3s;
+        .price-text {
+            color: var(--md-sys-color-primary);
+            font-size: 16px;
+            font-weight: 700;
+            display: flex; align-items: center; gap: 4px;
         }
 
-        .nav-icon.active {
-            color: #fff;
-            opacity: 1;
-            text-shadow: 0 0 10px #fff;
-        }
-
-        /* Головна кнопка "+" (Градієнтна крапля) */
-        .add-btn {
-            width: 55px;
-            height: 55px;
-            /* Яскравий градієнт */
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border-radius: 50%;
+        /* --- FAB (Floating Action Button) --- */
+        /* Велика квадратна кнопка з заокругленнями */
+        .fab {
+            position: fixed;
+            bottom: 100px;
+            right: 16px;
+            width: 56px;
+            height: 56px;
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border-radius: 16px; /* Squircle */
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 30px;
-            color: white;
-            box-shadow: 0 5px 20px rgba(248, 7, 89, 0.5); /* Рожеве світіння */
-            transform: translateY(-20px);
-            border: 3px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* Elevation 3 */
+            z-index: 20;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* --- Navigation Bar (Material 3 Style) --- */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 80px; /* Високе меню */
+            background-color: var(--md-sys-color-surface); /* Або трохи світліший за фон */
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            width: 64px; /* Ширина зони кліку */
+        }
+
+        /* Індикатор активної вкладки (Pill shape) */
+        .nav-icon-container {
+            width: 64px;
+            height: 32px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item.active .nav-icon-container {
+            background-color: var(--md-sys-color-secondary-container);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .nav-item.active .nav-icon {
+            color: var(--md-sys-color-on-surface); /* Активна іконка яскравіша */
+        }
+
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface-variant);
         }
         
-        .add-btn:active {
-            transform: translateY(-18px) scale(0.95);
+        .nav-item.active .nav-label {
+            color: var(--md-sys-color-on-surface);
+            font-weight: 700;
         }
 
     </style>
 </head>
 <body>
 
-    <header class="header">
-        <div class="logo">StarMarket</div>
-        <div class="balance-pill">
-            <span style="color: var(--gold-star);">★</span> 150
+    <header class="top-app-bar">
+        <div class="headline">Material Market</div>
+        <div class="balance-chip">
+            <span class="material-icons-round" style="font-size: 16px; color: var(--star-gold);">star</span>
+            150
         </div>
     </header>
 
-    <div class="section-title">Fresh Loot 📦</div>
-
     <main class="grid">
-        <div class="game-card">
-            <div class="img-container">
-                <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500">
+        <div class="md-card">
+            <div class="card-image-container">
+                <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500" class="card-img">
             </div>
-            <div class="card-info">
+            <div class="card-content">
                 <div class="card-title">iPhone 12 Mini</div>
-                <div class="price-tag">★ 10,000</div>
-                <span class="fiat-price">≈ 6,000 UAH</span>
+                <div class="card-subhead">Електроніка</div>
+                <div class="price-container">
+                    <span class="price-text">10,000 *</span>
+                </div>
             </div>
         </div>
 
-        <div class="game-card">
-            <div class="img-container">
-                <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=500">
+        <div class="md-card">
+            <div class="card-image-container">
+                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500" class="card-img">
             </div>
-            <div class="card-info">
-                <div class="card-title">Sony DualSense</div>
-                <div class="price-tag">★ 3,500</div>
-                <span class="fiat-price">≈ 2,100 UAH</span>
-            </div>
-        </div>
-
-        <div class="game-card">
-            <div class="img-container">
-                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500">
-            </div>
-            <div class="card-info">
+            <div class="card-content">
                 <div class="card-title">Nike Air Max</div>
-                <div class="price-tag">★ 2,500</div>
-                <span class="fiat-price">≈ 1,500 UAH</span>
+                <div class="card-subhead">Взуття</div>
+                <div class="price-container">
+                    <span class="price-text">2,500 *</span>
+                </div>
             </div>
         </div>
 
-        <div class="game-card">
-            <div class="img-container">
-                <img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500">
+        <div class="md-card">
+            <div class="card-image-container">
+                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500" class="card-img">
             </div>
-            <div class="card-info">
-                <div class="card-title">Polaroid Retro</div>
-                <div class="price-tag">★ 1,200</div>
-                <span class="fiat-price">≈ 720 UAH</span>
+            <div class="card-content">
+                <div class="card-title">Sony Audio</div>
+                <div class="card-subhead">Музика</div>
+                <div class="price-container">
+                    <span class="price-text">3,000 *</span>
+                </div>
+            </div>
+        </div>
+
+         <div class="md-card">
+            <div class="card-image-container">
+                <img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500" class="card-img">
+            </div>
+            <div class="card-content">
+                <div class="card-title">Polaroid Cam</div>
+                <div class="card-subhead">Вінтаж</div>
+                <div class="price-container">
+                    <span class="price-text">1,200 *</span>
+                </div>
             </div>
         </div>
     </main>
 
-    <nav class="nav-container">
-        <div class="nav-icon active">🏠</div>
-        <div class="nav-icon">🔍</div>
-        <div class="add-btn" onclick="alert('Sell Item')">+</div>
-        <div class="nav-icon">🛒</div>
-        <div class="nav-icon">👤</div>
+    <div class="fab" onclick="alert('Відкрити форму продажу')">
+        <span class="material-icons-round" style="font-size: 24px;">add</span>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="nav-item active">
+            <div class="nav-icon-container">
+                <span class="material-icons-round nav-icon">home</span>
+            </div>
+            <span class="nav-label">Головна</span>
+        </div>
+        
+        <div class="nav-item">
+            <div class="nav-icon-container">
+                <span class="material-icons-round nav-icon">search</span>
+            </div>
+            <span class="nav-label">Пошук</span>
+        </div>
+
+        <div class="nav-item">
+            <div class="nav-icon-container">
+                <span class="material-icons-round nav-icon">shopping_cart</span>
+            </div>
+            <span class="nav-label">Кошик</span>
+        </div>
     </nav>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.setHeaderColor('#0f0c29'); // Колір під фон
+        tg.setHeaderColor('#141218'); // Колір фону (Surface)
+        tg.setBackgroundColor('#141218');
     </script>
 </body>
 </html>
