@@ -29,7 +29,7 @@ body {
 /* --- Header --- */
 .top-app-bar {
     position: fixed; top: 0; left: 0; width: 100%;
-    /* Великий відступ зверху (безпечна зона) */
+    /* Висота хедера разом з відступами ~140px */
     padding: 80px 20px 20px 20px; 
     background-color: var(--md-sys-color-background);
     z-index: 50; display: flex; justify-content: space-between; align-items: center;
@@ -64,11 +64,11 @@ body {
     font-weight: bold; font-size: 18px; border: 2px solid var(--md-sys-color-primary);
 }
 
-/* --- CATEGORIES BAR --- */
+/* --- CATEGORIES BAR (ВИПРАВЛЕНО) --- */
 .categories-bar {
     position: fixed;
-    /* БУЛО 150px -> СТАЛО 120px (Підняли вище) */
-    top: 120px; 
+    /* ОПУСТИЛИ НИЖЧЕ: 160px (щоб не налізало на логотип) */
+    top: 160px; 
     left: 0;
     width: 100%;
     height: 60px;
@@ -104,10 +104,7 @@ body {
     display: flex; align-items: center; gap: 8px;
 }
 
-/* Стиль іконок у категоріях */
-.category-icon {
-    font-size: 18px;
-}
+.category-icon { font-size: 18px; }
 
 .category-chip:active { transform: scale(0.9); }
 
@@ -125,12 +122,12 @@ body {
     100% { box-shadow: 0 0 0 rgba(208, 188, 255, 0); }
 }
 
-/* --- Grid --- */
+/* --- Grid (ВИПРАВЛЕНО) --- */
 .grid {
     display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
     padding: 0 16px 16px 16px; 
-    /* БУЛО 240px -> СТАЛО 190px (Підтягнули вгору) */
-    margin-top: 190px; 
+    /* ЗБІЛЬШИЛИ ВІДСТУП: 240px (щоб товари починались після категорій) */
+    margin-top: 240px; 
 }
 
 /* --- Card Styles --- */
@@ -165,7 +162,7 @@ body {
 }
 .cart-btn-small:active { background-color: var(--md-sys-color-primary); color: #000; transform: scale(1.1); }
 
-/* --- ЛЕТЮЧИЙ ЕЛЕМЕНТ (Анімація) --- */
+/* --- ЛЕТЮЧИЙ ЕЛЕМЕНТ --- */
 .fly-item {
     position: fixed;
     z-index: 1000;
