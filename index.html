@@ -27,29 +27,29 @@
             background-color: var(--md-sys-color-background);
             color: var(--md-sys-color-on-surface);
             font-family: 'Roboto', sans-serif;
-            padding-bottom: 100px;
+            /* Відступ знизу для меню навігації */
+            padding-bottom: 100px; 
+            /* Важливо: вимикаємо стандартний скрол бару, щоб не смикався */
+            overflow-x: hidden; 
         }
 
-        /* --- Top App Bar --- */
+        /* --- Top App Bar (Фіксована шапка) --- */
         .top-app-bar {
+            position: fixed; /* Завжди на одному місці */
+            top: 0;
+            left: 0;
+            width: 100%;
+            /* Висота відступу зверху (80px) + контент + відступ знизу */
+            padding: 80px 20px 20px 20px; 
+            background-color: var(--md-sys-color-background);
+            z-index: 50; /* Вище за картки */
             display: flex;
             justify-content: space-between;
             align-items: center;
-            /* ТУТ ЗМІНИ: 80px зверху - це багато, але надійно */
-            padding: 80px 20px 15px 20px; 
-            background-color: var(--md-sys-color-background);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            /* Тінь з'являється тільки щоб відділити хедер від контенту */
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2); 
-            /* Щоб хедер перекривав все при скролі, але не був прозорим */
-            margin-top: -60px; /* Компенсація, щоб фон був, але контент не тікав надто далеко */
-        }
-        
-        /* Цей трюк з margin-top і padding дозволяє розширити фон хедера вгору */
-        body {
-            padding-top: 0; 
+            box-sizing: border-box; /* Щоб padding не ламав ширину */
+            
+            /* Тінь, щоб відділити від контенту */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
         }
 
         .logo-text {
@@ -79,12 +79,16 @@
             gap: 6px;
         }
 
-        /* --- Grid --- */
+        /* --- Grid (Сітка товарів) --- */
         .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
-            padding: 10px 16px 16px 16px; /* Трохи відступу від хедера */
+            padding: 0 16px 16px 16px;
+            
+            /* ГОЛОВНЕ ВИПРАВЛЕННЯ: */
+            /* Відштовхуємо контент вниз на висоту хедера (140px) */
+            margin-top: 150px; 
         }
 
         .md-card {
@@ -287,6 +291,17 @@
                 <div class="card-title">RayBan Glasses</div>
                 <div class="card-subhead">Аксесуари</div>
                 <div class="price-text">800 *</div>
+            </div>
+        </div>
+
+         <div class="md-card">
+            <div class="card-image-container">
+                <img src="https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=500" class="card-img">
+            </div>
+            <div class="card-content">
+                <div class="card-title">Logitech Mouse</div>
+                <div class="card-subhead">PC</div>
+                <div class="price-text">500 *</div>
             </div>
         </div>
     </main>
