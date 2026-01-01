@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Material You Market</title>
+    <title>Junk Store</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Poppins:wght@800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 
     <style>
@@ -15,20 +15,15 @@
             --md-sys-color-surface: #1D1B20;
             --md-sys-color-surface-variant: #49454F;
             
-            /* Primary (Акцент - Лаванда/Фіолетовий) */
+            /* Акцент - Лаванда */
             --md-sys-color-primary: #D0BCFF;
-            --md-sys-color-on-primary: #381E72;
             --md-sys-color-primary-container: #4F378B;
             --md-sys-color-on-primary-container: #EADDFF;
             
-            /* Secondary */
-            --md-sys-color-secondary-container: #4A4458;
-            
-            /* Text */
+            /* Текст */
             --md-sys-color-on-surface: #E6E1E5;
             --md-sys-color-on-surface-variant: #CAC4D0;
 
-            /* Stars Gold */
             --star-gold: #FFD700;
         }
 
@@ -38,7 +33,7 @@
             background-color: var(--md-sys-color-background);
             color: var(--md-sys-color-on-surface);
             font-family: 'Roboto', sans-serif;
-            padding-bottom: 100px; /* Місце для високого меню */
+            padding-bottom: 100px;
         }
 
         /* --- Top App Bar --- */
@@ -46,33 +41,43 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 16px;
+            /* ЗБІЛЬШЕНИЙ ВІДСТУП ЗВЕРХУ, щоб не налізало на кнопки */
+            padding: 40px 20px 20px 20px; 
             background-color: var(--md-sys-color-background);
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
-        .headline {
-            font-size: 22px;
-            font-weight: 400; /* Regular у Material 3 */
+        .logo-text {
+            font-family: 'Poppins', sans-serif; /* Більш жирний шрифт для лого */
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
             color: var(--md-sys-color-on-surface);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .logo-emoji {
+            font-size: 24px;
         }
 
         /* Chip балансу */
         .balance-chip {
             background-color: var(--md-sys-color-surface-variant);
             color: var(--md-sys-color-on-surface);
-            padding: 6px 12px;
-            border-radius: 8px; /* Менші заокруглення для чіпів */
+            padding: 6px 14px;
+            border-radius: 20px;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        /* --- Content Grid --- */
+        /* --- Grid --- */
         .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -83,22 +88,21 @@
         /* --- Material Card --- */
         .md-card {
             background-color: var(--md-sys-color-surface);
-            border-radius: 16px; /* Стандарт Material 3 */
+            border-radius: 16px;
             overflow: hidden;
-            /* Немає рамок, тільки колір поверхні */
             transition: background-color 0.2s;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
-        /* Ефект наведення (State Layer) */
         .md-card:active {
             background-color: #2B2930; 
         }
 
         .card-image-container {
             width: 100%;
-            height: 150px;
+            height: 160px;
             position: relative;
         }
 
@@ -113,7 +117,7 @@
         }
 
         .card-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 500;
             margin-bottom: 4px;
             color: var(--md-sys-color-on-surface);
@@ -128,56 +132,48 @@
             margin-bottom: 12px;
         }
 
-        /* Ціна у вигляді зафарбованої кнопки (Filled Tonal Button) */
-        .price-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
         .price-text {
             color: var(--md-sys-color-primary);
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 700;
             display: flex; align-items: center; gap: 4px;
         }
 
-        /* --- FAB (Floating Action Button) --- */
-        /* Велика квадратна кнопка з заокругленнями */
+        /* --- FAB (Plus Button) --- */
         .fab {
             position: fixed;
             bottom: 100px;
-            right: 16px;
-            width: 56px;
-            height: 56px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
             background-color: var(--md-sys-color-primary-container);
             color: var(--md-sys-color-on-primary-container);
-            border-radius: 16px; /* Squircle */
+            border-radius: 18px;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* Elevation 3 */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
             z-index: 20;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: transform 0.1s;
         }
 
         .fab:active {
             transform: scale(0.95);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
-        /* --- Navigation Bar (Material 3 Style) --- */
+        /* --- Navigation Bar --- */
         .nav-bar {
             position: fixed;
             bottom: 0;
             width: 100%;
-            height: 80px; /* Високе меню */
-            background-color: var(--md-sys-color-surface); /* Або трохи світліший за фон */
+            height: 80px;
+            background-color: var(--md-sys-color-surface);
             display: flex;
             justify-content: space-around;
             align-items: center;
             z-index: 100;
+            border-top: 1px solid rgba(255,255,255,0.05);
         }
 
         .nav-item {
@@ -186,10 +182,9 @@
             align-items: center;
             gap: 4px;
             cursor: pointer;
-            width: 64px; /* Ширина зони кліку */
+            width: 64px;
         }
 
-        /* Індикатор активної вкладки (Pill shape) */
         .nav-icon-container {
             width: 64px;
             height: 32px;
@@ -210,7 +205,7 @@
         }
 
         .nav-item.active .nav-icon {
-            color: var(--md-sys-color-on-surface); /* Активна іконка яскравіша */
+            color: var(--md-sys-color-on-surface);
         }
 
         .nav-label {
@@ -229,7 +224,9 @@
 <body>
 
     <header class="top-app-bar">
-        <div class="headline">Material Market</div>
+        <div class="logo-text">
+            Junk<span class="logo-emoji">🛍️</span>Store
+        </div>
         <div class="balance-chip">
             <span class="material-icons-round" style="font-size: 16px; color: var(--star-gold);">star</span>
             150
@@ -243,10 +240,8 @@
             </div>
             <div class="card-content">
                 <div class="card-title">iPhone 12 Mini</div>
-                <div class="card-subhead">Електроніка</div>
-                <div class="price-container">
-                    <span class="price-text">10,000 *</span>
-                </div>
+                <div class="card-subhead">Apple</div>
+                <div class="price-text">10,000 *</div>
             </div>
         </div>
 
@@ -257,9 +252,7 @@
             <div class="card-content">
                 <div class="card-title">Nike Air Max</div>
                 <div class="card-subhead">Взуття</div>
-                <div class="price-container">
-                    <span class="price-text">2,500 *</span>
-                </div>
+                <div class="price-text">2,500 *</div>
             </div>
         </div>
 
@@ -269,10 +262,8 @@
             </div>
             <div class="card-content">
                 <div class="card-title">Sony Audio</div>
-                <div class="card-subhead">Музика</div>
-                <div class="price-container">
-                    <span class="price-text">3,000 *</span>
-                </div>
+                <div class="card-subhead">Звук</div>
+                <div class="price-text">3,000 *</div>
             </div>
         </div>
 
@@ -282,16 +273,25 @@
             </div>
             <div class="card-content">
                 <div class="card-title">Polaroid Cam</div>
-                <div class="card-subhead">Вінтаж</div>
-                <div class="price-container">
-                    <span class="price-text">1,200 *</span>
-                </div>
+                <div class="card-subhead">Камери</div>
+                <div class="price-text">1,200 *</div>
+            </div>
+        </div>
+        
+        <div class="md-card">
+            <div class="card-image-container">
+                <img src="https://images.unsplash.com/photo-1585336261022-680e295ce3fe?w=500" class="card-img">
+            </div>
+            <div class="card-content">
+                <div class="card-title">RayBan Glasses</div>
+                <div class="card-subhead">Аксесуари</div>
+                <div class="price-text">800 *</div>
             </div>
         </div>
     </main>
 
     <div class="fab" onclick="alert('Відкрити форму продажу')">
-        <span class="material-icons-round" style="font-size: 24px;">add</span>
+        <span class="material-icons-round" style="font-size: 28px;">add</span>
     </div>
 
     <nav class="nav-bar">
@@ -320,8 +320,7 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.setHeaderColor('#141218'); // Колір фону (Surface)
-        tg.setBackgroundColor('#141218');
+        tg.setHeaderColor('#141218'); 
     </script>
 </body>
 </html>
