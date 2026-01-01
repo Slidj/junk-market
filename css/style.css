@@ -23,16 +23,14 @@ body {
     -webkit-overflow-scrolling: touch; 
 }
 
-/* --- Header (ВИПРАВЛЕНО) --- */
+/* --- Header (ПОВЕРНУЛИ ВІДСТУП) --- */
 .top-app-bar {
     position: fixed; top: 0; left: 0; width: 100%;
-    /* Було 80px, ставимо 60px. Це все ще безпечно, але компактніше */
-    padding: 60px 20px 15px 20px; 
+    /* Повернули 80px, щоб логотип був нижче і не ліз на статус-бар */
+    padding: 80px 20px 20px 20px; 
     background-color: var(--md-sys-color-background);
     z-index: 50; display: flex; justify-content: space-between; align-items: center;
     box-sizing: border-box; 
-    /* Тінь прибрали тут, щоб не було лінії між хедером і категоріями */
-    /* box-shadow: 0 4px 20px rgba(0,0,0,0.5); */
 }
 
 .logo-text {
@@ -63,11 +61,11 @@ body {
     font-weight: bold; font-size: 18px; border: 2px solid var(--md-sys-color-primary);
 }
 
-/* --- CATEGORIES BAR (ВИПРАВЛЕНО) --- */
+/* --- CATEGORIES BAR (ІДЕАЛЬНА ПІДГОНКА) --- */
 .categories-bar {
     position: fixed;
-    /* 60px (padding-top) + ~40px (контент) + 15px (padding-bottom) ≈ 115px */
-    top: 115px; 
+    /* 140px - це рівно там, де закінчується шапка з відступом 80px */
+    top: 140px; 
     left: 0;
     width: 100%;
     height: 60px;
@@ -84,8 +82,8 @@ body {
     scrollbar-width: none; 
     -ms-overflow-style: none;
     
-    /* Тінь тепер тут, спільна для всього блоку зверху */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    /* Тінь тепер тут */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 .categories-bar::-webkit-scrollbar { display: none; }
 
@@ -122,12 +120,12 @@ body {
     100% { box-shadow: 0 0 0 rgba(208, 188, 255, 0); }
 }
 
-/* --- Grid (ВИПРАВЛЕНО) --- */
+/* --- Grid (ПІДГОНКА) --- */
 .grid {
     display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
     padding: 0 16px 16px 16px; 
-    /* 115px (хедер) + 60px (категорії) + відступ = ~185px */
-    margin-top: 185px; 
+    /* 140px (шапка) + 60px (категорії) + 10px (зазор) = 210px */
+    margin-top: 210px; 
 }
 
 /* --- Card Styles --- */
