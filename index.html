@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Netflix Market Style</title>
+    <title>Marketplace</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            /* Використовуємо темну тему за замовчуванням для ефекту кінотеатру, 
-               але змінні Телеграм підтягнуть реальну тему користувача */
-            --bg-color: var(--tg-theme-bg-color, #141414); 
-            --text-color: var(--tg-theme-text-color, #ffffff);
-            --secondary-bg: var(--tg-theme-secondary-bg-color, #1f1f1f);
-            --button-color: var(--tg-theme-button-color, #E50914); /* Netflix red */
-            --border-color: rgba(255,255,255,0.1);
+            --bg-color: #141414; 
+            --text-color: #ffffff;
+            --secondary-bg: #1f1f1f;
+            --button-color: #E50914; 
+            --star-color: #FFD700;
         }
 
         body {
@@ -22,10 +20,10 @@
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            padding-bottom: 60px;
+            padding-bottom: 70px;
         }
 
-        /* --- Верхня панель (спрощена) --- */
+        /* --- Header --- */
         .header {
             display: flex;
             justify-content: space-between;
@@ -33,129 +31,158 @@
             padding: 15px 20px;
             position: sticky;
             top: 0;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 50%, transparent 100%);
+            background: rgba(20, 20, 20, 0.95);
             z-index: 10;
-            /* Розмиття фону як в iOS/Netflix */
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
         }
 
         .logo {
             font-weight: 800;
-            font-size: 24px;
-            color: var(--button-color); /* Червоний логотип */
+            font-size: 22px;
+            color: var(--button-color);
             letter-spacing: 1px;
-        }
-        
-        .header-balance {
-             font-size: 14px;
-             font-weight: 600;
-             color: #FFD700;
+            text-transform: uppercase;
         }
 
-        /* --- Сітка товарів (Netflix Poster Style) --- */
+        /* Баланс користувача */
+        .balance-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* --- Grid --- */
         .grid-title {
-             padding: 10px 20px 5px;
-             font-size: 18px;
-             font-weight: 700;
+             padding: 15px 15px 5px;
+             font-size: 16px;
+             color: #aaa;
+             font-weight: 500;
         }
 
         .grid {
             display: grid;
-            /* Три колонки, мінімальна ширина 100px, розтягуються */
             grid-template-columns: repeat(3, 1fr); 
-            gap: 10px;
-            padding: 10px 15px;
+            gap: 8px;
+            padding: 0 10px;
         }
 
         .movie-card {
             position: relative;
-            /* Співвідношення сторін для постера (високий прямокутник) */
-            aspect-ratio: 2 / 3; 
-            border-radius: 8px;
+            aspect-ratio: 2 / 3.2; /* Трохи вищі картки */
+            border-radius: 6px;
             overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.1s;
             background-color: var(--secondary-bg);
-        }
-
-        .movie-card:active {
-            transform: scale(0.98);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
 
         .movie-card img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            opacity: 0.9;
         }
 
-        /* Градієнт знизу, щоб текст читався */
         .card-overlay {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 60%;
-            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 50%, transparent 100%);
+            padding: 10px 8px;
+            box-sizing: border-box;
+            background: linear-gradient(to top, rgba(0,0,0,1) 10%, rgba(0,0,0,0.6) 60%, transparent 100%);
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            padding: 10px;
-            box-sizing: border-box;
         }
 
         .card-title {
             color: white;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             margin-bottom: 4px;
-            /* Обрізка довгого тексту трикрапкою */
-            white-space: nowrap;
+            line-height: 1.2;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* Обмеження до 2 рядків тексту */
+            -webkit-box-orient: vertical;
             overflow: hidden;
-            text-overflow: ellipsis;
         }
 
-        .card-price {
-            color: #FFD700; /* Золотий для зірок */
+        /* Стиль ціни */
+        .price-row {
+            display: flex;
+            align-items: baseline; /* Вирівнювання по базовій лінії тексту */
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .stars-price {
+            color: var(--star-color);
             font-size: 14px;
             font-weight: 800;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 2px;
         }
         
-        .star-icon {
-            width: 14px; height: 14px; fill: #FFD700;
+        .real-price {
+            font-size: 10px;
+            color: #ccc;
+            font-weight: 400;
         }
 
+        .star-icon {
+            width: 12px; height: 12px; fill: var(--star-color);
+        }
 
-        /* --- Нижнє меню --- */
+        /* --- Bottom Nav --- */
         .bottom-nav {
             position: fixed;
-            bottom: 0;
-            width: 100%;
-            height: 55px;
-            background-color: rgba(20, 20, 20, 0.95); /* Майже чорний фон */
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            height: 60px;
+            background-color: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 30px; /* Плаваюче меню-капсула */
             display: flex;
-            justify-content: space-around;
+            justify-content: space-evenly;
             align-items: center;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             z-index: 100;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .nav-icon {
             font-size: 24px;
-            color: #888;
-            cursor: pointer;
+            opacity: 0.6;
+            transition: 0.2s;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            font-size: 10px;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
         }
-        .nav-icon span { font-size: 22px; margin-bottom: 2px; }
-        .nav-icon.active { color: white; }
+
+        .nav-icon.active {
+            opacity: 1;
+            color: white;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+        
+        .add-btn {
+            background: var(--button-color);
+            border-radius: 50%;
+            color: white;
+            opacity: 1;
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+            transform: translateY(-5px); /* Трохи піднята */
+        }
 
     </style>
 </head>
@@ -163,103 +190,102 @@
 
     <div class="header">
         <div class="logo">BARAHOLKA</div>
-        <div class="header-balance">⭐️ 150</div>
+        <div class="balance-box">
+            <svg class="star-icon" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <span>150</span>
+        </div>
     </div>
 
-    <div class="grid-title">Тренди зараз</div>
+    <div class="grid-title">Свіжі оголошення</div>
 
     <div class="grid" id="grid">
         <div class="movie-card">
-            <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500" alt="Кросівки">
+            <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500">
             <div class="card-overlay">
-                <div class="card-title">Nike Air Jordan Retro High</div>
-                <div class="card-price">
-                    <svg class="star-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                    500
+                <div class="card-title">iPhone 12 Mini (Б/У)</div>
+                <div class="price-row">
+                    <div class="stars-price">⭐️ 10,000</div>
+                    <div class="real-price">≈ 6000 ₴</div>
                 </div>
             </div>
         </div>
+        
         <div class="movie-card">
-            <img src="https://images.unsplash.com/photo-1616348436168-de43ad0db179?w=500" alt="iPhone">
+            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500">
             <div class="card-overlay">
-                <div class="card-title">iPhone 13 Pro Max 256GB</div>
-                <div class="card-price">
-                    <svg class="star-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                    1200
+                <div class="card-title">Nike Air Max 90</div>
+                <div class="price-row">
+                    <div class="stars-price">⭐️ 2,500</div>
+                    <div class="real-price">≈ 1500 ₴</div>
                 </div>
             </div>
         </div>
+
         <div class="movie-card">
-            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500" alt="Годинник">
+            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500">
             <div class="card-overlay">
-                <div class="card-title">Casio Vintage Silver</div>
-                <div class="card-price">
-                     <svg class="star-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                    45
+                <div class="card-title">Sony Headphones</div>
+                <div class="price-row">
+                    <div class="stars-price">⭐️ 3,000</div>
+                    <div class="real-price">≈ 1800 ₴</div>
                 </div>
             </div>
         </div>
+
         <div class="movie-card">
-            <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=500" alt="Геймпад">
+            <img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500">
             <div class="card-overlay">
-                <div class="card-title">DualSense PS5 Controller</div>
-                <div class="card-price">
-                     <svg class="star-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                    60
+                <div class="card-title">Polaroid Camera</div>
+                <div class="price-row">
+                    <div class="stars-price">⭐️ 1,200</div>
+                    <div class="real-price">≈ 750 ₴</div>
                 </div>
             </div>
         </div>
-        <div class="movie-card">
-            <img src="https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=500" alt="Рюкзак">
-            <div class="card-overlay">
-                <div class="card-title">Рюкзак міський</div>
-                <div class="card-price">
-                     <svg class="star-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                    30
-                </div>
-            </div>
-        </div>
+
          <div class="movie-card">
-            <img src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=500" alt="Фотоапарат">
+            <img src="https://images.unsplash.com/photo-1585336261022-680e295ce3fe?w=500">
             <div class="card-overlay">
-                <div class="card-title">Canon AE-1 Film Camera</div>
-                <div class="card-price">
-                     <svg class="star-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                    250
+                <div class="card-title">Окуляри RayBan</div>
+                <div class="price-row">
+                    <div class="stars-price">⭐️ 800</div>
+                    <div class="real-price">≈ 480 ₴</div>
+                </div>
+            </div>
+        </div>
+
+         <div class="movie-card">
+            <img src="https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=500">
+            <div class="card-overlay">
+                <div class="card-title">Мишка Logitech</div>
+                <div class="price-row">
+                    <div class="stars-price">⭐️ 500</div>
+                    <div class="real-price">≈ 300 ₴</div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-icon active">
-            <span>🏠</span>
-            Головна
-        </div>
-        <div class="nav-icon">
-            <span>🔥</span>
-            Гаряче
-        </div>
-        <div class="nav-icon" onclick="alert('Відкрити форму продажу')">
-            <span style="font-size: 28px; color: var(--button-color);">⊕</span>
-            Продати
-        </div>
-        <div class="nav-icon">
-            <span>🛒</span>
-            Кошик
-        </div>
-        <div class="nav-icon">
-            <span>😎</span>
-            Профіль
-        </div>
+        <div class="nav-icon active">🏠</div>
+        <div class="nav-icon">🔍</div>
+        <div class="nav-icon add-btn" onclick="openSellModal()">＋</div>
+        <div class="nav-icon">🛒</div>
+        <div class="nav-icon">👤</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        // Для Netflix стилю краще примусово задати темний хедер, 
-        // або використати прозорий, як зараз в коді.
-        // tg.setHeaderColor('#000000'); 
+        
+        // Функція для імітації відкриття вікна продажу
+        function openSellModal() {
+            tg.showPopup({
+                title: 'Продати товар',
+                message: 'Введіть ціну в гривнях, і ми конвертуємо її в Stars.',
+                buttons: [{type: 'ok', text: 'Зрозуміло'}]
+            });
+        }
     </script>
 </body>
 </html>
