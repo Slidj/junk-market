@@ -23,22 +23,18 @@ let cartCount = 0;
 const cartBadge = document.getElementById('cart-badge');
 const cartNavItem = document.getElementById('cart-nav-item');
 
-// Функція анімації польоту
 function animateFly(startElementId) {
     const productImg = document.getElementById(startElementId);
     const cartTarget = cartNavItem.querySelector('.nav-icon-container');
 
     if (!productImg || !cartTarget) return;
 
-    // Створюємо клон картинки
     const flyImg = productImg.cloneNode();
     flyImg.classList.add('fly-item');
     
-    // Отримуємо координати старту і фінішу
     const startRect = productImg.getBoundingClientRect();
     const endRect = cartTarget.getBoundingClientRect();
 
-    // Ставимо клон на місце старту
     flyImg.style.top = startRect.top + "px";
     flyImg.style.left = startRect.left + "px";
     flyImg.style.width = startRect.width + "px";
@@ -46,7 +42,6 @@ function animateFly(startElementId) {
 
     document.body.appendChild(flyImg);
 
-    // Запускаємо анімацію через 50мс
     setTimeout(() => {
         flyImg.style.top = (endRect.top + 10) + "px";
         flyImg.style.left = (endRect.left + 20) + "px";
@@ -55,18 +50,12 @@ function animateFly(startElementId) {
         flyImg.style.opacity = "0.5";
     }, 50);
 
-    // Коли долетів (0.8с)
     setTimeout(() => {
         flyImg.remove();
-        
-        // Оновлюємо лічильник
         cartCount++;
         updateCartUI();
-        
-        // Ефект "Pop" на кошику
         cartBadge.classList.add('badge-pop');
         setTimeout(() => cartBadge.classList.remove('badge-pop'), 200);
-        
         tg.HapticFeedback.impactOccurred('heavy');
     }, 800);
 }
@@ -82,7 +71,6 @@ function updateCartUI() {
 
 function addToCart(event, imgId) {
     event.stopPropagation();
-    // Запускаємо політ
     animateFly(imgId);
 }
 
@@ -108,4 +96,20 @@ function switchTab(clickedTab) {
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     clickedTab.classList.add('active');
     tg.HapticFeedback.selectionChanged();
+}
+
+// --- Category Logic (НОВЕ) ---
+function selectCategory(element) {
+    document.querySelectorAll('.category-chip').forEach(chip => {
+        chip.classList.remove('active');
+    });
+    element.classList.add('active');
+    tg.HapticFeedback.selectionChanged();
+    
+    // Плавна прокрутка до центру
+    element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center'
+    });
 }
