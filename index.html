@@ -19,6 +19,7 @@
             --md-sys-color-on-surface: #E6E1E5;
             --md-sys-color-on-surface-variant: #CAC4D0;
             --star-gold: #FFD700;
+            --cart-badge-color: #ff4b4b;
         }
 
         body {
@@ -31,13 +32,12 @@
             overflow-x: hidden; 
         }
 
-        /* --- Top App Bar --- */
+        /* --- Header --- */
         .top-app-bar {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            /* ПОВЕРНУВ ВЕЛИКИЙ ВІДСТУП: 80px зверху */
             padding: 80px 20px 20px 20px; 
             background-color: var(--md-sys-color-background);
             z-index: 50;
@@ -54,19 +54,11 @@
             font-weight: 800;
             letter-spacing: -0.5px;
             color: var(--md-sys-color-on-surface);
-            display: flex;
-            align-items: center;
-            gap: 2px;
+            display: flex; align-items: center; gap: 2px;
         }
-        
         .logo-emoji { font-size: 24px; }
 
-        /* Правий блок: Баланс + Аватар */
-        .right-section {
-            display: flex;
-            align-items: center;
-            gap: 12px; /* Відстань між балансом і аватаркою */
-        }
+        .right-section { display: flex; align-items: center; gap: 12px; }
 
         .balance-chip {
             background-color: var(--md-sys-color-surface-variant);
@@ -75,33 +67,21 @@
             border-radius: 20px;
             font-size: 14px;
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            display: flex; align-items: center; gap: 4px;
         }
 
-        /* Тільки аватарка, без імені */
         .user-avatar {
-            width: 40px; /* Трохи більша аватарка */
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
+            width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
             border: 2px solid var(--md-sys-color-primary);
             background-color: var(--md-sys-color-surface-variant);
         }
         
-        /* Заглушка (літера) */
         .avatar-placeholder {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            width: 40px; height: 40px; border-radius: 50%;
             background-color: var(--md-sys-color-primary-container);
             color: var(--md-sys-color-on-primary-container);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 18px;
+            display: flex; justify-content: center; align-items: center;
+            font-weight: bold; font-size: 18px;
             border: 2px solid var(--md-sys-color-primary);
         }
 
@@ -111,117 +91,169 @@
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             padding: 0 16px 16px 16px;
-            /* Збільшив відступ, бо шапка тепер вища */
             margin-top: 160px; 
         }
 
+        /* --- Updated Card Styles --- */
         .md-card {
             background-color: var(--md-sys-color-surface);
             border-radius: 16px;
             overflow: hidden;
-            transition: background-color 0.2s;
             display: flex;
             flex-direction: column;
             position: relative;
+            /* Анімація натискання */
+            transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent; /* Прибираємо синє виділення на Android */
         }
 
-        .md-card:active { background-color: #2B2930; }
-
-        .card-image-container {
-            width: 100%;
-            height: 160px;
+        /* Ефект "пружини" при натисканні */
+        .md-card:active {
+            transform: scale(0.96);
         }
 
-        .card-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .card-image-container { width: 100%; height: 160px; position: relative; }
+        .card-img { width: 100%; height: 100%; object-fit: cover; }
+
+        .card-content {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
-        .card-content { padding: 12px 16px; }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .text-group { overflow: hidden; }
 
         .card-title {
-            font-size: 15px;
-            font-weight: 500;
-            margin-bottom: 4px;
+            font-size: 15px; font-weight: 500;
             color: var(--md-sys-color-on-surface);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
         .card-subhead {
-            font-size: 12px;
-            color: var(--md-sys-color-on-surface-variant);
-            margin-bottom: 12px;
+            font-size: 12px; color: var(--md-sys-color-on-surface-variant);
+        }
+
+        /* Нижній рядок: Ціна та Кнопка кошика */
+        .card-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
         }
 
         .price-text {
             color: var(--md-sys-color-primary);
-            font-size: 17px;
-            font-weight: 700;
+            font-size: 16px; font-weight: 700;
             display: flex; align-items: center; gap: 4px;
         }
 
-        /* --- FAB --- */
+        /* Кнопка кошика (бейдж) */
+        .cart-btn-small {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface);
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .cart-btn-small:active {
+            background-color: var(--md-sys-color-primary);
+            color: #000;
+            transform: scale(1.1); /* Легке збільшення при кліку */
+        }
+
+        /* --- Bottom Sheet (Опис товару) --- */
+        .bottom-sheet-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            z-index: 150;
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .bottom-sheet {
+            position: fixed; bottom: -100%; left: 0; width: 100%;
+            background-color: var(--md-sys-color-surface);
+            border-radius: 28px 28px 0 0;
+            padding: 24px;
+            box-sizing: border-box;
+            transition: bottom 0.3s cubic-bezier(0.1, 0.7, 0.1, 1);
+            z-index: 160;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .sheet-active .bottom-sheet-overlay { opacity: 1; visibility: visible; }
+        .sheet-active .bottom-sheet { bottom: 0; }
+
+        .sheet-img {
+            width: 100%; height: 250px; object-fit: cover;
+            border-radius: 16px; margin-bottom: 20px;
+        }
+        
+        .sheet-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+        .sheet-price { font-size: 20px; color: var(--md-sys-color-primary); font-weight: 700; margin-bottom: 16px; }
+        .sheet-desc { color: var(--md-sys-color-on-surface-variant); line-height: 1.6; margin-bottom: 30px; }
+        
+        .sheet-btn {
+            width: 100%; padding: 16px; border-radius: 100px; border: none;
+            background-color: var(--md-sys-color-primary);
+            color: #000; font-size: 16px; font-weight: 700;
+        }
+
+        /* --- Nav & FAB --- */
         .fab {
-            position: fixed;
-            bottom: 100px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
+            position: fixed; bottom: 100px; right: 20px;
+            width: 60px; height: 60px;
             background-color: var(--md-sys-color-primary-container);
             color: var(--md-sys-color-on-primary-container);
             border-radius: 18px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex; justify-content: center; align-items: center;
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            z-index: 20;
-            cursor: pointer;
-            transition: transform 0.1s;
+            z-index: 20; cursor: pointer; transition: transform 0.1s;
         }
-
         .fab:active { transform: scale(0.95); }
 
-        /* --- Nav --- */
         .nav-bar {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            height: 80px;
+            position: fixed; bottom: 0; width: 100%; height: 80px;
             background-color: var(--md-sys-color-surface);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 100;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 100; border-top: 1px solid rgba(255,255,255,0.05);
         }
 
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            width: 64px;
-        }
-
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; width: 64px; position: relative; }
         .nav-icon-container {
-            width: 64px;
-            height: 32px;
-            border-radius: 16px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 64px; height: 32px; border-radius: 16px;
+            display: flex; justify-content: center; align-items: center;
             transition: background-color 0.2s;
         }
-
         .nav-item.active .nav-icon-container { background-color: var(--md-sys-color-secondary-container); }
         .nav-icon { font-size: 24px; color: var(--md-sys-color-on-surface-variant); }
         .nav-item.active .nav-icon { color: var(--md-sys-color-on-surface); }
         .nav-label { font-size: 12px; font-weight: 500; color: var(--md-sys-color-on-surface-variant); }
         .nav-item.active .nav-label { color: var(--md-sys-color-on-surface); font-weight: 700; }
+
+        /* Червоний лічильник на кошику */
+        .badge {
+            position: absolute; top: 0; right: 12px;
+            background-color: var(--cart-badge-color);
+            color: white; font-size: 10px; font-weight: bold;
+            width: 16px; height: 16px; border-radius: 50%;
+            display: none; justify-content: center; align-items: center;
+        }
 
     </style>
 </head>
@@ -231,13 +263,11 @@
         <div class="logo-text">
             Junk<span class="logo-emoji">🛍️</span>Store
         </div>
-
         <div class="right-section">
             <div class="balance-chip">
                 <span class="material-icons-round" style="font-size: 16px; color: var(--star-gold);">star</span>
                 150
             </div>
-            
             <div id="user-profile">
                 <div class="avatar-placeholder" id="avatar-placeholder">G</div>
                 <img id="user-avatar" class="user-avatar" src="" style="display: none;">
@@ -246,67 +276,87 @@
     </header>
 
     <main class="grid">
-        <div class="md-card">
+        <div class="md-card" onclick="openProduct('iPhone 12 Mini', 10000, 'Apple', 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500', 'Телефон у чудовому стані. Батарея 85%. У комплекті тільки телефон.')">
             <div class="card-image-container">
                 <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500" class="card-img">
             </div>
             <div class="card-content">
-                <div class="card-title">iPhone 12 Mini</div>
-                <div class="card-subhead">Apple</div>
-                <div class="price-text">10,000 *</div>
+                <div class="text-group">
+                    <div class="card-title">iPhone 12 Mini</div>
+                    <div class="card-subhead">Apple</div>
+                </div>
+                <div class="card-actions">
+                    <div class="price-text">10,000 *</div>
+                    <button class="cart-btn-small" onclick="addToCart(event)">
+                        <span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span>
+                    </button>
+                </div>
             </div>
         </div>
-        <div class="md-card">
+
+        <div class="md-card" onclick="openProduct('Nike Air Max', 2500, 'Взуття', 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500', 'Оригінальні кросівки. Розмір 42. Носились один сезон.')">
             <div class="card-image-container">
                 <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500" class="card-img">
             </div>
             <div class="card-content">
-                <div class="card-title">Nike Air Max</div>
-                <div class="card-subhead">Взуття</div>
-                <div class="price-text">2,500 *</div>
+                <div class="text-group">
+                    <div class="card-title">Nike Air Max</div>
+                    <div class="card-subhead">Взуття</div>
+                </div>
+                <div class="card-actions">
+                    <div class="price-text">2,500 *</div>
+                    <button class="cart-btn-small" onclick="addToCart(event)">
+                        <span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span>
+                    </button>
+                </div>
             </div>
         </div>
-        <div class="md-card">
+
+        <div class="md-card" onclick="openProduct('Sony Audio', 3000, 'Звук', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500', 'Професійні навушники з шумоподавленням.')">
             <div class="card-image-container">
                 <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500" class="card-img">
             </div>
             <div class="card-content">
-                <div class="card-title">Sony Audio</div>
-                <div class="card-subhead">Звук</div>
-                <div class="price-text">3,000 *</div>
+                <div class="text-group">
+                    <div class="card-title">Sony Audio</div>
+                    <div class="card-subhead">Звук</div>
+                </div>
+                <div class="card-actions">
+                    <div class="price-text">3,000 *</div>
+                    <button class="cart-btn-small" onclick="addToCart(event)">
+                        <span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span>
+                    </button>
+                </div>
             </div>
         </div>
-        <div class="md-card">
+        
+         <div class="md-card" onclick="openProduct('Polaroid Cam', 1200, 'Камери', 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500', 'Вінтажна камера для цінителів.')">
             <div class="card-image-container">
                 <img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500" class="card-img">
             </div>
             <div class="card-content">
-                <div class="card-title">Polaroid Cam</div>
-                <div class="card-subhead">Камери</div>
-                <div class="price-text">1,200 *</div>
-            </div>
-        </div>
-        <div class="md-card">
-            <div class="card-image-container">
-                <img src="https://images.unsplash.com/photo-1585336261022-680e295ce3fe?w=500" class="card-img">
-            </div>
-            <div class="card-content">
-                <div class="card-title">RayBan Glasses</div>
-                <div class="card-subhead">Аксесуари</div>
-                <div class="price-text">800 *</div>
-            </div>
-        </div>
-         <div class="md-card">
-            <div class="card-image-container">
-                <img src="https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=500" class="card-img">
-            </div>
-            <div class="card-content">
-                <div class="card-title">Logitech Mouse</div>
-                <div class="card-subhead">PC</div>
-                <div class="price-text">500 *</div>
+                <div class="text-group">
+                    <div class="card-title">Polaroid Cam</div>
+                    <div class="card-subhead">Камери</div>
+                </div>
+                <div class="card-actions">
+                    <div class="price-text">1,200 *</div>
+                    <button class="cart-btn-small" onclick="addToCart(event)">
+                        <span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span>
+                    </button>
+                </div>
             </div>
         </div>
     </main>
+
+    <div id="sheet-overlay" class="bottom-sheet-overlay" onclick="closeProduct()"></div>
+    <div id="bottom-sheet" class="bottom-sheet">
+        <img id="sheet-img" src="" class="sheet-img">
+        <div id="sheet-title" class="sheet-title">Product Name</div>
+        <div id="sheet-price" class="sheet-price">0 *</div>
+        <div id="sheet-desc" class="sheet-desc">Description here...</div>
+        <button class="sheet-btn" onclick="addToCartDirect()">Додати у кошик</button>
+    </div>
 
     <div class="fab" onclick="alert('Відкрити форму продажу')">
         <span class="material-icons-round" style="font-size: 28px;">add</span>
@@ -322,7 +372,10 @@
             <span class="nav-label">Пошук</span>
         </div>
         <div class="nav-item">
-            <div class="nav-icon-container"><span class="material-icons-round nav-icon">shopping_cart</span></div>
+            <div class="nav-icon-container">
+                <span class="material-icons-round nav-icon">shopping_cart</span>
+                <div id="cart-badge" class="badge">0</div>
+            </div>
             <span class="nav-label">Кошик</span>
         </div>
     </nav>
@@ -332,10 +385,9 @@
         tg.expand();
         tg.setHeaderColor('#141218');
 
-        // --- ЛОГІКА АВАТАРКИ ---
+        // --- ЛОГІКА ПРОФІЛЮ ---
         const userAvatarEl = document.getElementById('user-avatar');
         const avatarPlaceholderEl = document.getElementById('avatar-placeholder');
-
         const user = tg.initDataUnsafe.user;
 
         if (user) {
@@ -344,14 +396,62 @@
                 userAvatarEl.style.display = 'block';
                 avatarPlaceholderEl.style.display = 'none';
             } else {
-                // Немає фото -> показуємо першу літеру
                 userAvatarEl.style.display = 'none';
                 avatarPlaceholderEl.style.display = 'flex';
-                // Беремо першу літеру, якщо імені немає - ставимо "U"
-                const firstLetter = user.first_name ? user.first_name.charAt(0).toUpperCase() : 'U';
-                avatarPlaceholderEl.innerText = firstLetter;
+                avatarPlaceholderEl.innerText = user.first_name ? user.first_name.charAt(0).toUpperCase() : 'U';
             }
         }
+
+        // --- ЛОГІКА КОШИКА ---
+        let cartCount = 0;
+        const cartBadge = document.getElementById('cart-badge');
+
+        function updateCartUI() {
+            if (cartCount > 0) {
+                cartBadge.style.display = 'flex';
+                cartBadge.innerText = cartCount;
+                // Ефект вібрації при додаванні (Haptic Feedback)
+                tg.HapticFeedback.impactOccurred('medium');
+            } else {
+                cartBadge.style.display = 'none';
+            }
+        }
+
+        function addToCart(event) {
+            // ВАЖЛИВО: Зупиняємо "спливання" події, щоб не відкрилась модалка
+            event.stopPropagation();
+            
+            cartCount++;
+            updateCartUI();
+            
+            // Можна додати красиву анімацію, але поки просто алерт для тесту
+            // tg.showAlert('Товар додано в кошик!');
+        }
+        
+        // Додавання з відкритої картки
+        function addToCartDirect() {
+            cartCount++;
+            updateCartUI();
+            closeProduct();
+        }
+
+        // --- ЛОГІКА ВІДКРИТТЯ ТОВАРУ (Bottom Sheet) ---
+        const overlay = document.getElementById('sheet-overlay');
+        const sheet = document.getElementById('bottom-sheet');
+        
+        function openProduct(title, price, brand, img, desc) {
+            document.getElementById('sheet-title').innerText = title;
+            document.getElementById('sheet-price').innerText = price.toLocaleString() + " *";
+            document.getElementById('sheet-img').src = img;
+            document.getElementById('sheet-desc').innerText = desc;
+            
+            document.body.classList.add('sheet-active');
+        }
+
+        function closeProduct() {
+            document.body.classList.remove('sheet-active');
+        }
+
     </script>
 </body>
 </html>
