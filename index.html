@@ -94,7 +94,7 @@
             margin-top: 160px; 
         }
 
-        /* --- Updated Card Styles --- */
+        /* --- Card Styles --- */
         .md-card {
             background-color: var(--md-sys-color-surface);
             border-radius: 16px;
@@ -102,13 +102,11 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            /* Анімація натискання */
             transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
-            -webkit-tap-highlight-color: transparent; /* Прибираємо синє виділення на Android */
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Ефект "пружини" при натисканні */
         .md-card:active {
             transform: scale(0.96);
         }
@@ -123,12 +121,6 @@
             gap: 4px;
         }
 
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
         .text-group { overflow: hidden; }
 
         .card-title {
@@ -141,7 +133,6 @@
             font-size: 12px; color: var(--md-sys-color-on-surface-variant);
         }
 
-        /* Нижній рядок: Ціна та Кнопка кошика */
         .card-actions {
             display: flex;
             justify-content: space-between;
@@ -155,7 +146,6 @@
             display: flex; align-items: center; gap: 4px;
         }
 
-        /* Кнопка кошика (бейдж) */
         .cart-btn-small {
             width: 36px;
             height: 36px;
@@ -166,15 +156,16 @@
             display: flex; justify-content: center; align-items: center;
             cursor: pointer;
             transition: background-color 0.2s, transform 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .cart-btn-small:active {
             background-color: var(--md-sys-color-primary);
             color: #000;
-            transform: scale(1.1); /* Легке збільшення при кліку */
+            transform: scale(1.1);
         }
 
-        /* --- Bottom Sheet (Опис товару) --- */
+        /* --- Bottom Sheet --- */
         .bottom-sheet-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6);
@@ -214,7 +205,7 @@
             color: #000; font-size: 16px; font-weight: 700;
         }
 
-        /* --- Nav & FAB --- */
+        /* --- FAB --- */
         .fab {
             position: fixed; bottom: 100px; right: 20px;
             width: 60px; height: 60px;
@@ -223,10 +214,13 @@
             border-radius: 18px;
             display: flex; justify-content: center; align-items: center;
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            z-index: 20; cursor: pointer; transition: transform 0.1s;
+            z-index: 20; cursor: pointer; 
+            transition: transform 0.1s;
+            -webkit-tap-highlight-color: transparent;
         }
         .fab:active { transform: scale(0.95); }
 
+        /* --- Nav Bar & Animation --- */
         .nav-bar {
             position: fixed; bottom: 0; width: 100%; height: 80px;
             background-color: var(--md-sys-color-surface);
@@ -234,19 +228,50 @@
             z-index: 100; border-top: 1px solid rgba(255,255,255,0.05);
         }
 
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; width: 64px; position: relative; }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            cursor: pointer; width: 64px; position: relative;
+            transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .nav-item:active { transform: scale(0.90); }
+
         .nav-icon-container {
             width: 64px; height: 32px; border-radius: 16px;
             display: flex; justify-content: center; align-items: center;
-            transition: background-color 0.2s;
+            /* Статичний колір для неактивних */
+            background-color: transparent;
+            transition: all 0.3s ease;
         }
-        .nav-item.active .nav-icon-container { background-color: var(--md-sys-color-secondary-container); }
-        .nav-icon { font-size: 24px; color: var(--md-sys-color-on-surface-variant); }
-        .nav-item.active .nav-icon { color: var(--md-sys-color-on-surface); }
-        .nav-label { font-size: 12px; font-weight: 500; color: var(--md-sys-color-on-surface-variant); }
+
+        /* --- МАГІЧНА АНІМАЦІЯ КОЛЬОРУ (Keyframes) --- */
+        @keyframes colorFlow {
+            0% {
+                background-color: #4A4458; /* Базовий темний */
+                box-shadow: 0 0 5px rgba(208, 188, 255, 0.1);
+            }
+            50% {
+                background-color: #6a4fa3; /* Більш яскравий фіолетовий */
+                box-shadow: 0 0 15px rgba(208, 188, 255, 0.4); /* Світіння */
+            }
+            100% {
+                background-color: #4A4458;
+                box-shadow: 0 0 5px rgba(208, 188, 255, 0.1);
+            }
+        }
+
+        /* Застосування анімації до активної кнопки */
+        .nav-item.active .nav-icon-container {
+            animation: colorFlow 3s infinite ease-in-out;
+        }
+
+        .nav-icon { font-size: 24px; color: var(--md-sys-color-on-surface-variant); transition: color 0.3s;}
+        .nav-item.active .nav-icon { color: #fff; } /* Біла іконка на активному */
+        
+        .nav-label { font-size: 12px; font-weight: 500; color: var(--md-sys-color-on-surface-variant); transition: color 0.3s; }
         .nav-item.active .nav-label { color: var(--md-sys-color-on-surface); font-weight: 700; }
 
-        /* Червоний лічильник на кошику */
         .badge {
             position: absolute; top: 0; right: 12px;
             background-color: var(--cart-badge-color);
@@ -276,7 +301,7 @@
     </header>
 
     <main class="grid">
-        <div class="md-card" onclick="openProduct('iPhone 12 Mini', 10000, 'Apple', 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500', 'Телефон у чудовому стані. Батарея 85%. У комплекті тільки телефон.')">
+        <div class="md-card" onclick="openProduct('iPhone 12 Mini', 10000, 'Apple', 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500', 'Телефон у чудовому стані. Батарея 85%.')">
             <div class="card-image-container">
                 <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500" class="card-img">
             </div>
@@ -294,7 +319,7 @@
             </div>
         </div>
 
-        <div class="md-card" onclick="openProduct('Nike Air Max', 2500, 'Взуття', 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500', 'Оригінальні кросівки. Розмір 42. Носились один сезон.')">
+        <div class="md-card" onclick="openProduct('Nike Air Max', 2500, 'Взуття', 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500', 'Оригінальні кросівки. Розмір 42.')">
             <div class="card-image-container">
                 <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500" class="card-img">
             </div>
@@ -312,7 +337,7 @@
             </div>
         </div>
 
-        <div class="md-card" onclick="openProduct('Sony Audio', 3000, 'Звук', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500', 'Професійні навушники з шумоподавленням.')">
+        <div class="md-card" onclick="openProduct('Sony Audio', 3000, 'Звук', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500', 'Професійні навушники.')">
             <div class="card-image-container">
                 <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500" class="card-img">
             </div>
@@ -330,7 +355,7 @@
             </div>
         </div>
         
-         <div class="md-card" onclick="openProduct('Polaroid Cam', 1200, 'Камери', 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500', 'Вінтажна камера для цінителів.')">
+         <div class="md-card" onclick="openProduct('Polaroid Cam', 1200, 'Камери', 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500', 'Вінтажна камера.')">
             <div class="card-image-container">
                 <img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500" class="card-img">
             </div>
@@ -363,15 +388,15 @@
     </div>
 
     <nav class="nav-bar">
-        <div class="nav-item active">
+        <div class="nav-item active" onclick="switchTab(this)">
             <div class="nav-icon-container"><span class="material-icons-round nav-icon">home</span></div>
             <span class="nav-label">Головна</span>
         </div>
-        <div class="nav-item">
+        <div class="nav-item" onclick="switchTab(this)">
             <div class="nav-icon-container"><span class="material-icons-round nav-icon">search</span></div>
             <span class="nav-label">Пошук</span>
         </div>
-        <div class="nav-item">
+        <div class="nav-item" onclick="switchTab(this)">
             <div class="nav-icon-container">
                 <span class="material-icons-round nav-icon">shopping_cart</span>
                 <div id="cart-badge" class="badge">0</div>
@@ -385,7 +410,7 @@
         tg.expand();
         tg.setHeaderColor('#141218');
 
-        // --- ЛОГІКА ПРОФІЛЮ ---
+        // --- User Profile ---
         const userAvatarEl = document.getElementById('user-avatar');
         const avatarPlaceholderEl = document.getElementById('avatar-placeholder');
         const user = tg.initDataUnsafe.user;
@@ -402,7 +427,7 @@
             }
         }
 
-        // --- ЛОГІКА КОШИКА ---
+        // --- Cart Logic ---
         let cartCount = 0;
         const cartBadge = document.getElementById('cart-badge');
 
@@ -410,7 +435,6 @@
             if (cartCount > 0) {
                 cartBadge.style.display = 'flex';
                 cartBadge.innerText = cartCount;
-                // Ефект вібрації при додаванні (Haptic Feedback)
                 tg.HapticFeedback.impactOccurred('medium');
             } else {
                 cartBadge.style.display = 'none';
@@ -418,38 +442,41 @@
         }
 
         function addToCart(event) {
-            // ВАЖЛИВО: Зупиняємо "спливання" події, щоб не відкрилась модалка
             event.stopPropagation();
-            
             cartCount++;
             updateCartUI();
-            
-            // Можна додати красиву анімацію, але поки просто алерт для тесту
-            // tg.showAlert('Товар додано в кошик!');
         }
         
-        // Додавання з відкритої картки
         function addToCartDirect() {
             cartCount++;
             updateCartUI();
             closeProduct();
         }
 
-        // --- ЛОГІКА ВІДКРИТТЯ ТОВАРУ (Bottom Sheet) ---
-        const overlay = document.getElementById('sheet-overlay');
-        const sheet = document.getElementById('bottom-sheet');
-        
+        // --- Bottom Sheet ---
         function openProduct(title, price, brand, img, desc) {
             document.getElementById('sheet-title').innerText = title;
             document.getElementById('sheet-price').innerText = price.toLocaleString() + " *";
             document.getElementById('sheet-img').src = img;
             document.getElementById('sheet-desc').innerText = desc;
-            
             document.body.classList.add('sheet-active');
         }
 
         function closeProduct() {
             document.body.classList.remove('sheet-active');
+        }
+
+        // --- Tab Switching Logic (Щоб працювала анімація на всіх кнопках) ---
+        function switchTab(clickedTab) {
+            // Видаляємо клас active з усіх кнопок
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            // Додаємо клас active натиснутій кнопці
+            clickedTab.classList.add('active');
+            
+            // Вібрація
+            tg.HapticFeedback.selectionChanged();
         }
 
     </script>
