@@ -10,20 +10,14 @@
 
     <style>
         :root {
-            /* --- Material 3 Dark Palette --- */
             --md-sys-color-background: #141218;
             --md-sys-color-surface: #1D1B20;
             --md-sys-color-surface-variant: #49454F;
-            
-            /* Акцент - Лаванда */
             --md-sys-color-primary: #D0BCFF;
             --md-sys-color-primary-container: #4F378B;
             --md-sys-color-on-primary-container: #EADDFF;
-            
-            /* Текст */
             --md-sys-color-on-surface: #E6E1E5;
             --md-sys-color-on-surface-variant: #CAC4D0;
-
             --star-gold: #FFD700;
         }
 
@@ -41,16 +35,25 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            /* ЗБІЛЬШЕНИЙ ВІДСТУП ЗВЕРХУ, щоб не налізало на кнопки */
-            padding: 40px 20px 20px 20px; 
+            /* ТУТ ЗМІНИ: 80px зверху - це багато, але надійно */
+            padding: 80px 20px 15px 20px; 
             background-color: var(--md-sys-color-background);
             position: sticky;
             top: 0;
             z-index: 10;
+            /* Тінь з'являється тільки щоб відділити хедер від контенту */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2); 
+            /* Щоб хедер перекривав все при скролі, але не був прозорим */
+            margin-top: -60px; /* Компенсація, щоб фон був, але контент не тікав надто далеко */
+        }
+        
+        /* Цей трюк з margin-top і padding дозволяє розширити фон хедера вгору */
+        body {
+            padding-top: 0; 
         }
 
         .logo-text {
-            font-family: 'Poppins', sans-serif; /* Більш жирний шрифт для лого */
+            font-family: 'Poppins', sans-serif;
             font-size: 24px;
             font-weight: 800;
             letter-spacing: -0.5px;
@@ -64,7 +67,6 @@
             font-size: 24px;
         }
 
-        /* Chip балансу */
         .balance-chip {
             background-color: var(--md-sys-color-surface-variant);
             color: var(--md-sys-color-on-surface);
@@ -82,10 +84,9 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
-            padding: 0 16px 16px 16px;
+            padding: 10px 16px 16px 16px; /* Трохи відступу від хедера */
         }
 
-        /* --- Material Card --- */
         .md-card {
             background-color: var(--md-sys-color-surface);
             border-radius: 16px;
@@ -139,7 +140,7 @@
             display: flex; align-items: center; gap: 4px;
         }
 
-        /* --- FAB (Plus Button) --- */
+        /* --- FAB --- */
         .fab {
             position: fixed;
             bottom: 100px;
@@ -278,7 +279,7 @@
             </div>
         </div>
         
-        <div class="md-card">
+         <div class="md-card">
             <div class="card-image-container">
                 <img src="https://images.unsplash.com/photo-1585336261022-680e295ce3fe?w=500" class="card-img">
             </div>
