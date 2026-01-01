@@ -7,7 +7,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Poppins:wght@800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=5">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -23,14 +23,30 @@
     </header>
 
     <div class="categories-bar">
-        <div class="category-chip active" onclick="selectCategory(this)"><span>🔥</span> Усі</div>
-        <div class="category-chip" onclick="selectCategory(this)"><span>📱</span> Телефони</div>
-        <div class="category-chip" onclick="selectCategory(this)"><span>👟</span> Взуття</div>
-        <div class="category-chip" onclick="selectCategory(this)"><span>🎧</span> Аудіо</div>
-        <div class="category-chip" onclick="selectCategory(this)"><span>📷</span> Камери</div>
-        <div class="category-chip" onclick="selectCategory(this)"><span>🎮</span> Ігри</div>
-        <div class="category-chip" onclick="selectCategory(this)"><span>⌚️</span> Годинники</div>
-        <div class="category-chip" onclick="selectCategory(this)"><span>🕶️</span> Аксесуари</div>
+        <div class="category-chip active" onclick="selectCategory(this)">
+            <span class="material-icons-round category-icon">local_fire_department</span> Усі
+        </div>
+        <div class="category-chip" onclick="selectCategory(this)">
+            <span class="material-icons-round category-icon">smartphone</span> Телефони
+        </div>
+        <div class="category-chip" onclick="selectCategory(this)">
+            <span class="material-icons-round category-icon">checkroom</span> Одяг
+        </div>
+        <div class="category-chip" onclick="selectCategory(this)">
+            <span class="material-icons-round category-icon">headphones</span> Аудіо
+        </div>
+        <div class="category-chip" onclick="selectCategory(this)">
+            <span class="material-icons-round category-icon">photo_camera</span> Камери
+        </div>
+        <div class="category-chip" onclick="selectCategory(this)">
+            <span class="material-icons-round category-icon">sports_esports</span> Ігри
+        </div>
+        <div class="category-chip" onclick="selectCategory(this)">
+            <span class="material-icons-round category-icon">watch</span> Годинники
+        </div>
+        <div class="category-chip" onclick="selectCategory(this)">
+            <span class="material-icons-round category-icon">diamond</span> Аксесуари
+        </div>
     </div>
 
     <main class="grid">
@@ -77,6 +93,28 @@
                 </div>
             </div>
         </div>
+
+         <div class="md-card" onclick="openProduct('Logitech Mouse', 500, 'PC', 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=500', 'Опис Мишки...')">
+            <div class="card-image-container"><img src="https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=500" class="card-img" id="img-5"></div>
+            <div class="card-content">
+                <div class="text-group"><div class="card-title">Logitech Mouse</div><div class="card-subhead">PC</div></div>
+                <div class="card-actions">
+                    <div class="price-text">500 *</div>
+                    <button class="cart-btn-small" onclick="addToCart(event, 'img-5')"><span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span></button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="md-card" onclick="openProduct('RayBan Glasses', 800, 'Стиль', 'https://images.unsplash.com/photo-1585336261022-680e295ce3fe?w=500', 'Опис Окулярів...')">
+            <div class="card-image-container"><img src="https://images.unsplash.com/photo-1585336261022-680e295ce3fe?w=500" class="card-img" id="img-6"></div>
+            <div class="card-content">
+                <div class="text-group"><div class="card-title">RayBan Glasses</div><div class="card-subhead">Стиль</div></div>
+                <div class="card-actions">
+                    <div class="price-text">800 *</div>
+                    <button class="cart-btn-small" onclick="addToCart(event, 'img-6')"><span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span></button>
+                </div>
+            </div>
+        </div>
     </main>
 
     <div id="sheet-overlay" class="bottom-sheet-overlay" onclick="closeProduct()"></div>
@@ -110,6 +148,6 @@
         </div>
     </nav>
 
-    <script src="js/app.js?v=5"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
