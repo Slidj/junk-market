@@ -37,9 +37,8 @@
             top: 0;
             left: 0;
             width: 100%;
-            /* Висота відступу підганяємо під системні кнопки */
-            padding: 10px 20px 15px 20px; 
-            padding-top: 50px; /* Безпечна зона зверху */
+            /* ПОВЕРНУВ ВЕЛИКИЙ ВІДСТУП: 80px зверху */
+            padding: 80px 20px 20px 20px; 
             background-color: var(--md-sys-color-background);
             z-index: 50;
             display: flex;
@@ -51,7 +50,7 @@
 
         .logo-text {
             font-family: 'Poppins', sans-serif;
-            font-size: 20px; /* Трохи зменшив, щоб влізло ім'я */
+            font-size: 24px; 
             font-weight: 800;
             letter-spacing: -0.5px;
             color: var(--md-sys-color-on-surface);
@@ -60,57 +59,41 @@
             gap: 2px;
         }
         
-        .logo-emoji { font-size: 20px; }
+        .logo-emoji { font-size: 24px; }
 
-        /* Правий блок: Баланс + Профіль */
+        /* Правий блок: Баланс + Аватар */
         .right-section {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 12px; /* Відстань між балансом і аватаркою */
         }
 
         .balance-chip {
             background-color: var(--md-sys-color-surface-variant);
             color: var(--md-sys-color-on-surface);
-            padding: 4px 10px;
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 4px;
         }
 
-        /* Профіль користувача */
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .user-name {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--md-sys-color-on-surface);
-            max-width: 80px; /* Обмеження ширини, щоб не ламало верстку */
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
+        /* Тільки аватарка, без імені */
         .user-avatar {
-            width: 36px;
-            height: 36px;
+            width: 40px; /* Трохи більша аватарка */
+            height: 40px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--md-sys-color-primary);
             background-color: var(--md-sys-color-surface-variant);
         }
         
-        /* Заглушка, якщо немає фото */
+        /* Заглушка (літера) */
         .avatar-placeholder {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background-color: var(--md-sys-color-primary-container);
             color: var(--md-sys-color-on-primary-container);
@@ -118,7 +101,7 @@
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 18px;
             border: 2px solid var(--md-sys-color-primary);
         }
 
@@ -128,7 +111,8 @@
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             padding: 0 16px 16px 16px;
-            margin-top: 130px; /* Відступ під фіксований хедер */
+            /* Збільшив відступ, бо шапка тепер вища */
+            margin-top: 160px; 
         }
 
         .md-card {
@@ -254,8 +238,7 @@
                 150
             </div>
             
-            <div class="user-profile" id="user-profile">
-                <div class="user-name" id="user-name">Guest</div>
+            <div id="user-profile">
                 <div class="avatar-placeholder" id="avatar-placeholder">G</div>
                 <img id="user-avatar" class="user-avatar" src="" style="display: none;">
             </div>
@@ -313,7 +296,7 @@
                 <div class="price-text">800 *</div>
             </div>
         </div>
-        <div class="md-card">
+         <div class="md-card">
             <div class="card-image-container">
                 <img src="https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=500" class="card-img">
             </div>
@@ -349,33 +332,25 @@
         tg.expand();
         tg.setHeaderColor('#141218');
 
-        // --- ЛОГІКА ПРОФІЛЮ КОРИСТУВАЧА ---
-        const userNameEl = document.getElementById('user-name');
+        // --- ЛОГІКА АВАТАРКИ ---
         const userAvatarEl = document.getElementById('user-avatar');
         const avatarPlaceholderEl = document.getElementById('avatar-placeholder');
 
-        // Отримуємо дані користувача з Telegram
         const user = tg.initDataUnsafe.user;
 
         if (user) {
-            // Встановлюємо ім'я
-            userNameEl.innerText = user.first_name;
-
-            // Перевіряємо, чи є фото
             if (user.photo_url) {
                 userAvatarEl.src = user.photo_url;
                 userAvatarEl.style.display = 'block';
                 avatarPlaceholderEl.style.display = 'none';
             } else {
-                // Якщо фото немає, показуємо першу букву імені
+                // Немає фото -> показуємо першу літеру
                 userAvatarEl.style.display = 'none';
                 avatarPlaceholderEl.style.display = 'flex';
-                avatarPlaceholderEl.innerText = user.first_name.charAt(0).toUpperCase();
+                // Беремо першу літеру, якщо імені немає - ставимо "U"
+                const firstLetter = user.first_name ? user.first_name.charAt(0).toUpperCase() : 'U';
+                avatarPlaceholderEl.innerText = firstLetter;
             }
-        } else {
-            // Для тестування в браузері (без Телеграму)
-            userNameEl.innerText = "Tester";
-            avatarPlaceholderEl.innerText = "T";
         }
     </script>
 </body>
