@@ -17,14 +17,19 @@ body {
     background-color: var(--md-sys-color-background);
     color: var(--md-sys-color-on-surface);
     font-family: 'Roboto', sans-serif;
-    padding-bottom: 100px;
-    overflow-x: hidden; 
+    /* Відступ знизу для меню */
+    padding-bottom: 120px;
+    /* Гарантуємо, що сторінка завжди вища за екран для роботи скролу */
+    min-height: 100vh;
+    overflow-x: hidden;
+    /* Робить скрол плавнішим на iOS */
+    -webkit-overflow-scrolling: touch; 
 }
 
 /* --- Header --- */
 .top-app-bar {
     position: fixed; top: 0; left: 0; width: 100%;
-    /* Висота хедера разом з відступами ~130px */
+    /* Великий відступ зверху (безпечна зона) */
     padding: 80px 20px 20px 20px; 
     background-color: var(--md-sys-color-background);
     z-index: 50; display: flex; justify-content: space-between; align-items: center;
@@ -59,12 +64,73 @@ body {
     font-weight: bold; font-size: 18px; border: 2px solid var(--md-sys-color-primary);
 }
 
+/* --- CATEGORIES BAR --- */
+.categories-bar {
+    position: fixed;
+    /* Опускаємо ще нижче, щоб точно не різало */
+    top: 150px; 
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: var(--md-sys-color-background);
+    z-index: 45;
+    
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px;
+    box-sizing: border-box;
+    
+    overflow-x: auto;
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
+    
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+.categories-bar::-webkit-scrollbar { display: none; }
+
+.category-chip {
+    padding: 8px 16px;
+    background-color: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface-variant);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    -webkit-tap-highlight-color: transparent;
+    display: flex; align-items: center; gap: 8px; /* Відступ між іконкою і текстом */
+}
+
+/* Стиль іконок у категоріях */
+.category-icon {
+    font-size: 18px; /* Трохи менші за основні */
+}
+
+.category-chip:active { transform: scale(0.9); }
+
+.category-chip.active {
+    background-color: var(--md-sys-color-primary-container);
+    color: #fff;
+    border-color: transparent;
+    font-weight: 700;
+    animation: breatheGlow 3s infinite ease-in-out;
+}
+
+@keyframes breatheGlow {
+    0% { box-shadow: 0 0 0 rgba(208, 188, 255, 0); }
+    50% { box-shadow: 0 0 15px rgba(208, 188, 255, 0.4); }
+    100% { box-shadow: 0 0 0 rgba(208, 188, 255, 0); }
+}
+
 /* --- Grid --- */
 .grid {
     display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
     padding: 0 16px 16px 16px; 
-    /* ЗБІЛЬШЕНО ВІДСТУП, щоб вмістити категорії (130px хедер + 60px категорії + відступ) */
-    margin-top: 220px; 
+    /* Відступ ще більший, щоб компенсувати і хедер, і категорії */
+    margin-top: 240px; 
 }
 
 /* --- Card Styles --- */
@@ -187,59 +253,3 @@ body {
     transition: transform 0.2s;
 }
 .badge-pop { transform: scale(1.5); }
-
-/* --- CATEGORIES BAR (НОВЕ) --- */
-.categories-bar {
-    position: fixed;
-    top: 130px; /* Одразу під хедером */
-    left: 0;
-    width: 100%;
-    height: 60px;
-    background-color: var(--md-sys-color-background);
-    z-index: 45;
-    
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0 16px;
-    box-sizing: border-box;
-    
-    overflow-x: auto;
-    scrollbar-width: none; 
-    -ms-overflow-style: none;
-    
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-.categories-bar::-webkit-scrollbar { display: none; }
-
-.category-chip {
-    padding: 8px 20px;
-    background-color: var(--md-sys-color-surface);
-    color: var(--md-sys-color-on-surface-variant);
-    border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 500;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    -webkit-tap-highlight-color: transparent;
-    display: flex; align-items: center; gap: 6px;
-}
-
-.category-chip:active { transform: scale(0.9); }
-
-/* Активна категорія з світінням */
-.category-chip.active {
-    background-color: var(--md-sys-color-primary-container);
-    color: #fff;
-    border-color: transparent;
-    font-weight: 700;
-    animation: breatheGlow 3s infinite ease-in-out;
-}
-
-@keyframes breatheGlow {
-    0% { box-shadow: 0 0 0 rgba(208, 188, 255, 0); }
-    50% { box-shadow: 0 0 15px rgba(208, 188, 255, 0.4); }
-    100% { box-shadow: 0 0 0 rgba(208, 188, 255, 0); }
-}
