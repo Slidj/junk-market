@@ -22,75 +22,58 @@
         </div>
     </header>
 
+    <div class="categories-bar">
+        <div class="category-chip active" onclick="selectCategory(this)"><span>🔥</span> Усі</div>
+        <div class="category-chip" onclick="selectCategory(this)"><span>📱</span> Телефони</div>
+        <div class="category-chip" onclick="selectCategory(this)"><span>👟</span> Взуття</div>
+        <div class="category-chip" onclick="selectCategory(this)"><span>🎧</span> Аудіо</div>
+        <div class="category-chip" onclick="selectCategory(this)"><span>📷</span> Камери</div>
+        <div class="category-chip" onclick="selectCategory(this)"><span>🎮</span> Ігри</div>
+        <div class="category-chip" onclick="selectCategory(this)"><span>⌚️</span> Годинники</div>
+        <div class="category-chip" onclick="selectCategory(this)"><span>🕶️</span> Аксесуари</div>
+    </div>
+
     <main class="grid">
         <div class="md-card" onclick="openProduct('iPhone 12 Mini', 10000, 'Apple', 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500', 'Опис iPhone...')">
-            <div class="card-image-container">
-                <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500" class="card-img" id="img-1">
-            </div>
+            <div class="card-image-container"><img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500" class="card-img" id="img-1"></div>
             <div class="card-content">
-                <div class="text-group">
-                    <div class="card-title">iPhone 12 Mini</div>
-                    <div class="card-subhead">Apple</div>
-                </div>
+                <div class="text-group"><div class="card-title">iPhone 12 Mini</div><div class="card-subhead">Apple</div></div>
                 <div class="card-actions">
                     <div class="price-text">10,000 *</div>
-                    <button class="cart-btn-small" onclick="addToCart(event, 'img-1')">
-                        <span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span>
-                    </button>
+                    <button class="cart-btn-small" onclick="addToCart(event, 'img-1')"><span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span></button>
                 </div>
             </div>
         </div>
 
         <div class="md-card" onclick="openProduct('Nike Air Max', 2500, 'Взуття', 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500', 'Опис Nike...')">
-            <div class="card-image-container">
-                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500" class="card-img" id="img-2">
-            </div>
+            <div class="card-image-container"><img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500" class="card-img" id="img-2"></div>
             <div class="card-content">
-                <div class="text-group">
-                    <div class="card-title">Nike Air Max</div>
-                    <div class="card-subhead">Взуття</div>
-                </div>
+                <div class="text-group"><div class="card-title">Nike Air Max</div><div class="card-subhead">Взуття</div></div>
                 <div class="card-actions">
                     <div class="price-text">2,500 *</div>
-                    <button class="cart-btn-small" onclick="addToCart(event, 'img-2')">
-                        <span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span>
-                    </button>
+                    <button class="cart-btn-small" onclick="addToCart(event, 'img-2')"><span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span></button>
                 </div>
             </div>
         </div>
 
         <div class="md-card" onclick="openProduct('Sony Audio', 3000, 'Звук', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500', 'Опис Sony...')">
-            <div class="card-image-container">
-                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500" class="card-img" id="img-3">
-            </div>
+            <div class="card-image-container"><img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500" class="card-img" id="img-3"></div>
             <div class="card-content">
-                <div class="text-group">
-                    <div class="card-title">Sony Audio</div>
-                    <div class="card-subhead">Звук</div>
-                </div>
+                <div class="text-group"><div class="card-title">Sony Audio</div><div class="card-subhead">Звук</div></div>
                 <div class="card-actions">
                     <div class="price-text">3,000 *</div>
-                    <button class="cart-btn-small" onclick="addToCart(event, 'img-3')">
-                        <span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span>
-                    </button>
+                    <button class="cart-btn-small" onclick="addToCart(event, 'img-3')"><span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span></button>
                 </div>
             </div>
         </div>
         
          <div class="md-card" onclick="openProduct('Polaroid Cam', 1200, 'Камери', 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500', 'Опис Polaroid...')">
-            <div class="card-image-container">
-                <img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500" class="card-img" id="img-4">
-            </div>
+            <div class="card-image-container"><img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500" class="card-img" id="img-4"></div>
             <div class="card-content">
-                <div class="text-group">
-                    <div class="card-title">Polaroid Cam</div>
-                    <div class="card-subhead">Камери</div>
-                </div>
+                <div class="text-group"><div class="card-title">Polaroid Cam</div><div class="card-subhead">Камери</div></div>
                 <div class="card-actions">
                     <div class="price-text">1,200 *</div>
-                    <button class="cart-btn-small" onclick="addToCart(event, 'img-4')">
-                        <span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span>
-                    </button>
+                    <button class="cart-btn-small" onclick="addToCart(event, 'img-4')"><span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span></button>
                 </div>
             </div>
         </div>
