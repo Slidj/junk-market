@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Virus Market Style</title>
+    <title>Virus Market</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=VT323&family=Roboto+Mono:wght@400;700&display=swap');
-
         :root {
-            --bg-color: #000000;
-            --card-bg: #111111;
-            --accent-color: #39ff14; /* Toxic Green */
-            --accent-dim: rgba(57, 255, 20, 0.2);
-            --text-color: #e0e0e0;
-            --border-style: 2px solid var(--accent-color);
+            --bg-color: #050505;
+            --card-bg: #1a1a1a;
+            --virus-green: #39ff14; /* Кислотний зелений */
+            --virus-purple: #9d00ff; /* Фіолетовий акцент */
+            --text-color: #ffffff;
         }
 
         body {
@@ -22,15 +21,28 @@
             padding: 0;
             background-color: var(--bg-color);
             color: var(--text-color);
-            font-family: 'Roboto Mono', monospace; /* Шрифт як у терміналі */
+            font-family: 'Press Start 2P', cursive; /* Головний шрифт гри */
             padding-bottom: 90px;
-            
-            /* Ефект сітки на фоні */
-            background-image: 
-                linear-gradient(var(--accent-dim) 1px, transparent 1px),
-                linear-gradient(90deg, var(--accent-dim) 1px, transparent 1px);
-            background-size: 40px 40px;
-            background-position: center top;
+            overflow-x: hidden;
+        }
+
+        /* Ефект старого телевізора (Scanlines) */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 999;
         }
 
         /* --- Header --- */
@@ -38,316 +50,273 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
-            background: rgba(0,0,0,0.9);
-            border-bottom: var(--border-style);
+            padding: 20px 15px;
+            background: var(--bg-color);
+            border-bottom: 4px solid var(--virus-green); /* Товста рамка */
             position: sticky;
             top: 0;
             z-index: 50;
-            box-shadow: 0 0 15px var(--accent-color);
         }
 
         .logo {
-            font-family: 'VT323', monospace; /* Піксельний шрифт */
-            font-size: 32px;
-            color: var(--accent-color);
+            color: var(--virus-green);
+            font-size: 16px;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 2px 2px 0px #fff; /* Глітч ефект */
+            text-shadow: 2px 2px 0px #000, -1px -1px 0 #fff; /* Тінь для об'єму */
+            line-height: 1.5;
         }
 
-        .balance-box {
-            border: 1px solid var(--accent-color);
-            background: #000;
-            padding: 5px 10px;
-            color: var(--accent-color);
-            font-weight: 700;
-            box-shadow: 0 0 5px var(--accent-color);
+        /* Баланс як у грі (з іконкою) */
+        .balance-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #222;
+            padding: 8px 12px;
+            border: 2px solid var(--virus-purple);
+            box-shadow: 4px 4px 0px rgba(157, 0, 255, 0.4); /* Жорстка тінь */
         }
 
-        /* --- Grid Title --- */
-        .section-title {
-            padding: 20px 20px 10px;
-            font-size: 14px;
-            text-transform: uppercase;
-            color: #888;
-            letter-spacing: 1px;
-        }
-        .section-title span {
-            color: var(--accent-color);
-            margin-right: 5px;
+        .balance-text {
+            color: #fff;
+            font-size: 12px;
         }
 
         /* --- Grid --- */
+        .section-title {
+            padding: 25px 15px 10px;
+            font-size: 12px;
+            color: var(--virus-purple);
+            text-transform: uppercase;
+        }
+
         .grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 великі колонки */
+            grid-template-columns: 1fr 1fr; /* 2 колонки */
             gap: 15px;
             padding: 15px;
         }
 
-        .item-card {
-            background: var(--card-bg);
-            border: 1px solid #333;
+        /* Стиль картки як в грі */
+        .game-card {
+            background-color: var(--card-bg);
+            border: 2px solid #333;
             position: relative;
-            overflow: hidden;
-            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.1s;
         }
 
-        /* Ефект при натисканні */
-        .item-card:active {
-            transform: scale(0.98);
-            border-color: var(--accent-color);
-            box-shadow: 0 0 10px var(--accent-color);
+        .game-card:active {
+            transform: translateY(4px); /* Ефект натискання кнопки */
         }
 
-        .img-wrapper {
+        /* Рамка навколо фото */
+        .img-frame {
+            border-bottom: 2px solid #333;
+            padding: 5px;
+            background: #000;
+        }
+
+        .game-card img {
             width: 100%;
-            height: 160px;
-            position: relative;
-            border-bottom: 1px solid #333;
-        }
-
-        .item-img {
-            width: 100%;
-            height: 100%;
+            height: 140px;
             object-fit: cover;
-            filter: grayscale(80%) contrast(120%); /* Робимо фото похмурими */
-            transition: filter 0.3s;
-        }
-        
-        /* Коли картка активна, фото стає кольоровим */
-        .item-card:active .item-img {
-            filter: grayscale(0%);
+            /* Легкий фільтр пікселізації (насправді просто різкість) */
+            image-rendering: pixelated; 
         }
 
         .card-info {
-            padding: 10px;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .card-title {
-            font-size: 12px;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-            white-space: nowrap;
+            font-size: 10px;
+            line-height: 1.4;
+            color: #ccc;
+            height: 28px;
             overflow: hidden;
-            text-overflow: ellipsis;
         }
 
-        .card-price {
-            font-family: 'VT323', monospace;
-            font-size: 24px;
-            color: var(--accent-color);
-            text-shadow: 0 0 3px var(--accent-color);
+        .card-price-box {
+            background: var(--virus-green);
+            color: #000;
+            padding: 8px 4px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 3px 3px 0px #000; /* Ретро тінь */
         }
 
-        /* --- Floating Menu (Pixel Style) --- */
-        .retro-nav {
+        /* Лейбл "LVL" або категорія */
+        .lvl-badge {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: var(--virus-purple);
+            color: #fff;
+            font-size: 8px;
+            padding: 4px;
+            border: 1px solid #fff;
+        }
+
+        /* --- Bottom Menu (Pixel Style) --- */
+        .pixel-nav {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            width: 90%;
-            background: #000;
-            border: var(--border-style);
+            width: 92%;
+            background: #111;
+            border: 2px solid var(--text-color);
             display: flex;
-            justify-content: space-between;
-            padding: 10px 20px;
-            box-sizing: border-box;
-            box-shadow: 5px 5px 0px rgba(57, 255, 20, 0.3);
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 0;
             z-index: 100;
+            box-shadow: 6px 6px 0px rgba(0,0,0,0.5);
         }
 
-        .nav-btn {
-            background: none;
-            border: none;
-            color: #555;
-            font-size: 24px;
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            font-size: 8px;
+            color: #666;
             cursor: pointer;
-            position: relative;
         }
 
-        .nav-btn.active {
-            color: var(--accent-color);
-            text-shadow: 0 0 5px var(--accent-color);
+        .nav-item.active {
+            color: var(--virus-green);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            /* Імітація піксельних іконок */
+            filter: drop-shadow(2px 2px 0px #000); 
         }
 
         /* Центральна кнопка "+" */
-        .center-btn {
-            background: var(--accent-color);
-            color: #000;
+        .add-btn-pixel {
             width: 50px;
             height: 50px;
-            margin-top: -35px; /* Виступає вгору */
+            background: var(--virus-green);
+            color: #000;
             border: 2px solid #fff;
-            font-size: 30px;
-            font-weight: bold;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 0 15px var(--accent-color);
+            font-size: 30px;
+            margin-top: -30px; /* Вилазить вгору */
+            box-shadow: 4px 4px 0px #000;
             cursor: pointer;
         }
+        
+        .add-btn-pixel:active {
+            box-shadow: 0px 0px 0px;
+            transform: translate(4px, 4px);
+        }
 
-        /* --- Modal (Terminal Style) --- */
-        .modal {
+        /* --- Modal (Game Pop-up) --- */
+        .game-modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
             z-index: 200;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
             box-sizing: border-box;
-            border: 4px solid var(--accent-color);
         }
 
-        .terminal-header {
-            border-bottom: 1px dashed var(--accent-color);
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
+        .modal-box {
+            background: var(--bg-color);
+            border: 4px solid var(--virus-purple);
+            width: 100%;
+            max-width: 350px;
+            padding: 15px;
+            box-shadow: 10px 10px 0px rgba(0,0,0,0.5);
+            position: relative;
         }
 
-        .close-x {
-            color: var(--accent-color);
+        .modal-close {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            background: red;
+            color: white;
+            border: 2px solid #fff;
+            width: 30px; height: 30px;
+            display: flex; justify-content: center; align-items: center;
             cursor: pointer;
-            font-weight: bold;
-            font-size: 20px;
+            box-shadow: 3px 3px 0 #000;
         }
 
         .modal-img {
             width: 100%;
-            height: 300px;
-            object-fit: contain;
-            border: 1px solid #333;
-            margin-bottom: 20px;
-            background: #050505;
+            height: 200px;
+            object-fit: cover;
+            border: 2px solid #fff;
+            margin-bottom: 15px;
         }
 
-        .terminal-text {
-            color: var(--accent-color);
-            font-size: 16px;
+        .modal-title {
+            font-size: 14px;
+            color: var(--virus-green);
+            margin-bottom: 10px;
             line-height: 1.5;
-            margin-bottom: 20px;
         }
         
-        .buy-btn-pixel {
-            width: 100%;
-            background: var(--accent-color);
-            color: #000;
-            font-family: 'VT323', monospace;
-            font-size: 28px;
-            padding: 10px;
-            border: none;
-            cursor: pointer;
-            text-transform: uppercase;
-            box-shadow: 0 0 10px var(--accent-color);
+        .modal-price {
+            font-size: 20px;
+            color: var(--virus-purple);
+            margin-bottom: 20px;
+            text-align: right;
         }
 
-        .buy-btn-pixel:active {
-            background: #fff;
-            transform: translateY(2px);
+        .buy-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--virus-green);
+            color: #000;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+            border: none;
+            box-shadow: 4px 4px 0px #fff;
+            cursor: pointer;
+        }
+        .buy-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #fff;
         }
 
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="logo">VIRUS.SHOP</div>
-        <div class="balance-box">
-            STARS: 150
+    <header class="header">
+        <div class="logo">
+            VIRUS<br>STORE
         </div>
-    </div>
+        <div class="balance-container">
+            <span>⭐️</span>
+            <span class="balance-text">150</span>
+        </div>
+    </header>
 
-    <div class="section-title"><span>></span> SYSTEM_READY...</div>
+    <div class="section-title">Latest Drops_</div>
 
-    <div class="grid">
-        <div class="item-card" onclick="openModal('IPHONE_12_MINI', 10000, 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500')">
-            <div class="img-wrapper">
-                <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500" class="item-img">
+    <main class="grid">
+        <div class="game-card" onclick="openModal('IPHONE 12 MINI', 10000, 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500')">
+            <div class="lvl-badge">LVL.1</div>
+            <div class="img-frame">
+                <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500" alt="Item">
             </div>
             <div class="card-info">
-                <div class="card-title">IPHONE_12_MINI</div>
-                <div class="card-price">10,000 *</div>
-            </div>
-        </div>
-
-        <div class="item-card" onclick="openModal('CYBER_BOOTS', 2500, 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500')">
-            <div class="img-wrapper">
-                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500" class="item-img">
-            </div>
-            <div class="card-info">
-                <div class="card-title">NIKE_AIR_MAX</div>
-                <div class="card-price">2,500 *</div>
-            </div>
-        </div>
-
-        <div class="item-card" onclick="openModal('SONY_AUDIO', 3000, 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500')">
-            <div class="img-wrapper">
-                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500" class="item-img">
-            </div>
-            <div class="card-info">
-                <div class="card-title">HEADPHONES_MK2</div>
-                <div class="card-price">3,000 *</div>
-            </div>
-        </div>
-
-        <div class="item-card" onclick="openModal('RETRO_CAM', 1200, 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500')">
-            <div class="img-wrapper">
-                <img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500" class="item-img">
-            </div>
-            <div class="card-info">
-                <div class="card-title">POLAROID_CAM</div>
-                <div class="card-price">1,200 *</div>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal" class="modal">
-        <div class="terminal-header">
-            <span>ITEM_DETAILS.EXE</span>
-            <span class="close-x" onclick="closeModal()">[X]</span>
-        </div>
-        <img id="m-img" src="" class="modal-img">
-        <div class="terminal-text">
-            ITEM: <span id="m-title" style="color:#fff">...</span><br>
-            PRICE: <span id="m-price" style="color:#fff">...</span> STARS<br>
-            STATUS: AVAILABLE<br>
-            <br>
-            > Waiting for user input...
-        </div>
-        <button class="buy-btn-pixel" onclick="alert('INITIATING TRANSACTION...')">BUY NOW</button>
-    </div>
-
-    <div class="retro-nav">
-        <button class="nav-btn active">⌂</button>
-        <button class="nav-btn">🔍</button>
-        <div class="center-btn">+</div>
-        <button class="nav-btn">🛒</button>
-        <button class="nav-btn">☺</button>
-    </div>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.setHeaderColor('#000000');
-        tg.setBackgroundColor('#000000');
-
-        function openModal(title, price, img) {
-            document.getElementById('m-title').innerText = title;
-            document.getElementById('m-price').innerText = price;
-            document.getElementById('m-img').src = img;
-            document.getElementById('modal').style.display = 'block';
-        }
-
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-        }
-    </script>
-</body>
-</html>
+                <div class="card-title">iPhone 12 Mini [USED]</div>
+                <div class="card-price-
