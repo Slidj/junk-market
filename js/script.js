@@ -3,9 +3,47 @@ tg.expand();
 
 // --- CONFIG ---
 let balance = 1000;
-const symbols = ['🍒', '🍋', '🍇', '🍊', '🔔', '7️⃣', '💎']; 
+
+// СИМВОЛИ ТА ЇХ ВАГА (ШАНС ВИПАДІННЯ)
+// Чим більше число, тим частіше падає.
+const SYMBOL_WEIGHTS = {
+    '🍒': 50,  // Дуже часто
+    '🍋': 40,
+    '🍇': 30,
+    '🍊': 25,
+    '🔔': 15,  // Середньо
+    '7️⃣': 5,   // Рідко
+    '💎': 2    // Дуже рідко (Wild)
+};
+
 const WILD_SYMBOL = '💎'; 
-const PAYOUTS = { 3: 2, 4: 8, 5: 50 };
+const SYMBOLS_KEYS = Object.keys(SYMBOL_WEIGHTS);
+
+// Таблиця виплат (трохи підняв, бо виграти тепер важче)
+const PAYOUTS = { 3: 5, 4: 20, 5: 100 };
+
+// --- ГЕНЕРАТОР ЗВАЖЕНОГО ВИПАДКОВОГО ЧИСЛА ---
+// Це серце "жадібності" автомату
+function getRandomSymbol() {
+    // 1. Рахуємо загальну вагу (сума всіх чисел)
+    let totalWeight = 0;
+    for (let sym in SYMBOL_WEIGHTS) {
+        totalWeight += SYMBOL_WEIGHTS[sym];
+    }
+
+    // 2. Викидаємо випадкове число від 0 до totalWeight
+    let randomNum = Math.random() * totalWeight;
+
+    // 3. Знаходимо, якому символу воно належить
+    for (let sym in SYMBOL_WEIGHTS) {
+        if (randomNum < SYMBOL_WEIGHTS[sym]) {
+            return sym;
+        }
+        randomNum -= SYMBOL_WEIGHTS[sym];
+    }
+    return '🍒'; // На всяк випадок
+}
+
 
 // --- UI ---
 const balanceEl = document.getElementById('balance');
@@ -30,7 +68,7 @@ function showScreen(screenId) {
     document.getElementById('matrix-msg').innerText = '';
     
     if(screenId === 'screen-matrix') {
-        drawActiveLines(); // Малюємо лінії при вході
+        drawActiveLines(); 
     }
 }
 
@@ -60,8 +98,9 @@ function spinSlots() {
     reels.forEach(i => {
         const reel = document.getElementById(`reel${i}`);
         reel.classList.add('is-spinning');
+        // Візуально крутимо (тут можна просто рандом, це лише ефект)
         reel.dataset.interval = setInterval(() => {
-             reel.querySelector('.reel-strip').innerText = symbols[Math.floor(Math.random() * symbols.length)];
+             reel.querySelector('.reel-strip').innerText = SYMBOLS_KEYS[Math.floor(Math.random() * SYMBOLS_KEYS.length)];
         }, 80);
     });
 
@@ -72,7 +111,9 @@ function spinSlots() {
             clearInterval(reel.dataset.interval);
             reel.classList.remove('is-spinning');
             
-            const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+            // ВИКОРИСТОВУЄМО НОВИЙ ГЕНЕРАТОР
+            const symbol = getRandomSymbol();
+            
             reel.querySelector('.reel-strip').innerText = symbol;
             finalResult.push(symbol);
             tg.HapticFeedback.impactOccurred('light');
@@ -115,7 +156,7 @@ function checkWinBothWays(result, bet) {
 }
 
 // ==============================
-// GAME 2: MEGA GRID (VISUAL LINES)
+// GAME 2: MEGA GRID (VISUAL LINES + MANUAL BET)
 // ==============================
 
 const PAYLINES = {
@@ -126,7 +167,6 @@ const PAYLINES = {
     5: [0, 1, 2, 2, 2]  // COMBO
 };
 
-// Кольори для ліній SVG
 const LINE_COLORS = { 1: '#ef4444', 2: '#a855f7', 3: '#3b82f6', 4: '#eab308', 5: '#22c55e' };
 
 let activeLines = [1]; 
@@ -145,7 +185,7 @@ function toggleLine(lineId) {
     }
     tg.HapticFeedback.selectionChanged();
     updateMatrixBetDisplay();
-    drawActiveLines(); // Перемалювати лінії
+    drawActiveLines(); 
 }
 
 function updateMatrixBetDisplay() {
@@ -157,14 +197,10 @@ function updateMatrixBetDisplay() {
     document.getElementById('total-matrix-bet').innerText = totalBet;
 }
 
-// Функція малювання ліній через SVG
 function drawActiveLines() {
     const svg = document.getElementById('lines-svg');
-    svg.innerHTML = ''; // Очистити
+    svg.innerHTML = ''; 
 
-    // Координати центрів клітинок (у відсотках)
-    // X: 10, 30, 50, 70, 90 (для 5 колонок)
-    // Y: 16.6 (row 0), 50 (row 1), 83.3 (row 2)
     const rowY = [16.6, 50, 83.3];
     const colX = [10, 30, 50, 70, 90];
 
@@ -196,37 +232,34 @@ function spinMatrix() {
     updateBalance(-totalBet);
     msg.innerText = "КРУТИМО...";
     document.querySelectorAll('.sym').forEach(el => el.classList.remove('win-cell'));
-    
-    // Ховаємо лінії під час спіну
     document.getElementById('lines-svg').style.opacity = '0.2';
     
     tg.HapticFeedback.impactOccurred('medium');
 
-    // === ЛОГІКА АНІМАЦІЇ ПО РЯДАХ (Top -> Mid -> Bot) ===
-    // Запускаємо спін для КОЖНОЇ клітинки, але з затримкою по рядах
-    for(let r=0; r<3; r++) { // 3 рядки
+    // Анімація спіну
+    for(let r=0; r<3; r++) { 
         setTimeout(() => {
-            for(let c=1; c<=5; c++) { // 5 колонок
+            for(let c=1; c<=5; c++) { 
                  const col = document.getElementById(`m-col${c}`);
                  const cell = col.children[r];
                  cell.classList.add('row-spinning');
             }
-        }, r * 150); // Затримка 150мс між рядами
+        }, r * 150); 
     }
 
-    // Генеруємо результат
+    // Генерація результату з ВАГОЮ
     let resultMatrix = []; 
     for(let c=0; c<5; c++) {
         let col = [];
-        for(let r=0; r<3; r++) col.push(symbols[Math.floor(Math.random() * symbols.length)]);
+        // ВИКОРИСТОВУЄМО getRandomSymbol()
+        for(let r=0; r<3; r++) col.push(getRandomSymbol());
         resultMatrix.push(col);
     }
 
-    // Зупинка (також каскадом зліва направо для ефекту)
+    // Зупинка
     for(let i=0; i<5; i++) {
         setTimeout(() => {
             const colEl = document.getElementById(`m-col${i+1}`);
-            // Зупиняємо всі клітинки в цій колонці
             for(let r=0; r<3; r++) {
                 colEl.children[r].classList.remove('row-spinning');
                 colEl.children[r].innerText = resultMatrix[i][r];
@@ -254,16 +287,17 @@ function checkMatrixWin(matrix, betPerLine) {
         const matchRight = calculateMatch([...lineSymbols].reverse());
         let lineWin = 0;
         
+        // Збільшив множники, бо виграти тепер важче
         if (matchLeft.count >= 3) {
             let mult = PAYOUTS[matchLeft.count] || 0;
-            if (['7️⃣', '💎'].includes(matchLeft.symbol)) mult *= 2;
+            if (['7️⃣', '💎'].includes(matchLeft.symbol)) mult *= 3; // x3 за сімки
             lineWin += betPerLine * mult;
             for(let c=0; c<matchLeft.count; c++) winningCoords.push({c: c, r: pattern[c]});
         }
         
         if (matchRight.count >= 3 && matchLeft.count !== 5) {
             let mult = PAYOUTS[matchRight.count] || 0;
-            if (['7️⃣', '💎'].includes(matchRight.symbol)) mult *= 2;
+            if (['7️⃣', '💎'].includes(matchRight.symbol)) mult *= 3;
             lineWin += betPerLine * mult;
             for(let c=0; c<matchRight.count; c++) winningCoords.push({c: 4-c, r: pattern[4-c]});
         }
@@ -279,7 +313,7 @@ function checkMatrixWin(matrix, betPerLine) {
             document.getElementById(`m-col${coord.c + 1}`).children[coord.r].classList.add('win-cell');
         });
     } else {
-        msg.innerText = "СПРОБУЙ ЩЕ...";
+        msg.innerText = "ПУСТО...";
     }
 }
 
