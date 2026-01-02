@@ -11,8 +11,7 @@
 body {
     margin: 0;
     padding: 0;
-    background-color: #050505; /* Глибокий чорний */
-    /* Радіальний градієнт для фону */
+    background-color: #050505; 
     background-image: radial-gradient(circle at 50% 20%, #2a0e38 0%, #000000 80%);
     color: white;
     font-family: 'Montserrat', sans-serif;
@@ -23,17 +22,16 @@ body {
     align-items: center;
 }
 
-/* --- 2. HEADER (ОПУЩЕНИЙ ЩЕ НИЖЧЕ) --- */
+/* --- 2. HEADER --- */
 .header {
     position: relative;
-    /* Опускаємо на 100px від верху екрану */
     margin-top: 100px; 
     width: 90%;
     max-width: 400px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px; /* Відступ до гри */
+    margin-bottom: 30px;
     z-index: 10;
 }
 
@@ -71,32 +69,26 @@ body {
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* --- 4. MODERN SLOTS (Ніяких рамок 90-х) --- */
+/* --- 4. GAME 1: CLASSIC SLOTS --- */
 .slot-frame {
-    /* Корпус автомату */
     background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
     padding: 12px;
     border-radius: 24px;
-    /* Зовнішнє світіння */
-    box-shadow: 
-        0 20px 50px rgba(0,0,0,0.8),
-        inset 0 1px 1px rgba(255,255,255,0.1); 
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.1); 
     border: 1px solid #333;
     position: relative;
 }
 
 .slot-window {
-    /* Екран з барабанами */
     background: #000;
     border-radius: 16px;
     overflow: hidden;
     position: relative;
-    /* Внутрішня тінь для глибини (ніби екран втоплений) */
     box-shadow: inset 0 0 20px rgba(0,0,0,1);
     border: 2px solid #222;
 }
 
-/* Блік на склі (Glass reflection) */
+/* Блік на склі */
 .slot-window::after {
     content: '';
     position: absolute;
@@ -109,16 +101,14 @@ body {
 .slot-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    /* Відступ між барабанами 2px (темна лінія) */
     gap: 2px; 
     background: #050505;
-    height: 110px; /* Висота барабанів */
+    height: 110px;
 }
 
 .reel {
     position: relative;
     height: 100%;
-    /* Темний фон для кожної смуги */
     background: linear-gradient(to right, #0a0a0a, #141414 50%, #0a0a0a);
     overflow: hidden; 
 }
@@ -129,15 +119,14 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 2.4rem;
-    /* Трохи тіні для символів, щоб вони "висіли" в повітрі */
     filter: drop-shadow(0 4px 4px rgba(0,0,0,0.8));
-    transform: translateZ(0); /* Для плавності анімації на iPhone */
+    transform: translateZ(0);
 }
 
-/* Анімація спіну (motion blur) */
+/* Анімація спіну */
 .is-spinning .reel-strip {
     animation: rapidSpin 0.15s linear infinite;
-    filter: blur(4px); /* Сильне розмиття */
+    filter: blur(4px);
     opacity: 0.7;
 }
 
@@ -146,7 +135,7 @@ body {
     100% { transform: translateY(80px); }
 }
 
-/* --- 5. 3D BUTTONS (Фізичні кнопки) --- */
+/* --- 5. BUTTONS --- */
 .btn-3d {
     border: none;
     border-radius: 18px;
@@ -157,25 +146,21 @@ body {
     cursor: pointer;
     position: relative;
     transition: all 0.08s ease-out;
-    /* Тінь "товщини" кнопки */
     box-shadow: 0 8px 0 rgba(0,0,0,0.5);
-    /* Легка рамка зверху для світла */
     border-top: 1px solid rgba(255,255,255,0.2);
 }
 
 .btn-3d:active {
     box-shadow: 0 0 0 rgba(0,0,0,0.5);
-    transform: translateY(8px); /* Натискання */
+    transform: translateY(8px);
 }
 
-/* Стиль кнопки SPIN */
 .spin-btn {
     width: 100%;
     padding: 24px;
     font-size: 1.6rem;
     letter-spacing: 2px;
     margin-top: 20px;
-    /* Градієнт "Золото" */
     background: linear-gradient(to bottom, #f59e0b, #d97706);
     box-shadow: 0 8px 0 #92400e, 0 15px 20px rgba(0,0,0,0.4);
     text-shadow: 0 1px 2px rgba(255,255,255,0.3);
@@ -185,7 +170,6 @@ body {
     box-shadow: 0 0 0 #92400e, inset 0 5px 10px rgba(0,0,0,0.2);
 }
 
-/* Стиль фіолетових фішок */
 .btn-purple {
     background: linear-gradient(to bottom, #c026d3, #9333ea);
     box-shadow: 0 6px 0 #581c87;
@@ -194,7 +178,6 @@ body {
 }
 .btn-purple:active { box-shadow: 0 0 0 #581c87; }
 
-/* Стиль сірої кнопки (Назад) */
 .btn-gray {
     background: #333338;
     box-shadow: 0 5px 0 #18181b;
@@ -205,7 +188,7 @@ body {
 }
 .btn-gray:active { box-shadow: 0 0 0 #18181b; }
 
-/* --- 6. CONTROLS PANEL --- */
+/* --- 6. BET PANEL & TEXT --- */
 .bet-panel {
     background: #121214;
     border-radius: 20px;
@@ -230,7 +213,6 @@ body {
     font-weight: 800;
     font-size: 1.2rem;
     width: 100%;
-    /* Прибираємо стандартний вигляд інпуту */
     appearance: none; 
 }
 
@@ -244,7 +226,6 @@ body {
     text-shadow: 0 0 10px rgba(253, 224, 71, 0.3);
 }
 
-/* Menu Cards */
 .logo {
     font-size: 3rem; font-weight: 900; text-align: center;
     background: linear-gradient(180deg, #fff, #a855f7);
@@ -267,14 +248,108 @@ body {
 .card-icon { font-size: 3.5rem; }
 .card-info h3 { margin: 0; font-size: 1.3rem; text-transform: uppercase; color: #fff; }
 .card-info p { margin: 5px 0 0; color: #888; font-weight: 600; }
-/* Ефект перемоги для барабана */
-.win-glow .reel-strip {
+
+/* Ефект перемоги */
+.win-glow .reel-strip, .win-cell {
     animation: winPulse 0.8s ease-in-out infinite alternate;
     color: #ffd700;
     text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
 }
-
 @keyframes winPulse {
-    from { transform: scale(1); }
-    to { transform: scale(1.2); }
+    from { transform: scale(1); filter: brightness(1); }
+    to { transform: scale(1.1); filter: brightness(1.3); }
+}
+
+/* --- GAME 2: MEGA GRID (NEW) --- */
+.matrix-window {
+    height: 240px;
+}
+.matrix-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    height: 100%;
+    background: #000;
+}
+.reel-col {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #222;
+    overflow: hidden;
+}
+.reel-col:last-child { border-right: none; }
+
+.sym {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    border-bottom: 1px solid #1a1a1a;
+    position: relative;
+    z-index: 2;
+}
+
+/* Анімація спіну для колонки */
+.col-spinning .sym {
+    animation: blurVertical 0.1s linear infinite;
+    filter: blur(4px);
+    color: transparent;
+    text-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+@keyframes blurVertical {
+    0% { transform: translateY(-20px); }
+    100% { transform: translateY(20px); }
+}
+
+/* Win Cell Styling */
+.win-cell {
+    background: rgba(255, 215, 0, 0.2);
+    box-shadow: inset 0 0 15px #ffd700;
+}
+
+/* Кнопки ліній */
+.lines-panel {
+    background: #18181b;
+    padding: 10px;
+    border-radius: 16px;
+    border: 1px solid #333;
+}
+.lines-buttons {
+    display: flex;
+    gap: 5px;
+    justify-content: space-between;
+}
+.line-btn {
+    flex: 1;
+    background: #27272a;
+    color: #888;
+    border: 1px solid #3f3f46;
+    border-radius: 8px;
+    padding: 8px 0;
+    font-size: 0.7rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.line-btn.active {
+    background: #7c3aed;
+    color: white;
+    border-color: #a78bfa;
+    box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
+}
+.bet-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #ccc;
+    margin-bottom: 5px;
+}
+.total-bet-display {
+    text-align: center;
+    font-weight: 900;
+    font-size: 1.2rem;
+    background: #000;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #333;
 }
