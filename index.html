@@ -3,353 +3,380 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>To The Moon</title>
+    <title>Cyber Core</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     
     <style>
+        :root {
+            --bg-color: #050505;
+            --bar-bg: #1a1a1a;
+            --neon-green: #00ff41; /* Hacker Green */
+            --neon-red: #ff003c;   /* Cyber Red */
+            --neon-blue: #00f3ff;
+            --cursor-color: #fff;
+        }
+
         body {
-            background-color: #0b0e11;
+            background-color: var(--bg-color);
             color: white;
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Orbitron', sans-serif; /* Футуристичний шрифт */
             margin: 0;
             height: 100vh;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
             overflow: hidden;
         }
 
-        /* --- Header: Balance --- */
-        .header {
-            padding: 20px;
+        /* --- Header --- */
+        .stats-bar {
+            width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .balance-box {
-            background: #1e2329;
-            padding: 8px 16px;
-            border-radius: 8px;
+        .balance { font-size: 20px; color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+
+        /* --- GAME AREA (The Reactor) --- */
+        .reactor-container {
+            width: 100%;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 8px;
-            font-family: 'Roboto Mono', monospace;
-            font-size: 18px;
-            color: #f0b90b; /* Binance Yellow */
+            gap: 20px;
+            position: relative;
         }
 
-        /* --- Chart Area --- */
-        .chart-container {
-            flex-grow: 1;
+        .core-visual {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #222, #000);
+            border: 4px solid #333;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
             position: relative;
-            background: linear-gradient(180deg, #151a21 0%, #0b0e11 100%);
-            border-top: 1px solid #2b3139;
-            border-bottom: 1px solid #2b3139;
-            overflow: hidden;
+            transition: all 0.3s;
         }
         
-        canvas {
-            display: block;
+        /* Ефект дихання ядра */
+        .core-pulse {
+            animation: pulse 1s infinite alternate;
+        }
+        @keyframes pulse {
+            from { box-shadow: 0 0 10px var(--neon-blue); border-color: var(--neon-blue); }
+            to { box-shadow: 0 0 30px var(--neon-blue); border-color: #fff; }
+        }
+
+        /* --- THE BAR (Target Area) --- */
+        .target-bar-frame {
             width: 100%;
-            height: 100%;
-        }
-
-        /* Поточна ціна (велика цифра) */
-        .current-price {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-family: 'Roboto Mono', monospace;
-            font-size: 32px;
-            font-weight: 700;
-        }
-        .price-up { color: #0ecb81; }
-        .price-down { color: #f6465d; }
-
-        /* --- Controls --- */
-        .controls {
-            padding: 20px;
-            display: flex;
-            gap: 15px;
-            background: #0b0e11;
-        }
-
-        .btn {
-            flex: 1;
             height: 60px;
+            background: var(--bar-bg);
+            border-radius: 30px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #333;
+            box-shadow: inset 0 0 15px #000;
+        }
+
+        /* Зелена зона успіху */
+        .success-zone {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            background: var(--neon-green);
+            opacity: 0.6;
+            box-shadow: 0 0 15px var(--neon-green);
+        }
+
+        /* Бігунок */
+        .cursor {
+            position: absolute;
+            top: 0;
+            width: 6px;
+            height: 100%;
+            background: #fff;
+            box-shadow: 0 0 10px #fff, 0 0 20px var(--neon-blue);
+            z-index: 10;
+        }
+
+        /* --- CONTROLS --- */
+        .control-panel {
+            width: 100%;
+            text-align: center;
+        }
+
+        .info-text {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .action-btn {
+            width: 100%;
+            height: 70px;
             border: none;
             border-radius: 12px;
-            font-size: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
             font-weight: 900;
-            color: white;
-            cursor: pointer;
-            transition: transform 0.1s;
             text-transform: uppercase;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
         }
-        .btn:active { transform: translateY(4px); box-shadow: none; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .btn-up { background-color: #0ecb81; } /* Green */
-        .btn-down { background-color: #f6465d; } /* Red */
+        /* Стан: ГОТОВИЙ ДО СТАРТУ */
+        .btn-start {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+        
+        /* Стан: ЗУПИНИТИ */
+        .btn-stop {
+            background: var(--neon-red);
+            color: #fff;
+            box-shadow: 0 0 30px var(--neon-red);
+            animation: shake 0.5s infinite;
+        }
 
-        /* --- Timer / Status Overlay --- */
-        .status-overlay {
+        .action-btn:active { transform: scale(0.95); }
+
+        /* Анімація тряски кнопки STOP */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        /* --- RESULT POPUP --- */
+        .result-overlay {
             position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             background: rgba(0,0,0,0.8);
-            padding: 20px 40px;
-            border-radius: 16px;
-            text-align: center;
+            z-index: 100;
             display: none;
-            z-index: 10;
             backdrop-filter: blur(5px);
         }
-        .status-title { font-size: 14px; color: #848e9c; margin-bottom: 5px; }
-        .status-value { font-size: 36px; font-weight: 900; }
-        .win { color: #0ecb81; }
-        .lose { color: #f6465d; }
-
-        /* Лінія ставки */
-        .bet-line {
-            position: absolute;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            border-top: 2px dashed rgba(255,255,255,0.5);
-            pointer-events: none;
-            display: none;
+        
+        .result-box {
+            font-size: 40px;
+            font-weight: 900;
+            text-shadow: 0 0 20px currentColor;
         }
-        .bet-badge {
-            position: absolute;
-            right: 10px;
-            top: -12px;
-            background: #fff;
-            color: #000;
-            padding: 2px 6px;
-            font-size: 10px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
+        .win-text { color: var(--neon-green); }
+        .lose-text { color: var(--neon-red); }
 
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div style="font-weight: 900; font-size: 20px;">BTC/USD</div>
-        <div class="balance-box">
-            <span>★</span> <span id="balance">1000</span>
-        </div>
+    <div class="stats-bar">
+        <div>CORE STATUS: <span id="status-text" style="color:#888">IDLE</span></div>
+        <div class="balance">★ <span id="balance">1000</span></div>
     </div>
 
-    <div class="chart-container" id="chartBox">
-        <canvas id="chart"></canvas>
-        <div class="current-price price-up" id="priceDisplay">45,230.50</div>
+    <div class="reactor-container">
+        <div class="core-visual" id="core">☢</div>
         
-        <div class="bet-line" id="betLine">
-            <div class="bet-badge">ВАША СТАВКА</div>
-        </div>
-
-        <div class="status-overlay" id="statusOverlay">
-            <div class="status-title" id="statusTitle">RESULT</div>
-            <div class="status-value" id="statusValue">WIN</div>
+        <div class="target-bar-frame" id="frame">
+            <div class="success-zone" id="zone"></div>
+            <div class="cursor" id="cursor"></div>
         </div>
     </div>
 
-    <div class="controls">
-        <button class="btn btn-up" id="btnUp" onclick="placeBet('up')">ВВЕРХ 📈</button>
-        <button class="btn btn-down" id="btnDown" onclick="placeBet('down')">ВНИЗ 📉</button>
+    <div class="control-panel">
+        <div class="info-text">BET: 50 ★ | WIN: x2</div>
+        <button class="action-btn btn-start" id="mainBtn" onclick="handleBtn()">START</button>
+    </div>
+
+    <div class="result-overlay" id="resultOverlay">
+        <div class="result-box win-text" id="resultText">STABLE</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.setHeaderColor('#0b0e11');
+        tg.setHeaderColor('#050505');
 
-        // --- Game Config ---
+        // --- Config ---
         let balance = 1000;
-        const betAmount = 50;
-        let currentPrice = 45000;
-        let isGameActive = false; // Чи йде раунд
-        let betDirection = null; // 'up' або 'down'
-        let startPrice = 0; // Ціна на момент ставки
+        const betCost = 50;
+        let isPlaying = false;
+        let cursorPosition = 0; // 0 to 100%
+        let direction = 1; // 1 = right, -1 = left
+        let speed = 1.5; // Швидкість руху (можна збільшувати для складності)
+        let animationFrameId;
 
         // --- Elements ---
-        const canvas = document.getElementById('chart');
-        const ctx = canvas.getContext('2d');
-        const priceDisplay = document.getElementById('priceDisplay');
         const balanceEl = document.getElementById('balance');
-        const btnUp = document.getElementById('btnUp');
-        const btnDown = document.getElementById('btnDown');
-        const betLine = document.getElementById('betLine');
-        const statusOverlay = document.getElementById('statusOverlay');
-        const statusValue = document.getElementById('statusValue');
-        const chartBox = document.getElementById('chartBox');
+        const mainBtn = document.getElementById('mainBtn');
+        const cursor = document.getElementById('cursor');
+        const zone = document.getElementById('zone');
+        const core = document.getElementById('core');
+        const statusText = document.getElementById('status-text');
+        const resultOverlay = document.getElementById('resultOverlay');
+        const resultText = document.getElementById('resultText');
 
-        // --- Chart Data ---
-        let prices = [];
-        const maxDataPoints = 100; // Скільки точок влазить на екран
-        let width, height;
+        // Змінні зони
+        let zoneStart = 0; // %
+        let zoneWidth = 20; // % (ширина безпечної зони)
 
-        // Ініціалізація полотна
-        function resize() {
-            width = canvas.width = chartBox.clientWidth;
-            height = canvas.height = chartBox.clientHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        // Заповнюємо масив початковими даними
-        for(let i=0; i<maxDataPoints; i++) {
-            prices.push(currentPrice);
+        function updateUI() {
+            balanceEl.innerText = balance;
         }
 
-        // --- Core Loop (Оновлення графіка) ---
-        function updateGame() {
-            // 1. Генеруємо нову ціну (Випадкове блукання)
-            // Ціна змінюється на випадкову величину від -20 до +20
-            const change = (Math.random() - 0.5) * 40; 
-            currentPrice += change;
-            
-            // Додаємо в масив, видаляємо стару
-            prices.push(currentPrice);
-            if (prices.length > maxDataPoints) prices.shift();
-
-            // 2. Оновлюємо текст ціни
-            priceDisplay.innerText = currentPrice.toFixed(2);
-            priceDisplay.className = `current-price ${change >= 0 ? 'price-up' : 'price-down'}`;
-
-            // 3. Малюємо графік
-            drawChart();
-
-            // 4. Якщо гра активна - перевіряємо умову (таймер тут віртуальний, ми чекаємо 3 сек)
-            requestAnimationFrame(updateGame);
-        }
-
-        function drawChart() {
-            ctx.clearRect(0, 0, width, height);
-            
-            // Знаходимо мін/макс для масштабування
-            const min = Math.min(...prices) - 50;
-            const max = Math.max(...prices) + 50;
-            const range = max - min;
-
-            ctx.beginPath();
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = '#f0b90b'; // Gold line
-            
-            // Градієнт під лінією
-            const gradient = ctx.createLinearGradient(0, 0, 0, height);
-            gradient.addColorStop(0, "rgba(240, 185, 11, 0.2)");
-            gradient.addColorStop(1, "rgba(240, 185, 11, 0.0)");
-
-            for (let i = 0; i < prices.length; i++) {
-                const x = (i / (maxDataPoints - 1)) * width;
-                // Нормалізуємо Y: (val - min) / range -> 0..1 -> перевертаємо для canvas
-                const y = height - ((prices[i] - min) / range) * height;
-                
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
+        function handleBtn() {
+            if (isPlaying) {
+                stopGame();
+            } else {
+                startGame();
             }
-            
-            ctx.stroke();
-            
-            // Заливка під графіком
-            ctx.lineTo(width, height);
-            ctx.lineTo(0, height);
-            ctx.fillStyle = gradient;
-            ctx.fill();
-
-            // Пульсуюча точка в кінці
-            const lastY = height - ((prices[prices.length-1] - min) / range) * height;
-            ctx.beginPath();
-            ctx.arc(width, lastY, 5, 0, Math.PI * 2);
-            ctx.fillStyle = '#fff';
-            ctx.fill();
         }
 
-        // --- Betting Logic ---
-        function placeBet(direction) {
-            if (isGameActive) return; // Не можна ставити під час гри
-            if (balance < betAmount) {
-                tg.showAlert("Мало зірок!");
+        function startGame() {
+            if (balance < betCost) {
+                tg.showAlert("Мало енергії (зірок)!");
                 return;
             }
 
-            // Старт раунду
-            isGameActive = true;
-            betDirection = direction;
-            startPrice = currentPrice;
-            
             // Списання
-            balance -= betAmount;
-            balanceEl.innerText = balance;
+            balance -= betCost;
+            updateUI();
             
-            // UI зміни
-            btnUp.disabled = true;
-            btnDown.disabled = true;
-            statusOverlay.style.display = 'none';
-            tg.HapticFeedback.impactOccurred('medium');
-
-            // Показуємо лінію ставки
-            // (В реальному коді треба вираховувати Y лінії, але для простоти поставимо її по центру)
-            // Для демо просто покажемо, що лінія активна
-            betLine.style.display = 'block';
-            betLine.style.top = '50%'; 
-            betLine.querySelector('.bet-badge').innerText = `СТАРТ: ${startPrice.toFixed(2)}`;
-            betLine.querySelector('.bet-badge').style.backgroundColor = direction === 'up' ? '#0ecb81' : '#f6465d';
-            betLine.querySelector('.bet-badge').style.color = '#fff';
-
-            // Таймер раунду - 3 секунди
-            let timeLeft = 3;
+            // Скидання стану
+            isPlaying = true;
+            resultOverlay.style.display = 'none';
+            cursorPosition = 0;
+            direction = 1;
             
-            const timer = setInterval(() => {
-                timeLeft--;
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    finishRound();
-                }
-            }, 1000);
+            // Змінюємо кнопку
+            mainBtn.innerText = "LOCK";
+            mainBtn.className = "action-btn btn-stop"; // Червона кнопка
+            
+            // Активуємо ядро
+            core.classList.add('core-pulse');
+            core.style.color = 'var(--neon-blue)';
+            statusText.innerText = "UNSTABLE";
+            statusText.style.color = "var(--neon-red)";
+
+            // Генеруємо випадкову зону (від 20% до 80%, щоб не було скраю)
+            zoneWidth = Math.floor(Math.random() * (25 - 15) + 15); // Ширина від 15 до 25%
+            zoneStart = Math.floor(Math.random() * (80 - zoneWidth - 10) + 10);
+            
+            // Малюємо зону
+            zone.style.left = zoneStart + '%';
+            zone.style.width = zoneWidth + '%';
+
+            tg.HapticFeedback.impactOccurred('light');
+
+            // Запускаємо цикл
+            gameLoop();
         }
 
-        function finishRound() {
-            const endPrice = currentPrice;
-            const won = (betDirection === 'up' && endPrice > startPrice) || 
-                        (betDirection === 'down' && endPrice < startPrice);
+        function gameLoop() {
+            if (!isPlaying) return;
 
-            let message = "";
-            let colorClass = "";
+            // Рухаємо курсор
+            cursorPosition += speed * direction;
 
-            if (won) {
-                const profit = betAmount * 2; // x2
-                balance += profit;
-                balanceEl.innerText = balance;
-                message = `+${profit} ★`;
-                colorClass = "win";
-                tg.HapticFeedback.notificationOccurred('success');
-            } else {
-                message = "ВТРАЧЕНО";
-                colorClass = "lose";
-                tg.HapticFeedback.notificationOccurred('error');
+            // Відбиваємось від країв
+            if (cursorPosition >= 100) {
+                cursorPosition = 100;
+                direction = -1;
+            } else if (cursorPosition <= 0) {
+                cursorPosition = 0;
+                direction = 1;
             }
 
-            // Show Result
-            statusValue.innerText = message;
-            statusValue.className = `status-value ${colorClass}`;
-            document.getElementById('statusTitle').innerText = won ? "ПЕРЕМОГА!" : "НЕВДАЧА";
-            statusOverlay.style.display = 'block';
-            
-            // Reset
-            betLine.style.display = 'none';
-            btnUp.disabled = false;
-            btnDown.disabled = false;
-            isGameActive = false;
+            // Оновлюємо візуал
+            cursor.style.left = cursorPosition + '%';
+
+            animationFrameId = requestAnimationFrame(gameLoop);
         }
 
-        // Запуск
-        updateGame();
+        function stopGame() {
+            isPlaying = false;
+            cancelAnimationFrame(animationFrameId);
+
+            // Перевірка влучання
+            // Додаємо трохи "поблажки" (hitbox tolerance), бо курсор має ширину
+            const hitStart = zoneStart;
+            const hitEnd = zoneStart + zoneWidth;
+
+            // Успіх якщо курсор всередині зони
+            if (cursorPosition >= hitStart && cursorPosition <= hitEnd) {
+                win();
+            } else {
+                lose();
+            }
+
+            // Повертаємо кнопку
+            mainBtn.innerText = "START";
+            mainBtn.className = "action-btn btn-start";
+            
+            core.classList.remove('core-pulse');
+        }
+
+        function win() {
+            const winAmount = betCost * 2;
+            balance += winAmount;
+            updateUI();
+
+            // Ефекти
+            core.style.borderColor = "var(--neon-green)";
+            core.style.color = "var(--neon-green)";
+            statusText.innerText = "STABILIZED";
+            statusText.style.color = "var(--neon-green)";
+            
+            showPopup("SUCCESS", "win-text");
+            tg.HapticFeedback.notificationOccurred('success');
+        }
+
+        function lose() {
+            // Ефекти
+            core.style.borderColor = "var(--neon-red)";
+            core.style.color = "var(--neon-red)";
+            statusText.innerText = "MELTDOWN";
+            statusText.style.color = "var(--neon-red)";
+
+            showPopup("FAILURE", "lose-text");
+            tg.HapticFeedback.notificationOccurred('error');
+        }
+
+        function showPopup(text, cssClass) {
+            resultText.innerText = text;
+            resultText.className = "result-box " + cssClass;
+            resultOverlay.style.display = 'flex';
+            
+            // Автоматично сховати через 1.5 сек
+            setTimeout(() => {
+                resultOverlay.style.display = 'none';
+            }, 1500);
+        }
 
     </script>
 </body>
