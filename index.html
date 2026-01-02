@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pocket Game Casino</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -11,7 +11,7 @@
 
     <div class="header">
         <div class="user-info">
-            <span id="username">Гравець</span>
+            👤 <span id="username">Гравець</span>
         </div>
         <div class="balance-box">
             💰 <span id="balance">1000</span>
@@ -19,8 +19,8 @@
     </div>
 
     <div id="screen-lobby" class="screen active">
-        <h1>Pocket Game</h1>
-        <p class="subtitle">Обери свою удачу</p>
+        <h1 style="text-align: center; margin-bottom: 5px;">Pocket Game</h1>
+        <p style="text-align: center; color: #888; margin-top: 0;">Твій кишеньковий азарт</p>
         
         <div class="games-grid">
             <div class="game-card" onclick="showScreen('screen-slots')">
@@ -36,7 +36,7 @@
 
     <div id="screen-slots" class="screen">
         <button class="back-btn" onclick="showScreen('screen-lobby')">⬅ Назад</button>
-        <h2>Lucky Slots</h2>
+        <h2 style="text-align: center;">Lucky Slots</h2>
         
         <div class="slot-machine">
             <div class="reel" id="reel1">🍒</div>
@@ -45,7 +45,9 @@
         </div>
 
         <div class="controls">
-            <input type="number" id="slot-bet" value="50" min="10">
+            <label for="slot-bet" style="color: #888; font-size: 0.9rem;">Ваша ставка:</label>
+            <input type="number" id="slot-bet" value="50" min="10" style="width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; border: none; background: #333; color: white; text-align: center; font-weight: bold;">
+            
             <button class="action-btn" onclick="spinSlots()">КРУТИТИ</button>
         </div>
         <div id="slot-msg" class="message"></div>
@@ -53,11 +55,13 @@
 
     <div id="screen-roulette" class="screen">
         <button class="back-btn" onclick="showScreen('screen-lobby')">⬅ Назад</button>
-        <h2>Mini Roulette</h2>
+        <h2 style="text-align: center;">Mini Roulette</h2>
         
-        <div class="roulette-wheel" id="wheel">
-            <div class="wheel-pointer">🔻</div>
-            <div class="wheel-inner">🎡</div>
+        <div class="roulette-container">
+            <div class="wheel-pointer"></div>
+            <div class="roulette-wheel" id="wheel">
+                <div class="wheel-inner">💎</div>
+            </div>
         </div>
 
         <div class="bet-options">
@@ -67,10 +71,10 @@
         </div>
         
         <div class="controls">
-             <p>Ставка на: <span id="current-bet-color">Немає</span></p>
-             <button class="action-btn" onclick="spinRoulette()">КРУТИТИ (50 монет)</button>
+             <p style="text-align: center; margin: 10px 0;">Ставка на: <span id="current-bet-color" style="font-weight:bold; color:var(--gold-light)">...</span></p>
+             <button class="action-btn" onclick="spinRoulette()">КРУТИТИ (50)</button>
         </div>
-        <div id="roulette-msg" class="message"></div>
+        <div id="roulette-msg" class="message" style="text-align: center;"></div>
     </div>
 
     <script src="js/script.js"></script>
