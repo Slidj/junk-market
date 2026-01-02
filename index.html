@@ -2,152 +2,333 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Junk Store</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Cyber Slots</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Poppins:wght@800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=20">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0f0c29;
+            --slot-bg: #1a1a2e;
+            --neon-pink: #ff0055;
+            --neon-blue: #00ccff;
+            --gold: #ffd700;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #24243e, #0f0c29);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-evenly;
+            overflow: hidden;
+        }
+
+        /* --- BALANCE --- */
+        .balance-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 25px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 0 20px rgba(0, 204, 255, 0.3);
+        }
+
+        .star-icon { color: var(--gold); font-size: 24px; text-shadow: 0 0 10px var(--gold); }
+        .balance-text { font-size: 24px; font-weight: 700; }
+
+        /* --- SLOT MACHINE --- */
+        .slot-machine-frame {
+            position: relative;
+            padding: 15px;
+            background: linear-gradient(145deg, #2b2b40, #161625);
+            border-radius: 20px;
+            border: 4px solid var(--neon-blue);
+            box-shadow: 0 0 30px rgba(0, 204, 255, 0.4), inset 0 0 20px #000;
+        }
+
+        .slots-window {
+            display: flex;
+            gap: 10px;
+            background: #000;
+            padding: 15px;
+            border-radius: 10px;
+            overflow: hidden; /* Ховаємо те, що крутиться поза екраном */
+            position: relative;
+        }
+
+        /* Лінія перемоги */
+        .win-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--neon-pink);
+            transform: translateY(-50%);
+            z-index: 5;
+            opacity: 0.3;
+            pointer-events: none;
+            box-shadow: 0 0 10px var(--neon-pink);
+        }
+
+        .reel {
+            width: 80px;
+            height: 100px; /* Висота одного символу */
+            background: #1a1a2e;
+            border-radius: 8px;
+            font-size: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Ефект 3D барабану */
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            position: relative;
+        }
+
+        .symbol-strip {
+            display: flex;
+            flex-direction: column;
+            transition: transform 3s cubic-bezier(0.1, 1, 0.1, 1); /* Плавна зупинка */
+        }
+        
+        /* Клас для розмиття при обертанні */
+        .blur-effect {
+            filter: blur(4px);
+        }
+
+        /* --- CONTROLS --- */
+        .spin-btn {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--neon-pink), #990033);
+            border: 4px solid white;
+            color: white;
+            font-size: 24px;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 0 40px var(--neon-pink);
+            transition: transform 0.1s;
+            text-transform: uppercase;
+        }
+
+        .spin-btn:active {
+            transform: scale(0.9);
+            box-shadow: 0 0 20px var(--neon-pink);
+        }
+        
+        .spin-btn:disabled {
+            background: #555;
+            box-shadow: none;
+            border-color: #888;
+        }
+
+        .info-text {
+            color: #aaa;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        /* --- JACKPOT ANIMATION --- */
+        @keyframes jackPotPulse {
+            0% { transform: scale(1); text-shadow: 0 0 10px var(--gold); }
+            50% { transform: scale(1.2); text-shadow: 0 0 40px var(--gold), 0 0 80px red; }
+            100% { transform: scale(1); text-shadow: 0 0 10px var(--gold); }
+        }
+
+        .win-message {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            font-weight: 900;
+            color: var(--gold);
+            text-shadow: 0 0 20px black;
+            display: none;
+            z-index: 100;
+            animation: jackPotPulse 0.5s infinite;
+        }
+
+    </style>
 </head>
 <body>
 
-    <header class="top-app-bar">
-        <div class="logo-text">Junk<span class="logo-emoji">🛍️</span>Store</div>
-        <div class="right-section">
-            <div class="balance-chip"><span class="material-icons-round" style="font-size: 16px; color: var(--star-gold);">star</span>150</div>
-            <div id="user-profile">
-                <div class="avatar-placeholder" id="avatar-placeholder">G</div>
-                <img id="user-avatar" class="user-avatar" src="" style="display: none;">
-            </div>
-        </div>
-    </header>
+    <div class="balance-container">
+        <span class="star-icon">★</span>
+        <span class="balance-text" id="balance">1000</span>
+    </div>
 
-    <div class="categories-bar">
-        <div class="category-chip active" onclick="selectCategory(this)">
-            <span class="material-icons-round category-icon">local_fire_department</span> Усі
-        </div>
-        <div class="category-chip" onclick="selectCategory(this)">
-            <span class="material-icons-round category-icon">smartphone</span> Телефони
-        </div>
-        <div class="category-chip" onclick="selectCategory(this)">
-            <span class="material-icons-round category-icon">checkroom</span> Одяг
-        </div>
-        <div class="category-chip" onclick="selectCategory(this)">
-            <span class="material-icons-round category-icon">headphones</span> Аудіо
-        </div>
-        <div class="category-chip" onclick="selectCategory(this)">
-            <span class="material-icons-round category-icon">photo_camera</span> Камери
-        </div>
-        <div class="category-chip" onclick="selectCategory(this)">
-            <span class="material-icons-round category-icon">sports_esports</span> Ігри
-        </div>
-        <div class="category-chip" onclick="selectCategory(this)">
-            <span class="material-icons-round category-icon">watch</span> Годинники
-        </div>
-        <div class="category-chip" onclick="selectCategory(this)">
-            <span class="material-icons-round category-icon">diamond</span> Аксесуари
+    <div class="win-message" id="win-msg">JACKPOT!</div>
+
+    <div class="slot-machine-frame">
+        <div class="slots-window">
+            <div class="win-line"></div>
+            
+            <div class="reel">
+                <div class="symbol-strip" id="reel1">
+                    <div>🍒</div> </div>
+            </div>
+            <div class="reel">
+                <div class="symbol-strip" id="reel2">
+                    <div>🍒</div>
+                </div>
+            </div>
+            <div class="reel">
+                <div class="symbol-strip" id="reel3">
+                    <div>🍒</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <main class="grid">
-        <div class="md-card" onclick="openProduct('iPhone 12 Mini', 10000, 'Apple', 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500', 'Опис iPhone...')">
-            <div class="card-image-container"><img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500" class="card-img" id="img-1"></div>
-            <div class="card-content">
-                <div class="text-group"><div class="card-title">iPhone 12 Mini</div><div class="card-subhead">Apple</div></div>
-                <div class="card-actions">
-                    <div class="price-text">10,000 *</div>
-                    <button class="cart-btn-small" onclick="addToCart(event, 'img-1')"><span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span></button>
-                </div>
-            </div>
-        </div>
+    <div style="text-align: center;">
+        <button class="spin-btn" id="spinBtn" onclick="spin()">SPIN</button>
+        <div class="info-text">Cost: 10 ★ | Win: x10 ★</div>
+    </div>
 
-        <div class="md-card" onclick="openProduct('Nike Air Max', 2500, 'Взуття', 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500', 'Опис Nike...')">
-            <div class="card-image-container"><img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500" class="card-img" id="img-2"></div>
-            <div class="card-content">
-                <div class="text-group"><div class="card-title">Nike Air Max</div><div class="card-subhead">Взуття</div></div>
-                <div class="card-actions">
-                    <div class="price-text">2,500 *</div>
-                    <button class="cart-btn-small" onclick="addToCart(event, 'img-2')"><span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span></button>
-                </div>
-            </div>
-        </div>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.setHeaderColor('#0f0c29');
 
-        <div class="md-card" onclick="openProduct('Sony Audio', 3000, 'Звук', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500', 'Опис Sony...')">
-            <div class="card-image-container"><img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500" class="card-img" id="img-3"></div>
-            <div class="card-content">
-                <div class="text-group"><div class="card-title">Sony Audio</div><div class="card-subhead">Звук</div></div>
-                <div class="card-actions">
-                    <div class="price-text">3,000 *</div>
-                    <button class="cart-btn-small" onclick="addToCart(event, 'img-3')"><span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span></button>
-                </div>
-            </div>
-        </div>
+        let balance = 1000;
+        const spinCost = 10;
         
-         <div class="md-card" onclick="openProduct('Polaroid Cam', 1200, 'Камери', 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500', 'Опис Polaroid...')">
-            <div class="card-image-container"><img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500" class="card-img" id="img-4"></div>
-            <div class="card-content">
-                <div class="text-group"><div class="card-title">Polaroid Cam</div><div class="card-subhead">Камери</div></div>
-                <div class="card-actions">
-                    <div class="price-text">1,200 *</div>
-                    <button class="cart-btn-small" onclick="addToCart(event, 'img-4')"><span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span></button>
-                </div>
-            </div>
-        </div>
+        // Наші символи
+        const symbols = ['🍒', '🍋', '🍇', '💎', '7️⃣', '🔔'];
+        // Коефіцієнти виграшу
+        const rewards = {
+            '🍒': 5,
+            '🍋': 5,
+            '🍇': 10,
+            '🔔': 20,
+            '💎': 50,
+            '7️⃣': 100
+        };
 
-         <div class="md-card" onclick="openProduct('Logitech Mouse', 500, 'PC', 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=500', 'Опис Мишки...')">
-            <div class="card-image-container"><img src="https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=500" class="card-img" id="img-5"></div>
-            <div class="card-content">
-                <div class="text-group"><div class="card-title">Logitech Mouse</div><div class="card-subhead">PC</div></div>
-                <div class="card-actions">
-                    <div class="price-text">500 *</div>
-                    <button class="cart-btn-small" onclick="addToCart(event, 'img-5')"><span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span></button>
-                </div>
-            </div>
-        </div>
-        
-        <div class="md-card" onclick="openProduct('RayBan Glasses', 800, 'Стиль', 'https://images.unsplash.com/photo-1585336261022-680e295ce3fe?w=500', 'Опис Окулярів...')">
-            <div class="card-image-container"><img src="https://images.unsplash.com/photo-1585336261022-680e295ce3fe?w=500" class="card-img" id="img-6"></div>
-            <div class="card-content">
-                <div class="text-group"><div class="card-title">RayBan Glasses</div><div class="card-subhead">Стиль</div></div>
-                <div class="card-actions">
-                    <div class="price-text">800 *</div>
-                    <button class="cart-btn-small" onclick="addToCart(event, 'img-6')"><span class="material-icons-round" style="font-size: 20px;">add_shopping_cart</span></button>
-                </div>
-            </div>
-        </div>
-    </main>
+        const reel1 = document.getElementById('reel1');
+        const reel2 = document.getElementById('reel2');
+        const reel3 = document.getElementById('reel3');
+        const balanceEl = document.getElementById('balance');
+        const spinBtn = document.getElementById('spinBtn');
+        const winMsg = document.getElementById('win-msg');
 
-    <div id="sheet-overlay" class="bottom-sheet-overlay" onclick="closeProduct()"></div>
-    <div id="bottom-sheet" class="bottom-sheet">
-        <img id="sheet-img" src="" class="sheet-img">
-        <div id="sheet-title" class="sheet-title">Product Name</div>
-        <div id="sheet-price" class="sheet-price">0 *</div>
-        <div id="sheet-desc" class="sheet-desc">Description here...</div>
-        <button class="sheet-btn" onclick="addToCartDirect()">Додати у кошик</button>
-    </div>
+        function updateBalance(amount) {
+            balance += amount;
+            balanceEl.innerText = balance;
+            // Анімація балансу
+            balanceEl.style.color = amount > 0 ? '#00ff00' : '#fff';
+            setTimeout(() => balanceEl.style.color = '#fff', 300);
+        }
 
-    <div class="fab" onclick="alert('Відкрити форму продажу')">
-        <span class="material-icons-round" style="font-size: 28px;">add</span>
-    </div>
+        // Генеруємо випадкову стрічку символів для анімації
+        function generateStrip(finalSymbol) {
+            let html = '';
+            // Додаємо 20 випадкових символів для ефекту прокрутки
+            for(let i=0; i<20; i++) {
+                const randomSym = symbols[Math.floor(Math.random() * symbols.length)];
+                html += `<div style="height: 100px; display:flex; align-items:center; justify-content:center;">${randomSym}</div>`;
+            }
+            // Останній символ - той, що випаде
+            html += `<div style="height: 100px; display:flex; align-items:center; justify-content:center;">${finalSymbol}</div>`;
+            return html;
+        }
 
-    <nav class="nav-bar">
-        <div class="nav-item active" onclick="switchTab(this)">
-            <div class="nav-icon-container"><span class="material-icons-round nav-icon">home</span></div>
-            <span class="nav-label">Головна</span>
-        </div>
-        <div class="nav-item" onclick="switchTab(this)">
-            <div class="nav-icon-container"><span class="material-icons-round nav-icon">search</span></div>
-            <span class="nav-label">Пошук</span>
-        </div>
-        <div class="nav-item" id="cart-nav-item" onclick="switchTab(this)">
-            <div class="nav-icon-container">
-                <span class="material-icons-round nav-icon">shopping_cart</span>
-                <div id="cart-badge" class="badge">0</div>
-            </div>
-            <span class="nav-label">Кошик</span>
-        </div>
-    </nav>
+        function spin() {
+            if (balance < spinCost) {
+                tg.showAlert("Недостатньо зірок!");
+                return;
+            }
 
-    <script src="js/app.js?v=7"></script>
+            // Списуємо баланс
+            updateBalance(-spinCost);
+            tg.HapticFeedback.impactOccurred('medium');
+
+            // Блокуємо кнопку
+            spinBtn.disabled = true;
+            winMsg.style.display = 'none';
+
+            // Визначаємо результат наперед (RNG)
+            const result1 = symbols[Math.floor(Math.random() * symbols.length)];
+            const result2 = symbols[Math.floor(Math.random() * symbols.length)];
+            const result3 = symbols[Math.floor(Math.random() * symbols.length)];
+
+            // Заповнюємо барабани довгою стрічкою
+            reel1.innerHTML = generateStrip(result1);
+            reel2.innerHTML = generateStrip(result2);
+            reel3.innerHTML = generateStrip(result3);
+
+            // Скидаємо позицію (щоб анімація програлась з початку)
+            reel1.style.transition = 'none'; reel1.style.transform = 'translateY(0)';
+            reel2.style.transition = 'none'; reel2.style.transform = 'translateY(0)';
+            reel3.style.transition = 'none'; reel3.style.transform = 'translateY(0)';
+
+            // Примусове перемальовування (Reflow)
+            void reel1.offsetWidth;
+
+            // ЗАПУСК АНІМАЦІЇ (крутимо вниз)
+            // Довжина стрічки 21 символ * 100px = 2100px. Зсуваємо на (21-1)*100 = 2000px
+            const translateY = '-2000px';
+
+            // Барабан 1
+            reel1.style.transition = 'transform 2s cubic-bezier(0.5, 0, 0.2, 1)';
+            reel1.style.transform = `translateY(${translateY})`;
+            reel1.classList.add('blur-effect');
+
+            // Барабан 2 (із затримкою)
+            setTimeout(() => {
+                reel2.style.transition = 'transform 2.5s cubic-bezier(0.5, 0, 0.2, 1)';
+                reel2.style.transform = `translateY(${translateY})`;
+                reel2.classList.add('blur-effect');
+            }, 200);
+
+            // Барабан 3 (із затримкою)
+            setTimeout(() => {
+                reel3.style.transition = 'transform 3s cubic-bezier(0.5, 0, 0.2, 1)';
+                reel3.style.transform = `translateY(${translateY})`;
+                reel3.classList.add('blur-effect');
+            }, 400);
+
+            // ПЕРЕВІРКА РЕЗУЛЬТАТУ (після закінчення всіх анімацій - 3.4 сек)
+            setTimeout(() => {
+                // Прибираємо блюр
+                reel1.classList.remove('blur-effect');
+                reel2.classList.remove('blur-effect');
+                reel3.classList.remove('blur-effect');
+                
+                checkWin(result1, result2, result3);
+                spinBtn.disabled = false;
+            }, 3400);
+        }
+
+        function checkWin(r1, r2, r3) {
+            // Умова перемоги: всі 3 однакові
+            if (r1 === r2 && r2 === r3) {
+                const multiplier = rewards[r1];
+                const winAmount = spinCost * multiplier;
+                
+                updateBalance(winAmount);
+                
+                // Ефекти перемоги
+                winMsg.innerText = `+${winAmount}`;
+                winMsg.style.display = 'block';
+                tg.HapticFeedback.notificationOccurred('success');
+                
+                // Конфетті або просто блимання
+            } else if (r1 === r2 || r2 === r3 || r1 === r3) {
+                 // Втішний приз за 2 символи (опціонально)
+                 // updateBalance(5); 
+            }
+        }
+    </script>
 </body>
 </html>
