@@ -267,3 +267,14 @@ body {
 .card-icon { font-size: 3.5rem; }
 .card-info h3 { margin: 0; font-size: 1.3rem; text-transform: uppercase; color: #fff; }
 .card-info p { margin: 5px 0 0; color: #888; font-weight: 600; }
+/* Ефект перемоги для барабана */
+.win-glow .reel-strip {
+    animation: winPulse 0.8s ease-in-out infinite alternate;
+    color: #ffd700;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+}
+
+@keyframes winPulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.2); }
+}
