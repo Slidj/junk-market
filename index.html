@@ -3,381 +3,329 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Cyber Core</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
-    
+    <title>Top Down Shooter</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
     <style>
-        :root {
-            --bg-color: #050505;
-            --bar-bg: #1a1a1a;
-            --neon-green: #00ff41; /* Hacker Green */
-            --neon-red: #ff003c;   /* Cyber Red */
-            --neon-blue: #00f3ff;
-            --cursor-color: #fff;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: white;
-            font-family: 'Orbitron', sans-serif; /* Футуристичний шрифт */
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
-
-        /* --- Header --- */
-        .stats-bar {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255,255,255,0.05);
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .balance { font-size: 20px; color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
-
-        /* --- GAME AREA (The Reactor) --- */
-        .reactor-container {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            position: relative;
-        }
-
-        .core-visual {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #222, #000);
-            border: 4px solid #333;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 40px;
-            position: relative;
-            transition: all 0.3s;
-        }
-        
-        /* Ефект дихання ядра */
-        .core-pulse {
-            animation: pulse 1s infinite alternate;
-        }
-        @keyframes pulse {
-            from { box-shadow: 0 0 10px var(--neon-blue); border-color: var(--neon-blue); }
-            to { box-shadow: 0 0 30px var(--neon-blue); border-color: #fff; }
-        }
-
-        /* --- THE BAR (Target Area) --- */
-        .target-bar-frame {
-            width: 100%;
-            height: 60px;
-            background: var(--bar-bg);
-            border-radius: 30px;
-            position: relative;
-            overflow: hidden;
-            border: 2px solid #333;
-            box-shadow: inset 0 0 15px #000;
-        }
-
-        /* Зелена зона успіху */
-        .success-zone {
-            position: absolute;
-            top: 0;
-            height: 100%;
-            background: var(--neon-green);
-            opacity: 0.6;
-            box-shadow: 0 0 15px var(--neon-green);
-        }
-
-        /* Бігунок */
-        .cursor {
-            position: absolute;
-            top: 0;
-            width: 6px;
-            height: 100%;
-            background: #fff;
-            box-shadow: 0 0 10px #fff, 0 0 20px var(--neon-blue);
-            z-index: 10;
-        }
-
-        /* --- CONTROLS --- */
-        .control-panel {
-            width: 100%;
-            text-align: center;
-        }
-
-        .info-text {
-            color: #888;
-            font-size: 14px;
-            margin-bottom: 15px;
-            letter-spacing: 1px;
-        }
-
-        .action-btn {
-            width: 100%;
-            height: 70px;
-            border: none;
-            border-radius: 12px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 24px;
-            font-weight: 900;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Стан: ГОТОВИЙ ДО СТАРТУ */
-        .btn-start {
-            background: var(--neon-blue);
-            color: #000;
-            box-shadow: 0 0 20px var(--neon-blue);
-        }
-        
-        /* Стан: ЗУПИНИТИ */
-        .btn-stop {
-            background: var(--neon-red);
-            color: #fff;
-            box-shadow: 0 0 30px var(--neon-red);
-            animation: shake 0.5s infinite;
-        }
-
-        .action-btn:active { transform: scale(0.95); }
-
-        /* Анімація тряски кнопки STOP */
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
-        }
-
-        /* --- RESULT POPUP --- */
-        .result-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: rgba(0,0,0,0.8);
-            z-index: 100;
-            display: none;
-            backdrop-filter: blur(5px);
-        }
-        
-        .result-box {
-            font-size: 40px;
-            font-weight: 900;
-            text-shadow: 0 0 20px currentColor;
-        }
-        .win-text { color: var(--neon-green); }
-        .lose-text { color: var(--neon-red); }
-
+        body { margin: 0; padding: 0; background: #111; overflow: hidden; }
+        canvas { display: block; }
     </style>
 </head>
 <body>
 
-    <div class="stats-bar">
-        <div>CORE STATUS: <span id="status-text" style="color:#888">IDLE</span></div>
-        <div class="balance">★ <span id="balance">1000</span></div>
-    </div>
+<script>
+    const config = {
+        type: Phaser.AUTO,
+        width: window.innerWidth,
+        height: window.innerHeight,
+        physics: {
+            default: 'arcade',
+            arcade: { debug: false }
+        },
+        scene: {
+            preload: preload,
+            create: create,
+            update: update
+        }
+    };
 
-    <div class="reactor-container">
-        <div class="core-visual" id="core">☢</div>
+    const game = new Phaser.Game(config);
+
+    let player;
+    let cursors;
+    let reticle; // Приціл
+    let bullets;
+    let enemies;
+    let lastFired = 0;
+    let score = 0;
+    let scoreText;
+    let hp = 100;
+    let hpText;
+
+    function preload() {
+        // Ми генеруємо графіку на ходу, тому завантажувати нічого не треба
+    }
+
+    function create() {
+        // --- 1. МАЛЮЄМО КАРТУ (Вулиця) ---
+        // Створюємо текстуру трави та асфальту
+        const bgGraphics = this.add.graphics();
         
-        <div class="target-bar-frame" id="frame">
-            <div class="success-zone" id="zone"></div>
-            <div class="cursor" id="cursor"></div>
-        </div>
-    </div>
+        // Трава (вся мапа)
+        bgGraphics.fillStyle(0x2d5a27, 1); // Темно-зелений
+        bgGraphics.fillRect(0, 0, 2000, 2000);
+        
+        // Дорога (по центру)
+        bgGraphics.fillStyle(0x333333, 1); // Асфальт
+        bgGraphics.fillRect(800, 0, 400, 2000);
+        
+        // Розмітка дороги
+        bgGraphics.fillStyle(0xffffff, 0.8);
+        for(let i=0; i<2000; i+=100) {
+            bgGraphics.fillRect(995, i, 10, 50);
+        }
+        
+        // Генеруємо текстуру з графіки, щоб використовувати як фон
+        bgGraphics.generateTexture('map', 2000, 2000);
+        bgGraphics.destroy();
+        
+        // Додаємо фон
+        this.add.image(1000, 1000, 'map');
+        
+        // Встановлюємо межі світу
+        this.physics.world.setBounds(0, 0, 2000, 2000);
 
-    <div class="control-panel">
-        <div class="info-text">BET: 50 ★ | WIN: x2</div>
-        <button class="action-btn btn-start" id="mainBtn" onclick="handleBtn()">START</button>
-    </div>
+        // --- 2. СТВОРЕННЯ ГРАВЦЯ (Генерація спрайта) ---
+        const playerGraphics = this.make.graphics({x: 0, y: 0, add: false});
+        
+        // Тіло
+        playerGraphics.fillStyle(0xdba569, 1); // Шкіра
+        playerGraphics.fillCircle(16, 16, 16); // Голова
+        playerGraphics.fillStyle(0x224488, 1); // Одяг (плечі)
+        playerGraphics.fillCircle(8, 20, 10); // Ліве плече
+        playerGraphics.fillCircle(24, 20, 10); // Праве плече
+        
+        // Зброя
+        playerGraphics.fillStyle(0x111111, 1);
+        playerGraphics.fillRect(20, 10, 25, 6); // Ствол
 
-    <div class="result-overlay" id="resultOverlay">
-        <div class="result-box win-text" id="resultText">STABLE</div>
-    </div>
+        playerGraphics.generateTexture('playerTex', 64, 64);
+        
+        player = this.physics.add.sprite(1000, 1000, 'playerTex');
+        player.setCollideWorldBounds(true);
+        player.setOrigin(0.5, 0.5); // Центр обертання
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.setHeaderColor('#050505');
+        // --- 3. КАМЕРА ---
+        this.cameras.main.setBounds(0, 0, 2000, 2000);
+        this.cameras.main.startFollow(player, true, 0.1, 0.1); // Плавна камера (Lerp)
 
-        // --- Config ---
-        let balance = 1000;
-        const betCost = 50;
-        let isPlaying = false;
-        let cursorPosition = 0; // 0 to 100%
-        let direction = 1; // 1 = right, -1 = left
-        let speed = 1.5; // Швидкість руху (можна збільшувати для складності)
-        let animationFrameId;
+        // --- 4. УПРАВЛІННЯ ---
+        cursors = this.input.keyboard.addKeys({
+            'up': Phaser.Input.Keyboard.KeyCodes.W,
+            'down': Phaser.Input.Keyboard.KeyCodes.S,
+            'left': Phaser.Input.Keyboard.KeyCodes.A,
+            'right': Phaser.Input.Keyboard.KeyCodes.D
+        });
 
-        // --- Elements ---
-        const balanceEl = document.getElementById('balance');
-        const mainBtn = document.getElementById('mainBtn');
-        const cursor = document.getElementById('cursor');
-        const zone = document.getElementById('zone');
-        const core = document.getElementById('core');
-        const statusText = document.getElementById('status-text');
-        const resultOverlay = document.getElementById('resultOverlay');
-        const resultText = document.getElementById('resultText');
+        // Приціл
+        reticle = this.add.circle(0, 0, 10, 0xff0000).setDepth(10);
 
-        // Змінні зони
-        let zoneStart = 0; // %
-        let zoneWidth = 20; // % (ширина безпечної зони)
+        this.input.on('pointermove', function (pointer) {
+            // Приціл рухається відносно камери
+            reticle.x = this.cameras.main.scrollX + pointer.x;
+            reticle.y = this.cameras.main.scrollY + pointer.y;
+            
+            // Гравець повертається до прицілу
+            let angle = Phaser.Math.Angle.Between(player.x, player.y, reticle.x, reticle.y);
+            player.setRotation(angle);
+        }, this);
 
-        function updateUI() {
-            balanceEl.innerText = balance;
+        // Стрільба (Клік мишки)
+        this.input.on('pointerdown', function () {
+            fireBullet.call(this);
+        }, this);
+
+        // --- 5. КУЛІ ---
+        // Малюємо текстуру кулі
+        let bulletGfx = this.make.graphics({x:0, y:0, add:false});
+        bulletGfx.fillStyle(0xffff00, 1);
+        bulletGfx.fillRect(0, 0, 8, 8);
+        bulletGfx.generateTexture('bulletTex', 8, 8);
+
+        bullets = this.physics.add.group({
+            defaultKey: 'bulletTex',
+            maxSize: 50
+        });
+
+        // --- 6. ВОРОГИ (ЗОМБІ) ---
+        // Малюємо текстуру зомбі
+        let zombieGfx = this.make.graphics({x:0, y:0, add:false});
+        zombieGfx.fillStyle(0x55aa55, 1); // Зелена шкіра
+        zombieGfx.fillCircle(16, 16, 15);
+        zombieGfx.fillStyle(0x883333, 1); // Кров/одяг
+        zombieGfx.fillCircle(10, 25, 8); // Плече
+        zombieGfx.fillCircle(22, 25, 8); // Плече
+        zombieGfx.generateTexture('zombieTex', 32, 32);
+
+        enemies = this.physics.add.group();
+        
+        // Спавн зомбі таймером
+        this.time.addEvent({
+            delay: 1000, // Кожну секунду
+            callback: spawnEnemy,
+            callbackScope: this,
+            loop: true
+        });
+
+        // --- 7. КОЛІЗІЇ (Взаємодія) ---
+        this.physics.add.collider(bullets, enemies, hitEnemy, null, this);
+        this.physics.add.collider(player, enemies, hitPlayer, null, this);
+
+        // --- 8. UI ---
+        scoreText = this.add.text(20, 20, 'KILLS: 0', { fontSize: '32px', fill: '#fff' }).setScrollFactor(0).setDepth(20);
+        hpText = this.add.text(20, 60, 'HP: 100', { fontSize: '32px', fill: '#0f0' }).setScrollFactor(0).setDepth(20);
+        
+        // --- АНІМАЦІЯ ХОДЬБИ (Твін) ---
+        // Створюємо твін, який буде трохи "стискати" гравця при ходьбі, імітуючи кроки
+        this.walkTween = this.tweens.add({
+            targets: player,
+            scaleX: 0.9,
+            scaleY: 1.1,
+            duration: 200,
+            yoyo: true,
+            repeat: -1,
+            paused: true
+        });
+    }
+
+    function update(time, delta) {
+        if (!player.active) return;
+
+        // Рух гравця
+        player.body.setVelocity(0);
+        
+        let isMoving = false;
+
+        if (cursors.left.isDown) {
+            player.body.setVelocityX(-200);
+            isMoving = true;
+        } else if (cursors.right.isDown) {
+            player.body.setVelocityX(200);
+            isMoving = true;
         }
 
-        function handleBtn() {
-            if (isPlaying) {
-                stopGame();
-            } else {
-                startGame();
+        if (cursors.up.isDown) {
+            player.body.setVelocityY(-200);
+            isMoving = true;
+        } else if (cursors.down.isDown) {
+            player.body.setVelocityY(200);
+            isMoving = true;
+        }
+        
+        // Керування анімацією ходьби
+        if (isMoving) {
+            if (this.walkTween.paused) this.walkTween.play();
+        } else {
+            if (!this.walkTween.paused) {
+                this.walkTween.pause();
+                player.setScale(1); // Скидаємо масштаб
             }
         }
 
-        function startGame() {
-            if (balance < betCost) {
-                tg.showAlert("Мало енергії (зірок)!");
-                return;
+        // Логіка зомбі (бігти за гравцем)
+        enemies.children.iterate(function (enemy) {
+            if (enemy && enemy.active) {
+                this.physics.moveToObject(enemy, player, 100); // 100 - швидкість
+                enemy.setRotation(Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y));
             }
+        }, this);
+        
+        // Оновлення прицілу (щоб не відставав при русі)
+        reticle.x = this.input.activePointer.worldX;
+        reticle.y = this.input.activePointer.worldY;
+    }
 
-            // Списання
-            balance -= betCost;
-            updateUI();
-            
-            // Скидання стану
-            isPlaying = true;
-            resultOverlay.style.display = 'none';
-            cursorPosition = 0;
-            direction = 1;
-            
-            // Змінюємо кнопку
-            mainBtn.innerText = "LOCK";
-            mainBtn.className = "action-btn btn-stop"; // Червона кнопка
-            
-            // Активуємо ядро
-            core.classList.add('core-pulse');
-            core.style.color = 'var(--neon-blue)';
-            statusText.innerText = "UNSTABLE";
-            statusText.style.color = "var(--neon-red)";
+    function fireBullet() {
+        if (!player.active) return;
+        
+        // Затримка стрільби
+        if (this.time.now < lastFired) return;
+        lastFired = this.time.now + 150; // Швидкострільність (мс)
 
-            // Генеруємо випадкову зону (від 20% до 80%, щоб не було скраю)
-            zoneWidth = Math.floor(Math.random() * (25 - 15) + 15); // Ширина від 15 до 25%
-            zoneStart = Math.floor(Math.random() * (80 - zoneWidth - 10) + 10);
+        let bullet = bullets.get(player.x, player.y);
+
+        if (bullet) {
+            bullet.setActive(true);
+            bullet.setVisible(true);
             
-            // Малюємо зону
-            zone.style.left = zoneStart + '%';
-            zone.style.width = zoneWidth + '%';
+            // Розрахунок кута стрільби
+            let angle = Phaser.Math.Angle.Between(player.x, player.y, reticle.x, reticle.y);
+            
+            // Трохи розкиду для реалізму (рандом)
+            angle += (Math.random() - 0.5) * 0.1;
 
-            tg.HapticFeedback.impactOccurred('light');
-
-            // Запускаємо цикл
-            gameLoop();
+            bullet.setRotation(angle);
+            this.physics.velocityFromRotation(angle, 600, bullet.body.velocity);
+            
+            // Знищити кулю через 2 секунди
+            this.time.delayedCall(2000, () => {
+                if (bullet.active) bullet.setActive(false).setVisible(false);
+            });
+            
+            // Ефект "віддачі" (камера трясеться)
+            this.cameras.main.shake(50, 0.005);
         }
+    }
 
-        function gameLoop() {
-            if (!isPlaying) return;
+    function spawnEnemy() {
+        if (!player.active) return;
+        
+        // Спавн за межами екрану (випадкова точка навколо гравця)
+        let angle = Math.random() * Math.PI * 2;
+        let distance = 600; // Відстань від гравця
+        let x = player.x + Math.cos(angle) * distance;
+        let y = player.y + Math.sin(angle) * distance;
+        
+        // Обмеження картою
+        x = Phaser.Math.Clamp(x, 50, 1950);
+        y = Phaser.Math.Clamp(y, 50, 1950);
 
-            // Рухаємо курсор
-            cursorPosition += speed * direction;
+        let enemy = enemies.create(x, y, 'zombieTex');
+        enemy.setCollideWorldBounds(true);
+        enemy.setBounce(1); // Зомбі відштовхуються один від одного
+        enemy.hp = 3; // Життя зомбі
+    }
 
-            // Відбиваємось від країв
-            if (cursorPosition >= 100) {
-                cursorPosition = 100;
-                direction = -1;
-            } else if (cursorPosition <= 0) {
-                cursorPosition = 0;
-                direction = 1;
+    function hitEnemy(bullet, enemy) {
+        if (bullet.active && enemy.active) {
+            bullet.setActive(false).setVisible(false);
+            
+            // Ефект попадання (кров)
+            let particles = this.add.particles(0, 0, 'bulletTex', {
+                speed: 100,
+                scale: { start: 1, end: 0 },
+                blendMode: 'ADD',
+                life: 200,
+                tint: 0xff0000 // Червоний
+            });
+            particles.explode(5, enemy.x, enemy.y);
+
+            enemy.hp--;
+            
+            // Відштовхування зомбі назад при попаданні
+            let angle = Phaser.Math.Angle.Between(player.x, player.y, enemy.x, enemy.y);
+            enemy.x += Math.cos(angle) * 10;
+            enemy.y += Math.sin(angle) * 10;
+
+            if (enemy.hp <= 0) {
+                enemy.destroy();
+                score++;
+                scoreText.setText('KILLS: ' + score);
             }
-
-            // Оновлюємо візуал
-            cursor.style.left = cursorPosition + '%';
-
-            animationFrameId = requestAnimationFrame(gameLoop);
         }
+    }
 
-        function stopGame() {
-            isPlaying = false;
-            cancelAnimationFrame(animationFrameId);
+    function hitPlayer(player, enemy) {
+        if (enemy.active) {
+            hp -= 1; // Зомбі кусає
+            hpText.setText('HP: ' + hp);
+            
+            // Червоний спалах екрану
+            this.cameras.main.flash(200, 255, 0, 0);
 
-            // Перевірка влучання
-            // Додаємо трохи "поблажки" (hitbox tolerance), бо курсор має ширину
-            const hitStart = zoneStart;
-            const hitEnd = zoneStart + zoneWidth;
-
-            // Успіх якщо курсор всередині зони
-            if (cursorPosition >= hitStart && cursorPosition <= hitEnd) {
-                win();
-            } else {
-                lose();
+            if (hp <= 0) {
+                this.physics.pause();
+                player.setTint(0xff0000);
+                player.active = false;
+                
+                this.add.text(this.cameras.main.midPoint.x, this.cameras.main.midPoint.y, 'GAME OVER\nF5 to Restart', {
+                    fontSize: '64px',
+                    fill: '#ff0000',
+                    align: 'center'
+                }).setOrigin(0.5);
             }
-
-            // Повертаємо кнопку
-            mainBtn.innerText = "START";
-            mainBtn.className = "action-btn btn-start";
-            
-            core.classList.remove('core-pulse');
         }
+    }
+</script>
 
-        function win() {
-            const winAmount = betCost * 2;
-            balance += winAmount;
-            updateUI();
-
-            // Ефекти
-            core.style.borderColor = "var(--neon-green)";
-            core.style.color = "var(--neon-green)";
-            statusText.innerText = "STABILIZED";
-            statusText.style.color = "var(--neon-green)";
-            
-            showPopup("SUCCESS", "win-text");
-            tg.HapticFeedback.notificationOccurred('success');
-        }
-
-        function lose() {
-            // Ефекти
-            core.style.borderColor = "var(--neon-red)";
-            core.style.color = "var(--neon-red)";
-            statusText.innerText = "MELTDOWN";
-            statusText.style.color = "var(--neon-red)";
-
-            showPopup("FAILURE", "lose-text");
-            tg.HapticFeedback.notificationOccurred('error');
-        }
-
-        function showPopup(text, cssClass) {
-            resultText.innerText = text;
-            resultText.className = "result-box " + cssClass;
-            resultOverlay.style.display = 'flex';
-            
-            // Автоматично сховати через 1.5 сек
-            setTimeout(() => {
-                resultOverlay.style.display = 'none';
-            }, 1500);
-        }
-
-    </script>
 </body>
 </html>
