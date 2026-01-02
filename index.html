@@ -2,12 +2,12 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Top Down Shooter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile Shooter</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
     <style>
-        body { margin: 0; padding: 0; background: #111; overflow: hidden; }
-        canvas { display: block; }
+        body { margin: 0; padding: 0; background: #000; overflow: hidden; user-select: none; -webkit-user-select: none; }
+        canvas { display: block; touch-action: none; } /* Вимикає зум/скрол браузера */
     </style>
 </head>
 <body>
@@ -21,6 +21,9 @@
             default: 'arcade',
             arcade: { debug: false }
         },
+        input: {
+            activePointers: 3 // Підтримка мультитачу (2 пальці + миша)
+        },
         scene: {
             preload: preload,
             create: create,
@@ -31,301 +34,252 @@
     const game = new Phaser.Game(config);
 
     let player;
-    let cursors;
-    let reticle; // Приціл
     let bullets;
     let enemies;
     let lastFired = 0;
-    let score = 0;
-    let scoreText;
-    let hp = 100;
-    let hpText;
+    
+    // Joystick змінні
+    let joyBase, joyStick;
+    let isJoyActive = false;
+    let joyPointer = null;
+    let joyOrigin = {x: 0, y: 0};
+    const JOY_RADIUS = 50;
+    
+    // Кнопка стрільби
+    let fireBtn;
+    let isFiring = false;
 
     function preload() {
-        // Ми генеруємо графіку на ходу, тому завантажувати нічого не треба
+        // --- ЗАВАНТАЖУЄМО СПРАВЖНІ КАРТИНКИ (З інтернету) ---
+        
+        // Текстура землі
+        this.load.image('ground', 'https://labs.phaser.io/assets/tilemaps/tiles/scifi_platform_tiles_32x32.png');
+        
+        // Солдат (вигляд зверху)
+        this.load.image('soldier', 'https://labs.phaser.io/assets/sprites/topdown-player.png');
+        
+        // Куля
+        this.load.image('bullet', 'https://labs.phaser.io/assets/sprites/bullets/bullet7.png');
+        
+        // Зомбі (використаємо іншого персонажа як монстра)
+        this.load.image('zombie', 'https://labs.phaser.io/assets/sprites/beball1.png');
+        
+        // Картинки для інтерфейсу (джойстик)
+        // Генеруємо їх кодом, щоб не качати зайвого
     }
 
     function create() {
-        // --- 1. МАЛЮЄМО КАРТУ (Вулиця) ---
-        // Створюємо текстуру трави та асфальту
-        const bgGraphics = this.add.graphics();
-        
-        // Трава (вся мапа)
-        bgGraphics.fillStyle(0x2d5a27, 1); // Темно-зелений
-        bgGraphics.fillRect(0, 0, 2000, 2000);
-        
-        // Дорога (по центру)
-        bgGraphics.fillStyle(0x333333, 1); // Асфальт
-        bgGraphics.fillRect(800, 0, 400, 2000);
-        
-        // Розмітка дороги
-        bgGraphics.fillStyle(0xffffff, 0.8);
-        for(let i=0; i<2000; i+=100) {
-            bgGraphics.fillRect(995, i, 10, 50);
-        }
-        
-        // Генеруємо текстуру з графіки, щоб використовувати як фон
-        bgGraphics.generateTexture('map', 2000, 2000);
-        bgGraphics.destroy();
-        
-        // Додаємо фон
-        this.add.image(1000, 1000, 'map');
-        
-        // Встановлюємо межі світу
+        // 1. МАПА (Тайлінг)
+        // Створюємо нескінченну землю
+        this.add.tileSprite(0, 0, 4000, 4000, 'ground');
         this.physics.world.setBounds(0, 0, 2000, 2000);
 
-        // --- 2. СТВОРЕННЯ ГРАВЦЯ (Генерація спрайта) ---
-        const playerGraphics = this.make.graphics({x: 0, y: 0, add: false});
-        
-        // Тіло
-        playerGraphics.fillStyle(0xdba569, 1); // Шкіра
-        playerGraphics.fillCircle(16, 16, 16); // Голова
-        playerGraphics.fillStyle(0x224488, 1); // Одяг (плечі)
-        playerGraphics.fillCircle(8, 20, 10); // Ліве плече
-        playerGraphics.fillCircle(24, 20, 10); // Праве плече
-        
-        // Зброя
-        playerGraphics.fillStyle(0x111111, 1);
-        playerGraphics.fillRect(20, 10, 25, 6); // Ствол
-
-        playerGraphics.generateTexture('playerTex', 64, 64);
-        
-        player = this.physics.add.sprite(1000, 1000, 'playerTex');
+        // 2. ГРАВЕЦЬ
+        player = this.physics.add.sprite(1000, 1000, 'soldier');
         player.setCollideWorldBounds(true);
-        player.setOrigin(0.5, 0.5); // Центр обертання
+        // Трохи зменшимо хітбокс, щоб не застрягав
+        player.body.setCircle(15, 0, 0); 
 
-        // --- 3. КАМЕРА ---
+        // 3. КАМЕРА
         this.cameras.main.setBounds(0, 0, 2000, 2000);
-        this.cameras.main.startFollow(player, true, 0.1, 0.1); // Плавна камера (Lerp)
+        this.cameras.main.startFollow(player, true, 0.05, 0.05);
+        this.cameras.main.setZoom(1.2); // Трохи наблизимо
 
-        // --- 4. УПРАВЛІННЯ ---
-        cursors = this.input.keyboard.addKeys({
-            'up': Phaser.Input.Keyboard.KeyCodes.W,
-            'down': Phaser.Input.Keyboard.KeyCodes.S,
-            'left': Phaser.Input.Keyboard.KeyCodes.A,
-            'right': Phaser.Input.Keyboard.KeyCodes.D
-        });
-
-        // Приціл
-        reticle = this.add.circle(0, 0, 10, 0xff0000).setDepth(10);
-
-        this.input.on('pointermove', function (pointer) {
-            // Приціл рухається відносно камери
-            reticle.x = this.cameras.main.scrollX + pointer.x;
-            reticle.y = this.cameras.main.scrollY + pointer.y;
-            
-            // Гравець повертається до прицілу
-            let angle = Phaser.Math.Angle.Between(player.x, player.y, reticle.x, reticle.y);
-            player.setRotation(angle);
-        }, this);
-
-        // Стрільба (Клік мишки)
-        this.input.on('pointerdown', function () {
-            fireBullet.call(this);
-        }, this);
-
-        // --- 5. КУЛІ ---
-        // Малюємо текстуру кулі
-        let bulletGfx = this.make.graphics({x:0, y:0, add:false});
-        bulletGfx.fillStyle(0xffff00, 1);
-        bulletGfx.fillRect(0, 0, 8, 8);
-        bulletGfx.generateTexture('bulletTex', 8, 8);
-
-        bullets = this.physics.add.group({
-            defaultKey: 'bulletTex',
-            maxSize: 50
-        });
-
-        // --- 6. ВОРОГИ (ЗОМБІ) ---
-        // Малюємо текстуру зомбі
-        let zombieGfx = this.make.graphics({x:0, y:0, add:false});
-        zombieGfx.fillStyle(0x55aa55, 1); // Зелена шкіра
-        zombieGfx.fillCircle(16, 16, 15);
-        zombieGfx.fillStyle(0x883333, 1); // Кров/одяг
-        zombieGfx.fillCircle(10, 25, 8); // Плече
-        zombieGfx.fillCircle(22, 25, 8); // Плече
-        zombieGfx.generateTexture('zombieTex', 32, 32);
-
+        // 4. ВОРОГИ
         enemies = this.physics.add.group();
-        
-        // Спавн зомбі таймером
-        this.time.addEvent({
-            delay: 1000, // Кожну секунду
-            callback: spawnEnemy,
-            callbackScope: this,
-            loop: true
+        // Спавн ворогів
+        this.time.addEvent({ delay: 800, callback: spawnEnemy, callbackScope: this, loop: true });
+
+        // 5. КУЛІ
+        bullets = this.physics.add.group({
+            defaultKey: 'bullet',
+            maxSize: 20
         });
 
-        // --- 7. КОЛІЗІЇ (Взаємодія) ---
+        // 6. КОЛІЗІЇ
         this.physics.add.collider(bullets, enemies, hitEnemy, null, this);
-        this.physics.add.collider(player, enemies, hitPlayer, null, this);
+        this.physics.add.overlap(player, enemies, hitPlayer, null, this);
 
-        // --- 8. UI ---
-        scoreText = this.add.text(20, 20, 'KILLS: 0', { fontSize: '32px', fill: '#fff' }).setScrollFactor(0).setDepth(20);
-        hpText = this.add.text(20, 60, 'HP: 100', { fontSize: '32px', fill: '#0f0' }).setScrollFactor(0).setDepth(20);
-        
-        // --- АНІМАЦІЯ ХОДЬБИ (Твін) ---
-        // Створюємо твін, який буде трохи "стискати" гравця при ходьбі, імітуючи кроки
-        this.walkTween = this.tweens.add({
-            targets: player,
-            scaleX: 0.9,
-            scaleY: 1.1,
-            duration: 200,
-            yoyo: true,
-            repeat: -1,
-            paused: true
+        // --- МОБІЛЬНЕ КЕРУВАННЯ (UI) ---
+        createMobileControls.call(this);
+    }
+
+    function update() {
+        if (!player.active) return;
+
+        player.body.setVelocity(0);
+
+        // Логіка джойстика (Рух)
+        if (isJoyActive && joyPointer) {
+            // Вектор від центру джойстика до пальця
+            let dx = joyPointer.x - joyOrigin.x;
+            let dy = joyPointer.y - joyOrigin.y;
+            
+            // Розрахунок кута
+            let angle = Math.atan2(dy, dx);
+            
+            // Обмеження радіусу (щоб "грибок" не вилітав за межі)
+            let dist = Math.min(Math.sqrt(dx*dx + dy*dy), JOY_RADIUS);
+            
+            // Рухаємо графіку джойстика
+            joyStick.x = joyBase.x + Math.cos(angle) * dist;
+            joyStick.y = joyBase.y + Math.sin(angle) * dist;
+
+            // Рухаємо гравця
+            const speed = 200;
+            player.body.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
+            
+            // Повертаємо гравця в бік руху
+            player.setRotation(angle);
+        } else {
+            // Повертаємо джойстик в центр, якщо відпустили
+            if(joyBase && joyStick) {
+                joyStick.x = joyBase.x;
+                joyStick.y = joyBase.y;
+            }
+        }
+
+        // Логіка стрільби
+        if (isFiring) {
+            fireBullet.call(this);
+        }
+
+        // Вороги біжать за гравцем
+        enemies.children.iterate((enemy) => {
+            if (enemy && enemy.active) {
+                this.physics.moveToObject(enemy, player, 100);
+                enemy.setRotation(Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y));
+            }
         });
     }
 
-    function update(time, delta) {
-        if (!player.active) return;
-
-        // Рух гравця
-        player.body.setVelocity(0);
+    // --- ФУНКЦІЇ КЕРУВАННЯ ---
+    function createMobileControls() {
+        // Ми малюємо джойстик прямо на екрані
+        // Це UI, тому воно має бути поверх гри (ScrollFactor 0)
         
-        let isMoving = false;
-
-        if (cursors.left.isDown) {
-            player.body.setVelocityX(-200);
-            isMoving = true;
-        } else if (cursors.right.isDown) {
-            player.body.setVelocityX(200);
-            isMoving = true;
-        }
-
-        if (cursors.up.isDown) {
-            player.body.setVelocityY(-200);
-            isMoving = true;
-        } else if (cursors.down.isDown) {
-            player.body.setVelocityY(200);
-            isMoving = true;
-        }
+        // 1. Джойстик (Ліворуч)
+        const joyX = 100;
+        const joyY = window.innerHeight - 100;
         
-        // Керування анімацією ходьби
-        if (isMoving) {
-            if (this.walkTween.paused) this.walkTween.play();
-        } else {
-            if (!this.walkTween.paused) {
-                this.walkTween.pause();
-                player.setScale(1); // Скидаємо масштаб
+        // Основа
+        joyBase = this.add.circle(joyX, joyY, JOY_RADIUS, 0x888888).setAlpha(0.5).setScrollFactor(0).setDepth(100);
+        // Ручка
+        joyStick = this.add.circle(joyX, joyY, 25, 0x00ccff).setAlpha(0.8).setScrollFactor(0).setDepth(101);
+
+        // Зона дотику для джойстика (ліва половина екрану)
+        const joyZone = this.add.rectangle(window.innerWidth / 4, window.innerHeight / 2, window.innerWidth / 2, window.innerHeight, 0x000000, 0)
+            .setScrollFactor(0).setInteractive();
+
+        joyZone.on('pointerdown', (pointer) => {
+            joyPointer = pointer;
+            isJoyActive = true;
+            // Переміщуємо джойстик туди, де натиснули
+            joyBase.x = pointer.x;
+            joyBase.y = pointer.y;
+            joyOrigin = {x: pointer.x, y: pointer.y};
+            joyStick.x = pointer.x;
+            joyStick.y = pointer.y;
+        });
+
+        this.input.on('pointerup', (pointer) => {
+            if (pointer === joyPointer) {
+                isJoyActive = false;
+                joyPointer = null;
+                // Повертаємо джойстик на місце за замовчуванням
+                joyBase.x = joyX;
+                joyBase.y = joyY;
+                joyStick.x = joyX;
+                joyStick.y = joyY;
             }
-        }
+        });
 
-        // Логіка зомбі (бігти за гравцем)
-        enemies.children.iterate(function (enemy) {
-            if (enemy && enemy.active) {
-                this.physics.moveToObject(enemy, player, 100); // 100 - швидкість
-                enemy.setRotation(Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y));
-            }
-        }, this);
+        // 2. Кнопка стрільби (Праворуч)
+        const fireX = window.innerWidth - 80;
+        const fireY = window.innerHeight - 80;
+
+        fireBtn = this.add.circle(fireX, fireY, 40, 0xff0000).setAlpha(0.6).setScrollFactor(0).setDepth(100).setInteractive();
         
-        // Оновлення прицілу (щоб не відставав при русі)
-        reticle.x = this.input.activePointer.worldX;
-        reticle.y = this.input.activePointer.worldY;
+        // Іконка на кнопці (просто текст)
+        this.add.text(fireX, fireY, 'SHOOT', {fontSize: '14px', fontStyle: 'bold'}).setOrigin(0.5).setScrollFactor(0).setDepth(101);
+
+        fireBtn.on('pointerdown', () => { isFiring = true; fireBtn.setAlpha(1); });
+        fireBtn.on('pointerup', () => { isFiring = false; fireBtn.setAlpha(0.6); });
+        fireBtn.on('pointerout', () => { isFiring = false; fireBtn.setAlpha(0.6); });
     }
 
     function fireBullet() {
-        if (!player.active) return;
-        
-        // Затримка стрільби
         if (this.time.now < lastFired) return;
-        lastFired = this.time.now + 150; // Швидкострільність (мс)
+        lastFired = this.time.now + 150;
 
         let bullet = bullets.get(player.x, player.y);
-
         if (bullet) {
-            bullet.setActive(true);
-            bullet.setVisible(true);
+            bullet.setActive(true).setVisible(true);
             
-            // Розрахунок кута стрільби
-            let angle = Phaser.Math.Angle.Between(player.x, player.y, reticle.x, reticle.y);
+            // Куля летить туди, куди дивиться гравець
+            let angle = player.rotation;
             
-            // Трохи розкиду для реалізму (рандом)
-            angle += (Math.random() - 0.5) * 0.1;
+            // Трохи зміщуємо спавн кулі вперед, щоб не вилітала з центру тіла
+            bullet.x += Math.cos(angle) * 20;
+            bullet.y += Math.sin(angle) * 20;
 
             bullet.setRotation(angle);
-            this.physics.velocityFromRotation(angle, 600, bullet.body.velocity);
+            this.physics.velocityFromRotation(angle, 800, bullet.body.velocity);
             
-            // Знищити кулю через 2 секунди
-            this.time.delayedCall(2000, () => {
+            // Знищити через час
+            this.time.delayedCall(1000, () => {
                 if (bullet.active) bullet.setActive(false).setVisible(false);
             });
-            
-            // Ефект "віддачі" (камера трясеться)
-            this.cameras.main.shake(50, 0.005);
         }
     }
 
     function spawnEnemy() {
         if (!player.active) return;
         
-        // Спавн за межами екрану (випадкова точка навколо гравця)
         let angle = Math.random() * Math.PI * 2;
-        let distance = 600; // Відстань від гравця
+        let distance = 700;
         let x = player.x + Math.cos(angle) * distance;
         let y = player.y + Math.sin(angle) * distance;
         
-        // Обмеження картою
-        x = Phaser.Math.Clamp(x, 50, 1950);
-        y = Phaser.Math.Clamp(y, 50, 1950);
+        x = Phaser.Math.Clamp(x, 100, 1900);
+        y = Phaser.Math.Clamp(y, 100, 1900);
 
-        let enemy = enemies.create(x, y, 'zombieTex');
-        enemy.setCollideWorldBounds(true);
-        enemy.setBounce(1); // Зомбі відштовхуються один від одного
-        enemy.hp = 3; // Життя зомбі
+        let enemy = enemies.create(x, y, 'zombie');
+        enemy.setTint(0xff0000); // Робимо їх червоними
+        enemy.setScale(0.8);
+        enemy.body.setCircle(12);
+        enemy.hp = 3;
     }
 
     function hitEnemy(bullet, enemy) {
         if (bullet.active && enemy.active) {
             bullet.setActive(false).setVisible(false);
-            
-            // Ефект попадання (кров)
-            let particles = this.add.particles(0, 0, 'bulletTex', {
-                speed: 100,
-                scale: { start: 1, end: 0 },
-                blendMode: 'ADD',
-                life: 200,
-                tint: 0xff0000 // Червоний
-            });
-            particles.explode(5, enemy.x, enemy.y);
-
             enemy.hp--;
-            
-            // Відштовхування зомбі назад при попаданні
-            let angle = Phaser.Math.Angle.Between(player.x, player.y, enemy.x, enemy.y);
-            enemy.x += Math.cos(angle) * 10;
-            enemy.y += Math.sin(angle) * 10;
+            enemy.setAlpha(0.5); // Блимання при попаданні
+            this.time.delayedCall(50, () => enemy.setAlpha(1));
 
             if (enemy.hp <= 0) {
-                enemy.destroy();
-                score++;
-                scoreText.setText('KILLS: ' + score);
+                // Ефект смерті (зменшення)
+                this.tweens.add({
+                    targets: enemy,
+                    scale: 0,
+                    duration: 100,
+                    onComplete: () => enemy.destroy()
+                });
             }
         }
     }
 
     function hitPlayer(player, enemy) {
-        if (enemy.active) {
-            hp -= 1; // Зомбі кусає
-            hpText.setText('HP: ' + hp);
-            
-            // Червоний спалах екрану
-            this.cameras.main.flash(200, 255, 0, 0);
-
-            if (hp <= 0) {
-                this.physics.pause();
-                player.setTint(0xff0000);
-                player.active = false;
-                
-                this.add.text(this.cameras.main.midPoint.x, this.cameras.main.midPoint.y, 'GAME OVER\nF5 to Restart', {
-                    fontSize: '64px',
-                    fill: '#ff0000',
-                    align: 'center'
-                }).setOrigin(0.5);
-            }
-        }
+        // Простий перезапуск при дотику
+        this.scene.restart();
     }
-</script>
 
+    // Ресайз екрану (поворот телефону)
+    window.addEventListener('resize', () => {
+        game.scale.resize(window.innerWidth, window.innerHeight);
+    });
+
+</script>
 </body>
 </html>
