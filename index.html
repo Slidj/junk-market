@@ -2,453 +2,77 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Survival Looter</title>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-    <style>
-        body { 
-            margin: 0; padding: 0; background: #000; overflow: hidden; 
-            font-family: 'Courier New', Courier, monospace;
-            user-select: none; -webkit-user-select: none;
-            touch-action: none;
-        }
-
-        /* --- UI: INTERACT BUTTON --- */
-        #interact-btn {
-            position: absolute;
-            bottom: 120px; left: 50%;
-            transform: translateX(-50%);
-            width: 80px; height: 80px;
-            background: rgba(255, 165, 0, 0.8);
-            border: 2px solid #fff;
-            border-radius: 50%;
-            display: none; /* Ховаємо, поки не підійдемо */
-            justify-content: center; align-items: center;
-            font-size: 40px; color: #fff;
-            z-index: 100;
-            box-shadow: 0 0 20px orange;
-            animation: pulse 1s infinite;
-        }
-        @keyframes pulse { 0% {transform: translateX(-50%) scale(1);} 50% {transform: translateX(-50%) scale(1.1);} 100% {transform: translateX(-50%) scale(1);} }
-
-        /* --- UI: LOOT WINDOW --- */
-        #loot-modal {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            background: #1a1a1a;
-            border: 2px solid #555;
-            color: #eee;
-            padding: 20px;
-            display: none;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 200;
-            box-shadow: 0 0 50px rgba(0,0,0,0.9);
-        }
-        .loot-header { font-weight: bold; font-size: 20px; color: orange; border-bottom: 1px solid #444; padding-bottom: 10px;}
-        .loot-item { background: #333; padding: 10px; cursor: pointer; border: 1px solid #444; display: flex; justify-content: space-between; }
-        .loot-item:active { background: #444; }
-        #close-loot { margin-top: 10px; background: #800; color: white; border: none; padding: 10px; font-weight: bold; }
-
-        /* --- UI: INVENTORY --- */
-        #inventory {
-            position: absolute; top: 10px; left: 10px;
-            color: #aaa; font-size: 14px; background: rgba(0,0,0,0.5); padding: 5px;
-        }
-
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Pocket Game Casino</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
-    <div id="interact-btn">✋</div>
-    
-    <div id="loot-modal">
-        <div class="loot-header">БАГАЖНИК</div>
-        <div id="loot-content">
-            </div>
-        <button id="close-loot" onclick="closeLoot()">ЗАКРИТИ</button>
+    <div class="header">
+        <div class="user-info">
+            <span id="username">Гравець</span>
+        </div>
+        <div class="balance-box">
+            💰 <span id="balance">1000</span>
+        </div>
     </div>
 
-    <div id="inventory">🎒 Рюкзак: Пусто</div>
-
-    <script>
-    const config = {
-        type: Phaser.AUTO,
-        width: window.innerWidth,
-        height: window.innerHeight,
-        backgroundColor: '#050505', // Майже чорний
-        physics: {
-            default: 'arcade',
-            arcade: { debug: false }
-        },
-        input: { activePointers: 3 },
-        scene: { preload: preload, create: create, update: update }
-    };
-
-    const game = new Phaser.Game(config);
-
-    // --- ЗМІННІ ---
-    let player, bullets, enemies, lootables, exits;
-    let flashlight; // Маска світла
-    let lastFired = 0;
-    let currentLootObject = null; // Що ми зараз лутаємо
-    let inventoryData = { scraps: 0, food: 0, ammo: 0 };
-
-    // Керування
-    let joyBase, joyStick, fireBtn;
-    let joyPointer = null, isJoyActive = false, isFiring = false;
-    let joyPos = { x: 0, y: 0 };
-
-    function preload() {
-        // Генеруємо графіку кодом (Висока якість)
-        generateAssets.call(this);
-    }
-
-    function create() {
-        // 1. СВІТ (Асфальт)
-        this.add.tileSprite(0, 0, 4000, 4000, 'ground_tex').setDepth(-2);
-        this.physics.world.setBounds(0, 0, 3000, 3000);
-
-        // 2. ОБ'ЄКТИ (Машини, Будинки)
-        lootables = this.physics.add.group({ immovable: true }); // Машини
-        exits = this.physics.add.group({ immovable: true });     // Будинки/Люки
-
-        // Спавнимо розбиті машини
-        for(let i=0; i<15; i++) {
-            let x = Phaser.Math.Between(200, 2800);
-            let y = Phaser.Math.Between(200, 2800);
-            let car = lootables.create(x, y, 'car_tex');
-            car.setRotation(Math.random() * Math.PI * 2);
-            car.setBodySize(60, 100);
-            car.name = "car";
-        }
-
-        // Спавнимо будинки (входи)
-        for(let i=0; i<5; i++) {
-            let x = Phaser.Math.Between(200, 2800);
-            let y = Phaser.Math.Between(200, 2800);
-            let house = exits.create(x, y, 'house_tex');
-            house.setBodySize(100, 100);
-            house.name = "bunker";
-        }
-
-        // 3. ГРАВЕЦЬ
-        player = this.physics.add.sprite(1500, 1500, 'player_tex');
-        player.setCollideWorldBounds(true);
-        player.setDepth(10); // Поверх землі
-
-        // 4. ВОРОГИ
-        enemies = this.physics.add.group();
-        for(let i=0; i<20; i++) { spawnZombie.call(this); }
-
-        // 5. ОСВІТЛЕННЯ (Flashlight)
-        // Ми створюємо чорну картинку на весь екран, але "вирізаємо" дірку навколо гравця
-        const lightTexture = this.make.graphics({ x: 0, y: 0, add: false });
-        // Малюємо світлову пляму (градієнт)
-        lightTexture.fillStyle(0xffffff);
-        lightTexture.fillCircle(150, 150, 150);
-        lightTexture.generateTexture('light_mask', 300, 300);
-
-        flashlight = this.make.image({ x: player.x, y: player.y, key: 'light_mask', add: false });
+    <div id="screen-lobby" class="screen active">
+        <h1>Pocket Game</h1>
+        <p class="subtitle">Обери свою удачу</p>
         
-        // Шар темряви
-        const darkLayer = this.add.layer();
-        const darkness = this.make.graphics().fillStyle(0x000000, 0.95).fillRect(0, 0, 4000, 4000);
+        <div class="games-grid">
+            <div class="game-card" onclick="showScreen('screen-slots')">
+                <div class="icon">🎰</div>
+                <h3>Слоти</h3>
+            </div>
+            <div class="game-card" onclick="showScreen('screen-roulette')">
+                <div class="icon">🎡</div>
+                <h3>Рулетка</h3>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-slots" class="screen">
+        <button class="back-btn" onclick="showScreen('screen-lobby')">⬅ Назад</button>
+        <h2>Lucky Slots</h2>
         
-        // Створюємо маску з ліхтарика
-        const mask = flashlight.createBitmapMask();
-        darkness.setMask(mask);
-        darkLayer.add(darkness); // Додаємо темряву в світ
+        <div class="slot-machine">
+            <div class="reel" id="reel1">🍒</div>
+            <div class="reel" id="reel2">🍋</div>
+            <div class="reel" id="reel3">7️⃣</div>
+        </div>
 
-        // 6. КАМЕРА
-        this.cameras.main.startFollow(player, true, 0.1, 0.1);
-        this.cameras.main.setBounds(0, 0, 3000, 3000);
+        <div class="controls">
+            <input type="number" id="slot-bet" value="50" min="10">
+            <button class="action-btn" onclick="spinSlots()">КРУТИТИ</button>
+        </div>
+        <div id="slot-msg" class="message"></div>
+    </div>
 
-        // 7. КУЛІ
-        bullets = this.physics.add.group({ defaultKey: 'bullet_tex', maxSize: 20 });
-
-        // 8. КОЛІЗІЇ
-        this.physics.add.collider(player, lootables);
-        this.physics.add.collider(player, exits);
-        this.physics.add.collider(enemies, lootables);
-        this.physics.add.collider(enemies, enemies);
-        this.physics.add.collider(bullets, enemies, hitEnemy, null, this);
-        this.physics.add.collider(bullets, lootables, (b) => b.destroy());
-
-        // 9. UI КЕРУВАННЯ
-        createUI.call(this);
-    }
-
-    function update() {
-        if (!player.active) return;
-
-        player.body.setVelocity(0);
-
-        // --- ДЖОЙСТИК ---
-        if (isJoyActive && joyPointer) {
-            let dx = joyPointer.x - joyPos.x;
-            let dy = joyPointer.y - joyPos.y;
-            let angle = Math.atan2(dy, dx);
-            let dist = Math.min(Math.sqrt(dx*dx + dy*dy), 60);
-
-            joyStick.x = joyPos.x + Math.cos(angle) * dist;
-            joyStick.y = joyPos.y + Math.sin(angle) * dist;
-
-            player.body.setVelocity(Math.cos(angle) * 200, Math.sin(angle) * 200);
-            player.setRotation(angle);
-        } else {
-            if(joyStick) { joyStick.x = joyPos.x; joyStick.y = joyPos.y; }
-        }
-
-        // --- ЛІХТАР (Слідує за гравцем) ---
-        flashlight.x = player.x;
-        flashlight.y = player.y;
-
-        // --- ВОГОНЬ ---
-        if (isFiring) fire.call(this);
-
-        // --- ШІ ЗОМБІ (STATE MACHINE) ---
-        enemies.children.iterate((zombie) => {
-            if (zombie && zombie.active) {
-                const dist = Phaser.Math.Distance.Between(player.x, player.y, zombie.x, zombie.y);
-                
-                // Стан: ПОЛЮВАННЯ
-                if (dist < 250) { // Якщо гравець близько
-                    this.physics.moveToObject(zombie, player, zombie.speed + 50); // Біжить швидко
-                    zombie.setRotation(Phaser.Math.Angle.Between(zombie.x, zombie.y, player.x, player.y));
-                } 
-                // Стан: БРОДІННЯ (IDLE)
-                else {
-                    if (zombie.body.speed < 10) { // Якщо зупинився, вибираємо нову точку
-                        const randAngle = Math.random() * Math.PI * 2;
-                        this.physics.velocityFromRotation(randAngle, zombie.speed, zombie.body.velocity);
-                        zombie.setRotation(randAngle);
-                    }
-                }
-            }
-        });
-
-        // --- СИСТЕМА ВЗАЄМОДІЇ (INTERACTION) ---
-        checkInteraction.call(this);
-    }
-
-    // --- ЛОГІКА ВЗАЄМОДІЇ ---
-    function checkInteraction() {
-        const interactBtn = document.getElementById('interact-btn');
-        let found = false;
-
-        // Перевіряємо відстань до машин (Лут)
-        lootables.children.iterate((car) => {
-            if (Phaser.Math.Distance.Between(player.x, player.y, car.x, car.y) < 100) {
-                found = true;
-                currentLootObject = car;
-                interactBtn.style.display = 'flex';
-                interactBtn.innerText = '✋'; // Рука
-                interactBtn.style.borderColor = 'orange';
-                interactBtn.onclick = () => openLootMenu();
-            }
-        });
-
-        // Перевіряємо відстань до входів (Перехід)
-        if (!found) {
-            exits.children.iterate((house) => {
-                if (Phaser.Math.Distance.Between(player.x, player.y, house.x, house.y) < 100) {
-                    found = true;
-                    interactBtn.style.display = 'flex';
-                    interactBtn.innerText = '🚪'; // Двері
-                    interactBtn.style.borderColor = '#00ff00';
-                    interactBtn.onclick = () => enterBuilding();
-                }
-            });
-        }
-
-        if (!found) {
-            interactBtn.style.display = 'none';
-            currentLootObject = null;
-        }
-    }
-
-    // --- ФУНКЦІЇ ЛУТУ ---
-    window.openLootMenu = function() {
-        if (!currentLootObject) return;
+    <div id="screen-roulette" class="screen">
+        <button class="back-btn" onclick="showScreen('screen-lobby')">⬅ Назад</button>
+        <h2>Mini Roulette</h2>
         
-        const modal = document.getElementById('loot-modal');
-        const content = document.getElementById('loot-content');
-        content.innerHTML = '';
+        <div class="roulette-wheel" id="wheel">
+            <div class="wheel-pointer">🔻</div>
+            <div class="wheel-inner">🎡</div>
+        </div>
 
-        // Генеруємо випадковий лут
-        const items = ['Консерва', 'Набої', 'Брухт', 'Вода', 'Нічого'];
-        const item = items[Math.floor(Math.random() * items.length)];
-
-        if (item === 'Нічого') {
-            content.innerHTML = '<div style="color:#777">Пусто...</div>';
-        } else {
-            content.innerHTML = `<div class="loot-item" onclick="takeItem('${item}')">${item} <span>[Взяти]</span></div>`;
-        }
-
-        modal.style.display = 'flex';
-    }
-
-    window.takeItem = function(item) {
-        // Оновлюємо інвентар
-        if(item === 'Брухт') inventoryData.scraps++;
-        if(item === 'Консерва') inventoryData.food++;
-        if(item === 'Набої') inventoryData.ammo += 10;
-
-        document.getElementById('inventory').innerText = `🎒 Брухт: ${inventoryData.scraps} | Їжа: ${inventoryData.food} | Набої: ${inventoryData.ammo}`;
+        <div class="bet-options">
+            <button class="bet-color red" onclick="setRouletteBet('red')">🔴 x2</button>
+            <button class="bet-color black" onclick="setRouletteBet('black')">⚫ x2</button>
+            <button class="bet-color green" onclick="setRouletteBet('green')">🟢 x14</button>
+        </div>
         
-        closeLoot();
-    }
+        <div class="controls">
+             <p>Ставка на: <span id="current-bet-color">Немає</span></p>
+             <button class="action-btn" onclick="spinRoulette()">КРУТИТИ (50 монет)</button>
+        </div>
+        <div id="roulette-msg" class="message"></div>
+    </div>
 
-    window.closeLoot = function() {
-        document.getElementById('loot-modal').style.display = 'none';
-    }
-
-    window.enterBuilding = function() {
-        alert("Ви входите в будівлю... (Тут завантажиться рівень 'Приміщення')");
-    }
-
-    // --- ГЕНЕРАЦІЯ АСЕТІВ ---
-    function generateAssets() {
-        const gfx = this.make.graphics();
-
-        // 1. Гравець (Спецназ)
-        gfx.clear();
-        gfx.fillStyle(0x222222, 1);
-        gfx.fillCircle(32, 32, 22); // Тіло
-        gfx.fillStyle(0x555555, 1); 
-        gfx.fillCircle(32, 32, 16); // Шолом
-        gfx.fillStyle(0x111111, 1);
-        gfx.fillRect(40, 24, 30, 16); // Зброя
-        // Ліхтарик на зброї
-        gfx.fillStyle(0xffffaa, 0.8);
-        gfx.fillCircle(70, 32, 5); 
-        gfx.generateTexture('player_tex', 80, 64);
-
-        // 2. Зомбі (Потворний)
-        gfx.clear();
-        gfx.fillStyle(0x2e3b28, 1); // Гнилий зелений
-        gfx.beginPath(); gfx.moveTo(0,0); gfx.lineTo(50,20); gfx.lineTo(60,50); gfx.lineTo(10,60); gfx.closePath(); gfx.fillPath(); // Криве тіло
-        gfx.fillStyle(0x8a0303, 1); // Кров
-        gfx.fillCircle(30, 30, 10);
-        gfx.generateTexture('zombie_tex', 64, 64);
-
-        // 3. Розбита машина (Зверху)
-        gfx.clear();
-        gfx.fillStyle(0x444455, 1); // Метал
-        gfx.fillRoundedRect(0, 0, 80, 140, 10);
-        gfx.fillStyle(0x111111, 1); // Скло
-        gfx.fillRect(10, 30, 60, 20); // Лобове
-        gfx.fillRect(10, 100, 60, 20); // Заднє
-        gfx.fillStyle(0x222222, 0.5); // Тріщини
-        gfx.beginPath(); gfx.moveTo(10,30); gfx.lineTo(30,50); gfx.strokePath();
-        gfx.generateTexture('car_tex', 80, 140);
-
-        // 4. Будинок/Люк (Вхід)
-        gfx.clear();
-        gfx.fillStyle(0x333333, 1); // Дах
-        gfx.fillRect(0,0,120,120);
-        gfx.fillStyle(0x111111, 1); // Вхід
-        gfx.fillRect(40,40,40,40);
-        gfx.lineStyle(2, 0xffff00, 1); // Попередження
-        gfx.strokeRect(40,40,40,40);
-        gfx.generateTexture('house_tex', 120, 120);
-
-        // 5. Асфальт
-        gfx.clear();
-        gfx.fillStyle(0x151515, 1);
-        gfx.fillRect(0,0,64,64);
-        gfx.fillStyle(0x222222, 1); // Плями
-        gfx.fillCircle(20,20, 5); gfx.fillCircle(50,50, 8);
-        gfx.generateTexture('ground_tex', 64, 64);
-        
-        // 6. Куля
-        gfx.clear();
-        gfx.fillStyle(0xffaa00, 1);
-        gfx.fillRect(0,0,10,4);
-        gfx.generateTexture('bullet_tex', 10, 4);
-    }
-
-    // --- СПАВН ЗОМБІ ---
-    function spawnZombie() {
-        let x = Phaser.Math.Between(100, 2900);
-        let y = Phaser.Math.Between(100, 2900);
-        let z = enemies.create(x, y, 'zombie_tex');
-        z.setCollideWorldBounds(true);
-        z.hp = 3;
-        z.speed = Phaser.Math.Between(30, 80); // Різна швидкість
-    }
-
-    // --- ВОГОНЬ ---
-    function fire() {
-        if (this.time.now < lastFired) return;
-        lastFired = this.time.now + 120;
-
-        let bullet = bullets.get(player.x, player.y);
-        if (bullet) {
-            bullet.setActive(true).setVisible(true);
-            let angle = player.rotation;
-            
-            // Зміщення дула
-            bullet.setPosition(player.x + Math.cos(angle)*40, player.y + Math.sin(angle)*40);
-            bullet.setRotation(angle);
-            
-            // Розброс стрільби
-            angle += (Math.random() - 0.5) * 0.1;
-            this.physics.velocityFromRotation(angle, 1000, bullet.body.velocity);
-
-            // Спалах (Flash)
-            let flash = this.add.circle(bullet.x, bullet.y, 10, 0xffffaa).setDepth(11);
-            this.tweens.add({targets: flash, alpha: 0, scale: 2, duration: 50, onComplete: ()=>flash.destroy()});
-
-            this.time.delayedCall(1000, () => { if(bullet.active) bullet.destroy(); });
-        }
-    }
-
-    function hitEnemy(bullet, enemy) {
-        bullet.destroy();
-        enemy.hp--;
-        enemy.setTint(0xff0000);
-        this.time.delayedCall(100, ()=>enemy.clearTint());
-
-        if (enemy.hp <= 0) {
-            // Ефект смерті (кров)
-            const particles = this.add.particles(enemy.x, enemy.y, 'bullet_tex', {
-                speed: { min: 50, max: 150 },
-                angle: { min: 0, max: 360 },
-                scale: { start: 0.5, end: 0 },
-                tint: 0x880000,
-                lifespan: 500,
-                quantity: 10
-            });
-            particles.setDepth(1); // На підлозі
-            enemy.destroy();
-            
-            // Респавн нового через час
-            this.time.delayedCall(5000, () => spawnZombie.call(this));
-        }
-    }
-
-    // --- UI КЕРУВАННЯ ---
-    function createUI() {
-        // Джойстик (лівий низ)
-        joyBase = this.add.circle(120, window.innerHeight - 120, 60, 0xffffff, 0.1).setScrollFactor(0).setDepth(100);
-        joyStick = this.add.circle(120, window.innerHeight - 120, 30, 0x00aaff, 0.5).setScrollFactor(0).setDepth(101);
-        joyPos = { x: 120, y: window.innerHeight - 120 };
-
-        // Зона джойстика
-        let zone = this.add.rectangle(0, 0, window.innerWidth/2, window.innerHeight, 0x000000, 0).setOrigin(0).setScrollFactor(0).setInteractive();
-        zone.on('pointerdown', p => { joyPointer = p; isJoyActive = true; joyBase.x=p.x; joyBase.y=p.y; joyPos.x=p.x; joyPos.y=p.y; });
-        this.input.on('pointerup', p => { if(p===joyPointer) { isJoyActive=false; joyPointer=null; joyBase.x=120; joyBase.y=window.innerHeight-120; joyStick.x=120; joyStick.y=window.innerHeight-120; } });
-
-        // Кнопка вогню (правий низ)
-        fireBtn = this.add.circle(window.innerWidth - 100, window.innerHeight - 100, 50, 0xff0000, 0.5).setScrollFactor(0).setDepth(100).setInteractive();
-        fireBtn.on('pointerdown', () => { isFiring = true; fireBtn.setAlpha(0.9); });
-        fireBtn.on('pointerup', () => { isFiring = false; fireBtn.setAlpha(0.5); });
-        this.add.text(fireBtn.x, fireBtn.y, '🔥', { fontSize: '30px' }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
-    }
-    </script>
+    <script src="js/script.js"></script>
 </body>
 </html>
