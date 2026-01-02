@@ -38,7 +38,14 @@ function showScreen(screenId) {
     document.querySelectorAll('.status-text').forEach(e => e.innerText = '');
     
     if(screenId === 'screen-matrix') drawActiveLines();
-    if(screenId === 'screen-mines') initMinesUI();
+    
+    // Скидаємо стан Міни при вході
+    if(screenId === 'screen-mines') {
+        minesActive = false;
+        initMinesUI();
+        document.getElementById('mines-controls-start').style.display = 'block';
+        document.getElementById('mines-controls-cashout').style.display = 'none';
+    }
 }
 
 // ==============================
@@ -221,9 +228,7 @@ function initMinesUI() {
         cell.id = `mine-${i}`;
         grid.appendChild(cell);
     }
-    document.getElementById('mines-controls-start').style.display = 'block';
-    document.getElementById('mines-controls-cashout').style.display = 'none';
-    minesActive = false;
+    // Ми НЕ скидаємо minesActive тут, щоб не ламати гру при старті
 }
 
 function startMines() {
@@ -232,16 +237,19 @@ function startMines() {
     
     updateBalance(-bet);
     minesBet = bet;
-    minesActive = true;
-    minesRevealed = 0;
-    currentMultiplier = 1.0;
     
     // Генеруємо міни (3 міни, 22 діаманти)
     minesMap = Array(22).fill(0).concat(Array(3).fill(1));
     minesMap.sort(() => Math.random() - 0.5); // Перемішуємо
 
-    // Скидаємо UI
+    // Скидаємо UI (чиста сітка)
     initMinesUI();
+    
+    // АКТИВУЄМО ГРУ
+    minesActive = true;
+    minesRevealed = 0;
+    currentMultiplier = 1.0;
+    
     document.getElementById('mines-controls-start').style.display = 'none';
     document.getElementById('mines-controls-cashout').style.display = 'block';
     updateMinesInfo();
@@ -285,32 +293,41 @@ function cashoutMines() {
     if(!minesActive) return;
     const win = Math.floor(minesBet * currentMultiplier);
     updateBalance(win);
-    document.getElementById('mines-msg').innerText = `💰 ЗАБРАВ: ${win}`;
+    const msg = document.getElementById('mines-msg');
+    msg.innerText = `💰 ЗАБРАВ: ${win}`;
+    msg.style.color = "#4ade80";
     tg.HapticFeedback.notificationOccurred('success');
     gameOverMines(true);
 }
 
 function gameOverMines(win) {
     minesActive = false;
-    document.getElementById('mines-controls-start').style.display = 'block';
-    document.getElementById('mines-controls-cashout').style.display = 'none';
     
     // Показуємо всі міни
     minesMap.forEach((val, i) => {
         const cell = document.getElementById(`mine-${i}`);
         if(!cell.classList.contains('revealed')) {
             cell.classList.add('revealed');
-            if(val === 1) { cell.innerText = '💣'; cell.style.opacity = '0.5'; }
+            if(val === 1) { cell.innerText = '💣'; cell.style.opacity = '0.5'; cell.classList.add('bomb'); }
             else { cell.innerText = '💎'; cell.style.opacity = '0.2'; }
         }
     });
 
-    if(!win) document.getElementById('mines-msg').innerText = "💥 БАБАХ! СТАВКА ЗГОРІЛА";
+    if(!win) {
+        const msg = document.getElementById('mines-msg');
+        msg.innerText = "💥 БАБАХ! СТАВКА ЗГОРІЛА";
+        msg.style.color = "#ef4444";
+    }
+
+    // Повертаємо кнопки через 2 секунди
+    setTimeout(() => {
+        document.getElementById('mines-controls-start').style.display = 'block';
+        document.getElementById('mines-controls-cashout').style.display = 'none';
+    }, 2000);
 }
 
 function exitMines() {
     if(minesActive) {
-        // Якщо виходить під час гри - автоматичний кешаут (або програш, як вирішиш. Тут кешаут для добра)
         cashoutMines(); 
     }
     showScreen('screen-lobby');
