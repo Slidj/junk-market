@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800;900&display=swap');
 
-/* --- GLOBAL & RESET --- */
+/* --- 1. GLOBAL & RESET --- */
 * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
@@ -10,12 +10,10 @@
 
 body {
     margin: 0;
-    /* ВІДСТУП 80px, щоб не лізти під системні кнопки Telegram */
-    padding-top: 80px; 
-    padding-bottom: 40px;
+    padding: 0;
+    /* Фон */
     background-color: #121212;
-    background-image: 
-        radial-gradient(circle at 50% 10%, #2a0e38 0%, #000000 100%);
+    background-image: radial-gradient(circle at 50% 10%, #2a0e38 0%, #000000 100%);
     color: white;
     font-family: 'Montserrat', sans-serif;
     min-height: 100vh;
@@ -25,26 +23,31 @@ body {
     align-items: center;
 }
 
-/* --- HEADER --- */
+/* --- 2. HEADER (Виправлено накладання) --- */
 .header {
-    position: absolute; /* Фіксуємо його під відступом */
-    top: 20px;
-    left: 0;
-    width: 100%;
-    padding: 0 20px;
+    /* relative - щоб елемент був у потоці і не налізав на верх */
+    position: relative; 
+    
+    /* ВІДСТУП ВІД ВЕРХУ - Опускаємо шапку під кнопки Telegram */
+    margin-top: 60px; 
+    
+    width: 90%;
+    max-width: 400px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
     z-index: 10;
 }
 
 .badge {
-    background: rgba(30, 30, 40, 0.8);
+    background: rgba(30, 30, 40, 0.6);
     backdrop-filter: blur(10px);
     padding: 10px 15px;
-    border-radius: 50px;
+    border-radius: 16px;
     font-weight: 800;
     font-size: 0.9rem;
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     display: flex;
     align-items: center;
@@ -53,14 +56,16 @@ body {
 
 .coin { color: #ffd700; filter: drop-shadow(0 0 5px orange); }
 
-/* --- SCREENS --- */
+/* --- 3. SCREENS & MENU --- */
 .screen {
     display: none;
     width: 90%;
     max-width: 400px;
     flex-direction: column;
-    gap: 25px;
+    gap: 20px;
+    /* Анімація появи знизу */
     animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    padding-bottom: 40px; /* Відступ знизу для скролу */
 }
 .screen.active { display: flex; }
 
@@ -69,23 +74,26 @@ body {
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* --- MENU CARDS --- */
 .logo {
-    font-size: 3rem;
+    font-size: 3.5rem;
     line-height: 0.9;
     font-weight: 900;
     text-align: center;
-    background: linear-gradient(180deg, #fff 0%, #b026ff 100%);
+    text-transform: uppercase;
+    /* Градієнтний текст */
+    background: linear-gradient(180deg, #fff 20%, #b026ff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 15px rgba(176, 38, 255, 0.6));
-    margin-bottom: 20px;
+    filter: drop-shadow(0 0 20px rgba(176, 38, 255, 0.6));
+    margin-bottom: 10px;
+    transform: rotate(-2deg); /* Трохи нахилимо для драйву */
 }
 
+/* Картка гри */
 .game-card {
-    background: linear-gradient(145deg, #1e1e24, #141418);
-    border: 2px solid #333;
-    border-radius: 25px;
+    background: linear-gradient(145deg, #1e1e24, #101012);
+    border: 1px solid #333;
+    border-radius: 24px;
     padding: 20px;
     display: flex;
     align-items: center;
@@ -93,139 +101,55 @@ body {
     position: relative;
     overflow: hidden;
     cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
     transition: transform 0.1s;
 }
 
-/* Ефект натискання на картку */
-.game-card:active { transform: scale(0.96); border-color: #555; }
+.game-card:active { transform: scale(0.96); border-color: #666; }
 
-.card-icon { font-size: 3.5rem; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); }
-.card-title { font-size: 1.4rem; font-weight: 800; text-transform: uppercase; margin: 0; }
-.card-desc { font-size: 0.8rem; color: #888; margin-top: 5px; }
+.card-icon { font-size: 3rem; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); }
+.card-title { font-size: 1.2rem; font-weight: 800; text-transform: uppercase; margin: 0; color: #fff; }
+.card-desc { font-size: 0.8rem; color: #888; margin-top: 4px; font-weight: 600; }
 
-/* --- JUICY 3D BUTTONS --- */
-/* Це найважливіша частина для "відчуття" кліку */
+/* --- 4. 3D BUTTONS (Соковиті кнопки) --- */
 .btn-3d {
     border: none;
     border-radius: 16px;
-    font-weight: 800;
+    font-weight: 900;
     font-size: 1rem;
     color: white;
     cursor: pointer;
     position: relative;
-    /* Тінь, яка створює об'єм */
-    box-shadow: 0 6px 0 rgba(0,0,0,0.4); 
-    transition: all 0.1s;
     text-transform: uppercase;
+    transition: all 0.05s;
+    /* Жорстка тінь знизу для ефекту товщини */
+    box-shadow: 0 6px 0 rgba(0,0,0,1); 
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .btn-3d:active {
-    /* При натисканні зміщуємо кнопку вниз і прибираємо тінь */
-    box-shadow: 0 0 0 rgba(0,0,0,0.4);
-    transform: translateY(6px);
+    box-shadow: 0 0 0 rgba(0,0,0,0); /* Прибираємо тінь */
+    transform: translateY(6px); /* Зсуваємо кнопку вниз на розмір тіні */
 }
 
+/* Сіра кнопка (Назад / Меню) */
+.btn-gray {
+    background: #2d2d35;
+    box-shadow: 0 5px 0 #151518;
+    font-size: 0.8rem;
+    padding: 10px 20px;
+    align-self: flex-start; /* Притиснути вліво */
+}
+.btn-gray:active { box-shadow: 0 0 0 #151518; }
+
+/* Фіолетові фішки */
 .btn-purple {
     background: linear-gradient(to bottom, #d946ef, #9333ea);
-    box-shadow: 0 6px 0 #581c87;
+    box-shadow: 0 5px 0 #581c87;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 .btn-purple:active { box-shadow: 0 0 0 #581c87; }
 
-.btn-gray {
-    background: #3f3f46;
-    box-shadow: 0 4px 0 #18181b;
-    font-size: 0.8rem;
-    padding: 10px 15px;
-}
-.btn-gray:active { box-shadow: 0 0 0 #18181b; }
-
+/* Головна кнопка SPIN */
 .spin-btn {
     width: 100%;
-    padding: 20px;
-    font-size: 1.5rem;
-    letter-spacing: 2px;
-    background: linear-gradient(to bottom, #facc15, #ca8a04);
-    color: #422006;
-    box-shadow: 0 8px 0 #854d0e; /* Велика тінь для головної кнопки */
-    margin-top: 10px;
-}
-.spin-btn:active { box-shadow: 0 0 0 #854d0e; transform: translateY(8px); }
-
-/* --- SLOTS (REELS ANIMATION) --- */
-.slot-frame {
-    background: #000;
-    padding: 10px;
-    border-radius: 20px;
-    border: 4px solid #333;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    position: relative;
-}
-
-.slot-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 4px;
-    background: #111;
-    overflow: hidden; /* Ховаємо те, що вилітає за межі */
-    height: 100px;
-    border-radius: 8px;
-}
-
-.reel {
-    height: 100px;
-    position: relative;
-    background: linear-gradient(180deg, #111 0%, #222 50%, #111 100%);
-}
-
-/* Стрічка з символами всередині барабану */
-.reel-strip {
-    position: absolute;
-    top: 0; left: 0; width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100px; /* Висота одного символу */
-    font-size: 2.5rem;
-    line-height: 100px;
-}
-
-/* Клас для анімації обертання */
-.is-spinning .reel-strip {
-    /* Робимо стрічку дуже довгою візуально через повторення або блюр */
-    animation: reelMove 0.2s linear infinite; 
-    filter: blur(4px); /* Розмиття в русі - це дає швидкість */
-}
-
-@keyframes reelMove {
-    0% { transform: translateY(-50px); opacity: 0.5; }
-    50% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(50px); opacity: 0.5; }
-}
-
-/* Win Effect */
-.win-glow {
-    animation: glow 0.5s ease-in-out infinite alternate;
-}
-@keyframes glow {
-    from { text-shadow: 0 0 5px #fff; transform: scale(1); }
-    to { text-shadow: 0 0 20px #ffd700; transform: scale(1.2); }
-}
-
-/* --- CONTROLS --- */
-.bet-panel {
-    background: rgba(255,255,255,0.05);
-    border-radius: 20px;
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.bet-options { display: flex; gap: 10px; }
-.chip { flex: 1; padding: 12px 0; }
-.bet-input {
-    background: #000; border: 1px solid #444; color: #fff;
-    padding: 10px; border-radius: 10px; text-align: center; font-weight: bold; width: 100%;
-}
-
-.status-text { text-align: center; height: 20px; font-weight: bold; color: #ffd700; }
