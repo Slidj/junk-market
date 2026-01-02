@@ -3,332 +3,354 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Cyber Slots</title>
+    <title>To The Moon</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --bg-color: #0f0c29;
-            --slot-bg: #1a1a2e;
-            --neon-pink: #ff0055;
-            --neon-blue: #00ccff;
-            --gold: #ffd700;
-        }
-
         body {
-            background: radial-gradient(circle at center, #24243e, #0f0c29);
+            background-color: #0b0e11;
             color: white;
             font-family: 'Outfit', sans-serif;
             margin: 0;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: space-evenly;
             overflow: hidden;
         }
 
-        /* --- BALANCE --- */
-        .balance-container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px 25px;
-            border-radius: 50px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        /* --- Header: Balance --- */
+        .header {
+            padding: 20px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 10px;
-            box-shadow: 0 0 20px rgba(0, 204, 255, 0.3);
         }
-
-        .star-icon { color: var(--gold); font-size: 24px; text-shadow: 0 0 10px var(--gold); }
-        .balance-text { font-size: 24px; font-weight: 700; }
-
-        /* --- SLOT MACHINE --- */
-        .slot-machine-frame {
-            position: relative;
-            padding: 15px;
-            background: linear-gradient(145deg, #2b2b40, #161625);
-            border-radius: 20px;
-            border: 4px solid var(--neon-blue);
-            box-shadow: 0 0 30px rgba(0, 204, 255, 0.4), inset 0 0 20px #000;
-        }
-
-        .slots-window {
-            display: flex;
-            gap: 10px;
-            background: #000;
-            padding: 15px;
-            border-radius: 10px;
-            overflow: hidden; /* Ховаємо те, що крутиться поза екраном */
-            position: relative;
-        }
-
-        /* Лінія перемоги */
-        .win-line {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: var(--neon-pink);
-            transform: translateY(-50%);
-            z-index: 5;
-            opacity: 0.3;
-            pointer-events: none;
-            box-shadow: 0 0 10px var(--neon-pink);
-        }
-
-        .reel {
-            width: 80px;
-            height: 100px; /* Висота одного символу */
-            background: #1a1a2e;
+        .balance-box {
+            background: #1e2329;
+            padding: 8px 16px;
             border-radius: 8px;
-            font-size: 60px;
             display: flex;
-            justify-content: center;
             align-items: center;
-            /* Ефект 3D барабану */
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
-            position: relative;
+            gap: 8px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 18px;
+            color: #f0b90b; /* Binance Yellow */
         }
 
-        .symbol-strip {
-            display: flex;
-            flex-direction: column;
-            transition: transform 3s cubic-bezier(0.1, 1, 0.1, 1); /* Плавна зупинка */
+        /* --- Chart Area --- */
+        .chart-container {
+            flex-grow: 1;
+            position: relative;
+            background: linear-gradient(180deg, #151a21 0%, #0b0e11 100%);
+            border-top: 1px solid #2b3139;
+            border-bottom: 1px solid #2b3139;
+            overflow: hidden;
         }
         
-        /* Клас для розмиття при обертанні */
-        .blur-effect {
-            filter: blur(4px);
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
         }
 
-        /* --- CONTROLS --- */
-        .spin-btn {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: radial-gradient(circle, var(--neon-pink), #990033);
-            border: 4px solid white;
-            color: white;
-            font-size: 24px;
+        /* Поточна ціна (велика цифра) */
+        .current-price {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        .price-up { color: #0ecb81; }
+        .price-down { color: #f6465d; }
+
+        /* --- Controls --- */
+        .controls {
+            padding: 20px;
+            display: flex;
+            gap: 15px;
+            background: #0b0e11;
+        }
+
+        .btn {
+            flex: 1;
+            height: 60px;
+            border: none;
+            border-radius: 12px;
+            font-size: 20px;
             font-weight: 900;
+            color: white;
             cursor: pointer;
-            box-shadow: 0 0 40px var(--neon-pink);
             transition: transform 0.1s;
             text-transform: uppercase;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.3);
         }
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .spin-btn:active {
-            transform: scale(0.9);
-            box-shadow: 0 0 20px var(--neon-pink);
-        }
-        
-        .spin-btn:disabled {
-            background: #555;
-            box-shadow: none;
-            border-color: #888;
-        }
+        .btn-up { background-color: #0ecb81; } /* Green */
+        .btn-down { background-color: #f6465d; } /* Red */
 
-        .info-text {
-            color: #aaa;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-
-        /* --- JACKPOT ANIMATION --- */
-        @keyframes jackPotPulse {
-            0% { transform: scale(1); text-shadow: 0 0 10px var(--gold); }
-            50% { transform: scale(1.2); text-shadow: 0 0 40px var(--gold), 0 0 80px red; }
-            100% { transform: scale(1); text-shadow: 0 0 10px var(--gold); }
-        }
-
-        .win-message {
+        /* --- Timer / Status Overlay --- */
+        .status-overlay {
             position: absolute;
-            top: 40%;
-            left: 50%;
+            top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 60px;
-            font-weight: 900;
-            color: var(--gold);
-            text-shadow: 0 0 20px black;
+            background: rgba(0,0,0,0.8);
+            padding: 20px 40px;
+            border-radius: 16px;
+            text-align: center;
             display: none;
-            z-index: 100;
-            animation: jackPotPulse 0.5s infinite;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+        }
+        .status-title { font-size: 14px; color: #848e9c; margin-bottom: 5px; }
+        .status-value { font-size: 36px; font-weight: 900; }
+        .win { color: #0ecb81; }
+        .lose { color: #f6465d; }
+
+        /* Лінія ставки */
+        .bet-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            border-top: 2px dashed rgba(255,255,255,0.5);
+            pointer-events: none;
+            display: none;
+        }
+        .bet-badge {
+            position: absolute;
+            right: 10px;
+            top: -12px;
+            background: #fff;
+            color: #000;
+            padding: 2px 6px;
+            font-size: 10px;
+            border-radius: 4px;
+            font-weight: bold;
         }
 
     </style>
 </head>
 <body>
 
-    <div class="balance-container">
-        <span class="star-icon">★</span>
-        <span class="balance-text" id="balance">1000</span>
-    </div>
-
-    <div class="win-message" id="win-msg">JACKPOT!</div>
-
-    <div class="slot-machine-frame">
-        <div class="slots-window">
-            <div class="win-line"></div>
-            
-            <div class="reel">
-                <div class="symbol-strip" id="reel1">
-                    <div>🍒</div> </div>
-            </div>
-            <div class="reel">
-                <div class="symbol-strip" id="reel2">
-                    <div>🍒</div>
-                </div>
-            </div>
-            <div class="reel">
-                <div class="symbol-strip" id="reel3">
-                    <div>🍒</div>
-                </div>
-            </div>
+    <div class="header">
+        <div style="font-weight: 900; font-size: 20px;">BTC/USD</div>
+        <div class="balance-box">
+            <span>★</span> <span id="balance">1000</span>
         </div>
     </div>
 
-    <div style="text-align: center;">
-        <button class="spin-btn" id="spinBtn" onclick="spin()">SPIN</button>
-        <div class="info-text">Cost: 10 ★ | Win: x10 ★</div>
+    <div class="chart-container" id="chartBox">
+        <canvas id="chart"></canvas>
+        <div class="current-price price-up" id="priceDisplay">45,230.50</div>
+        
+        <div class="bet-line" id="betLine">
+            <div class="bet-badge">ВАША СТАВКА</div>
+        </div>
+
+        <div class="status-overlay" id="statusOverlay">
+            <div class="status-title" id="statusTitle">RESULT</div>
+            <div class="status-value" id="statusValue">WIN</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-up" id="btnUp" onclick="placeBet('up')">ВВЕРХ 📈</button>
+        <button class="btn btn-down" id="btnDown" onclick="placeBet('down')">ВНИЗ 📉</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.setHeaderColor('#0f0c29');
+        tg.setHeaderColor('#0b0e11');
 
+        // --- Game Config ---
         let balance = 1000;
-        const spinCost = 10;
-        
-        // Наші символи
-        const symbols = ['🍒', '🍋', '🍇', '💎', '7️⃣', '🔔'];
-        // Коефіцієнти виграшу
-        const rewards = {
-            '🍒': 5,
-            '🍋': 5,
-            '🍇': 10,
-            '🔔': 20,
-            '💎': 50,
-            '7️⃣': 100
-        };
+        const betAmount = 50;
+        let currentPrice = 45000;
+        let isGameActive = false; // Чи йде раунд
+        let betDirection = null; // 'up' або 'down'
+        let startPrice = 0; // Ціна на момент ставки
 
-        const reel1 = document.getElementById('reel1');
-        const reel2 = document.getElementById('reel2');
-        const reel3 = document.getElementById('reel3');
+        // --- Elements ---
+        const canvas = document.getElementById('chart');
+        const ctx = canvas.getContext('2d');
+        const priceDisplay = document.getElementById('priceDisplay');
         const balanceEl = document.getElementById('balance');
-        const spinBtn = document.getElementById('spinBtn');
-        const winMsg = document.getElementById('win-msg');
+        const btnUp = document.getElementById('btnUp');
+        const btnDown = document.getElementById('btnDown');
+        const betLine = document.getElementById('betLine');
+        const statusOverlay = document.getElementById('statusOverlay');
+        const statusValue = document.getElementById('statusValue');
+        const chartBox = document.getElementById('chartBox');
 
-        function updateBalance(amount) {
-            balance += amount;
-            balanceEl.innerText = balance;
-            // Анімація балансу
-            balanceEl.style.color = amount > 0 ? '#00ff00' : '#fff';
-            setTimeout(() => balanceEl.style.color = '#fff', 300);
+        // --- Chart Data ---
+        let prices = [];
+        const maxDataPoints = 100; // Скільки точок влазить на екран
+        let width, height;
+
+        // Ініціалізація полотна
+        function resize() {
+            width = canvas.width = chartBox.clientWidth;
+            height = canvas.height = chartBox.clientHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Заповнюємо масив початковими даними
+        for(let i=0; i<maxDataPoints; i++) {
+            prices.push(currentPrice);
         }
 
-        // Генеруємо випадкову стрічку символів для анімації
-        function generateStrip(finalSymbol) {
-            let html = '';
-            // Додаємо 20 випадкових символів для ефекту прокрутки
-            for(let i=0; i<20; i++) {
-                const randomSym = symbols[Math.floor(Math.random() * symbols.length)];
-                html += `<div style="height: 100px; display:flex; align-items:center; justify-content:center;">${randomSym}</div>`;
+        // --- Core Loop (Оновлення графіка) ---
+        function updateGame() {
+            // 1. Генеруємо нову ціну (Випадкове блукання)
+            // Ціна змінюється на випадкову величину від -20 до +20
+            const change = (Math.random() - 0.5) * 40; 
+            currentPrice += change;
+            
+            // Додаємо в масив, видаляємо стару
+            prices.push(currentPrice);
+            if (prices.length > maxDataPoints) prices.shift();
+
+            // 2. Оновлюємо текст ціни
+            priceDisplay.innerText = currentPrice.toFixed(2);
+            priceDisplay.className = `current-price ${change >= 0 ? 'price-up' : 'price-down'}`;
+
+            // 3. Малюємо графік
+            drawChart();
+
+            // 4. Якщо гра активна - перевіряємо умову (таймер тут віртуальний, ми чекаємо 3 сек)
+            requestAnimationFrame(updateGame);
+        }
+
+        function drawChart() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Знаходимо мін/макс для масштабування
+            const min = Math.min(...prices) - 50;
+            const max = Math.max(...prices) + 50;
+            const range = max - min;
+
+            ctx.beginPath();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#f0b90b'; // Gold line
+            
+            // Градієнт під лінією
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, "rgba(240, 185, 11, 0.2)");
+            gradient.addColorStop(1, "rgba(240, 185, 11, 0.0)");
+
+            for (let i = 0; i < prices.length; i++) {
+                const x = (i / (maxDataPoints - 1)) * width;
+                // Нормалізуємо Y: (val - min) / range -> 0..1 -> перевертаємо для canvas
+                const y = height - ((prices[i] - min) / range) * height;
+                
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
             }
-            // Останній символ - той, що випаде
-            html += `<div style="height: 100px; display:flex; align-items:center; justify-content:center;">${finalSymbol}</div>`;
-            return html;
+            
+            ctx.stroke();
+            
+            // Заливка під графіком
+            ctx.lineTo(width, height);
+            ctx.lineTo(0, height);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Пульсуюча точка в кінці
+            const lastY = height - ((prices[prices.length-1] - min) / range) * height;
+            ctx.beginPath();
+            ctx.arc(width, lastY, 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
         }
 
-        function spin() {
-            if (balance < spinCost) {
-                tg.showAlert("Недостатньо зірок!");
+        // --- Betting Logic ---
+        function placeBet(direction) {
+            if (isGameActive) return; // Не можна ставити під час гри
+            if (balance < betAmount) {
+                tg.showAlert("Мало зірок!");
                 return;
             }
 
-            // Списуємо баланс
-            updateBalance(-spinCost);
+            // Старт раунду
+            isGameActive = true;
+            betDirection = direction;
+            startPrice = currentPrice;
+            
+            // Списання
+            balance -= betAmount;
+            balanceEl.innerText = balance;
+            
+            // UI зміни
+            btnUp.disabled = true;
+            btnDown.disabled = true;
+            statusOverlay.style.display = 'none';
             tg.HapticFeedback.impactOccurred('medium');
 
-            // Блокуємо кнопку
-            spinBtn.disabled = true;
-            winMsg.style.display = 'none';
+            // Показуємо лінію ставки
+            // (В реальному коді треба вираховувати Y лінії, але для простоти поставимо її по центру)
+            // Для демо просто покажемо, що лінія активна
+            betLine.style.display = 'block';
+            betLine.style.top = '50%'; 
+            betLine.querySelector('.bet-badge').innerText = `СТАРТ: ${startPrice.toFixed(2)}`;
+            betLine.querySelector('.bet-badge').style.backgroundColor = direction === 'up' ? '#0ecb81' : '#f6465d';
+            betLine.querySelector('.bet-badge').style.color = '#fff';
 
-            // Визначаємо результат наперед (RNG)
-            const result1 = symbols[Math.floor(Math.random() * symbols.length)];
-            const result2 = symbols[Math.floor(Math.random() * symbols.length)];
-            const result3 = symbols[Math.floor(Math.random() * symbols.length)];
-
-            // Заповнюємо барабани довгою стрічкою
-            reel1.innerHTML = generateStrip(result1);
-            reel2.innerHTML = generateStrip(result2);
-            reel3.innerHTML = generateStrip(result3);
-
-            // Скидаємо позицію (щоб анімація програлась з початку)
-            reel1.style.transition = 'none'; reel1.style.transform = 'translateY(0)';
-            reel2.style.transition = 'none'; reel2.style.transform = 'translateY(0)';
-            reel3.style.transition = 'none'; reel3.style.transform = 'translateY(0)';
-
-            // Примусове перемальовування (Reflow)
-            void reel1.offsetWidth;
-
-            // ЗАПУСК АНІМАЦІЇ (крутимо вниз)
-            // Довжина стрічки 21 символ * 100px = 2100px. Зсуваємо на (21-1)*100 = 2000px
-            const translateY = '-2000px';
-
-            // Барабан 1
-            reel1.style.transition = 'transform 2s cubic-bezier(0.5, 0, 0.2, 1)';
-            reel1.style.transform = `translateY(${translateY})`;
-            reel1.classList.add('blur-effect');
-
-            // Барабан 2 (із затримкою)
-            setTimeout(() => {
-                reel2.style.transition = 'transform 2.5s cubic-bezier(0.5, 0, 0.2, 1)';
-                reel2.style.transform = `translateY(${translateY})`;
-                reel2.classList.add('blur-effect');
-            }, 200);
-
-            // Барабан 3 (із затримкою)
-            setTimeout(() => {
-                reel3.style.transition = 'transform 3s cubic-bezier(0.5, 0, 0.2, 1)';
-                reel3.style.transform = `translateY(${translateY})`;
-                reel3.classList.add('blur-effect');
-            }, 400);
-
-            // ПЕРЕВІРКА РЕЗУЛЬТАТУ (після закінчення всіх анімацій - 3.4 сек)
-            setTimeout(() => {
-                // Прибираємо блюр
-                reel1.classList.remove('blur-effect');
-                reel2.classList.remove('blur-effect');
-                reel3.classList.remove('blur-effect');
-                
-                checkWin(result1, result2, result3);
-                spinBtn.disabled = false;
-            }, 3400);
+            // Таймер раунду - 3 секунди
+            let timeLeft = 3;
+            
+            const timer = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    finishRound();
+                }
+            }, 1000);
         }
 
-        function checkWin(r1, r2, r3) {
-            // Умова перемоги: всі 3 однакові
-            if (r1 === r2 && r2 === r3) {
-                const multiplier = rewards[r1];
-                const winAmount = spinCost * multiplier;
-                
-                updateBalance(winAmount);
-                
-                // Ефекти перемоги
-                winMsg.innerText = `+${winAmount}`;
-                winMsg.style.display = 'block';
+        function finishRound() {
+            const endPrice = currentPrice;
+            const won = (betDirection === 'up' && endPrice > startPrice) || 
+                        (betDirection === 'down' && endPrice < startPrice);
+
+            let message = "";
+            let colorClass = "";
+
+            if (won) {
+                const profit = betAmount * 2; // x2
+                balance += profit;
+                balanceEl.innerText = balance;
+                message = `+${profit} ★`;
+                colorClass = "win";
                 tg.HapticFeedback.notificationOccurred('success');
-                
-                // Конфетті або просто блимання
-            } else if (r1 === r2 || r2 === r3 || r1 === r3) {
-                 // Втішний приз за 2 символи (опціонально)
-                 // updateBalance(5); 
+            } else {
+                message = "ВТРАЧЕНО";
+                colorClass = "lose";
+                tg.HapticFeedback.notificationOccurred('error');
             }
+
+            // Show Result
+            statusValue.innerText = message;
+            statusValue.className = `status-value ${colorClass}`;
+            document.getElementById('statusTitle').innerText = won ? "ПЕРЕМОГА!" : "НЕВДАЧА";
+            statusOverlay.style.display = 'block';
+            
+            // Reset
+            betLine.style.display = 'none';
+            btnUp.disabled = false;
+            btnDown.disabled = false;
+            isGameActive = false;
         }
+
+        // Запуск
+        updateGame();
+
     </script>
 </body>
 </html>
