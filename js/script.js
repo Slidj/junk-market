@@ -4,55 +4,46 @@ tg.expand();
 // --- НАЛАШТУВАННЯ ---
 let balance = 1000;
 const symbols = ['🍒', '🍋', '🍇', '🍊', '🔔', '7️⃣', '💎']; 
-const WILD_SYMBOL = '💎'; // Символ, який замінює всі інші
+const WILD_SYMBOL = '💎'; 
 
-// Коефіцієнти виграшу (за 3, 4 та 5 символів)
+// Коефіцієнти (зменшив трохи за 3, бо тепер виграшів буде вдвічі більше)
 const PAYOUTS = {
-    3: 2,   // x2 за 3 символи
-    4: 10,  // x10 за 4 символи
-    5: 50   // x50 за 5 символів
+    3: 2,   
+    4: 8,  
+    5: 50   
 };
 
 // --- UI ЕЛЕМЕНТИ ---
 const balanceEl = document.getElementById('balance');
 const usernameEl = document.getElementById('username');
 
-// Підтягуємо ім'я з Телеграм
 if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
     usernameEl.innerText = tg.initDataUnsafe.user.first_name;
 }
 
-// --- ФУНКЦІЇ БАЛАНСУ ---
+// --- БАЛАНС ---
 function updateBalance(amount) {
     balance += amount;
     balanceEl.innerText = balance;
     
-    // Анімація зміни балансу
+    // Анімація
     balanceEl.style.transform = 'scale(1.3)';
-    balanceEl.style.color = amount >= 0 ? '#4ade80' : '#f87171'; // Зелений або червоний
-    
+    balanceEl.style.color = amount >= 0 ? '#4ade80' : '#f87171';
     setTimeout(() => {
         balanceEl.style.transform = 'scale(1)';
-        balanceEl.style.color = '#ffd700'; // Повертаємо золотий
+        balanceEl.style.color = '#ffd700';
     }, 300);
 }
 
 // --- НАВІГАЦІЯ ---
 function showScreen(screenId) {
-    // Ховаємо всі екрани
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    // Показуємо потрібний
     document.getElementById(screenId).classList.add('active');
-    
-    // Скидаємо повідомлення
-    document.getElementById('slot-msg').innerText = '';
-    document.getElementById('roulette-msg').innerText = '';
-    
     tg.HapticFeedback.selectionChanged();
 }
 
 // ==============================
-// ЛОГІКА СЛОТІВ
+// ЛОГІКА СЛОТІВ (WIN BOTH WAYS)
 // ==============================
 
 function setSlotBet(amount) {
@@ -64,9 +55,7 @@ function spinSlots() {
     const betInput = document.getElementById('slot-bet-input');
     const bet = parseInt(betInput.value);
     const msg = document.getElementById('slot-msg');
-    const reels = [1, 2, 3, 4, 5]; // Індекси барабанів
     
-    // 1. Перевірка балансу
     if (balance < bet) {
         msg.innerText = "❌ НЕМАЄ КОШТІВ";
         msg.style.color = "#ff4444";
@@ -74,103 +63,100 @@ function spinSlots() {
         return;
     }
 
-    // 2. Списання ставки
     updateBalance(-bet);
     msg.innerText = "УДАЧІ...";
-    msg.style.color = "#aaa";
+    msg.style.color = "#888";
     
-    // Очищаємо попередні ефекти перемоги
+    // Очищення ефектів
     document.querySelectorAll('.reel').forEach(el => el.classList.remove('win-glow'));
 
     tg.HapticFeedback.impactOccurred('medium');
 
-    // 3. Запуск анімації (крутимо)
+    // Анімація спіну
+    const reels = [1, 2, 3, 4, 5];
     reels.forEach(i => {
         const reel = document.getElementById(`reel${i}`);
         reel.classList.add('is-spinning');
         
-        // Швидка зміна символів для візуального ефекту
         reel.dataset.interval = setInterval(() => {
              reel.querySelector('.reel-strip').innerText = symbols[Math.floor(Math.random() * symbols.length)];
         }, 80);
     });
 
-    // 4. Зупинка барабанів та генерація результату
+    // Зупинка
     let finalResult = [];
     
     reels.forEach((i, index) => {
-        // Кожен наступний барабан зупиняється пізніше (ефект хвилі)
-        const delay = 500 + (index * 400); 
+        const delay = 500 + (index * 350); 
         
         setTimeout(() => {
             const reel = document.getElementById(`reel${i}`);
-            clearInterval(reel.dataset.interval); // Стоп мерехтінню
-            reel.classList.remove('is-spinning'); // Стоп анімації блюру
+            clearInterval(reel.dataset.interval);
+            reel.classList.remove('is-spinning');
             
-            // === ГЕНЕРАЦІЯ СИМВОЛУ ===
-            // Тут ми визначаємо, що випало на цьому барабані
             const symbol = symbols[Math.floor(Math.random() * symbols.length)];
             reel.querySelector('.reel-strip').innerText = symbol;
             finalResult.push(symbol);
             
-            tg.HapticFeedback.impactOccurred('light'); // Стукіт
+            tg.HapticFeedback.impactOccurred('light');
 
-            // Якщо це останній барабан, перевіряємо виграш
             if (index === 4) {
-                checkWin(finalResult, bet);
+                checkWinBothWays(finalResult, bet);
             }
         }, delay);
     });
 }
 
-function checkWin(result, bet) {
+// --- ГОЛОВНА ЛОГІКА: РАХУЄМО ЗЛІВА І СПРАВА ---
+function checkWinBothWays(result, bet) {
     const msg = document.getElementById('slot-msg');
     
-    // Логіка: Шукаємо збіги зліва направо
-    // Wild (💎) замінює будь-який символ
+    // 1. Рахуємо зліва направо (Normal)
+    const leftWin = calculateMatch(result);
     
-    let firstSymbol = result[0];
-    let matchCount = 1;
-    let effectiveSymbol = firstSymbol; // Символ, який ми намагаємось зібрати
+    // 2. Рахуємо справа наліво (Reverse)
+    // [...result] створює копію, щоб не перевертати оригінал
+    const rightWin = calculateMatch([...result].reverse());
 
-    // Якщо перший символ Wild, то "ефективний" символ визначиться пізніше
-    // Наприклад: [💎, 🍒, ...] -> Ефективний стає 🍒
-    
-    for (let i = 1; i < result.length; i++) {
-        const current = result[i];
+    let totalWin = 0;
+    let winningReels = new Set(); // Використовуємо Set, щоб індекси не дублювались
+
+    // Обробка Лівого виграшу
+    if (leftWin.count >= 3) {
+        let mult = PAYOUTS[leftWin.count] || 0;
+        if (['7️⃣', '💎'].includes(leftWin.symbol)) mult *= 2;
+        totalWin += bet * mult;
         
-        if (current === effectiveSymbol || current === WILD_SYMBOL || effectiveSymbol === WILD_SYMBOL) {
-            matchCount++;
-            
-            // Якщо ми "сиділи" на Wild, а тепер випав звичайний символ, фіксуємо його
-            if (effectiveSymbol === WILD_SYMBOL && current !== WILD_SYMBOL) {
-                effectiveSymbol = current;
-            }
-        } else {
-            break; // Ланцюжок перервався
+        // Додаємо індекси барабанів (1, 2, 3...)
+        for(let i=1; i<=leftWin.count; i++) winningReels.add(i);
+    }
+
+    // Обробка Правого виграшу
+    // Важливо: Якщо 5 однакових, ми не хочемо платити двічі, якщо це не задумано.
+    // Але для "кайфу" гравця нехай платить двічі (Left + Right), це буде Jackpot!
+    if (rightWin.count >= 3) {
+        // Якщо це 5 символів, ми вже порахували це зліва. 
+        // Щоб не було x100, ігноруємо 5-ку справа, якщо зліва вже є 5-ка.
+        if (leftWin.count !== 5) {
+            let mult = PAYOUTS[rightWin.count] || 0;
+            if (['7️⃣', '💎'].includes(rightWin.symbol)) mult *= 2;
+            totalWin += bet * mult;
+
+            // Додаємо індекси барабанів (рахуючи з кінця: 5, 4, 3...)
+            for(let i=0; i<rightWin.count; i++) winningReels.add(5 - i);
         }
     }
 
-    // Розрахунок виграшу
-    if (matchCount >= 3) {
-        let multiplier = PAYOUTS[matchCount];
-        
-        // Бонус: Якщо символ - 7️⃣ або 💎, множник подвоюється
-        if (effectiveSymbol === '7️⃣' || effectiveSymbol === '💎') {
-            multiplier *= 2;
-        }
-
-        const winAmount = bet * multiplier;
-        updateBalance(winAmount);
-        
-        msg.innerHTML = `🎉 ВИГРАШ! x${multiplier} <span style="color:#4ade80">+${winAmount}</span>`;
+    if (totalWin > 0) {
+        updateBalance(totalWin);
+        msg.innerHTML = `🎉 ВИГРАШ! <span style="color:#4ade80">+${totalWin}</span>`;
         msg.style.color = "#ffd700";
         tg.HapticFeedback.notificationOccurred('success');
 
-        // Підсвічуємо виграшні барабани
-        for(let i=1; i<=matchCount; i++) {
-            document.getElementById(`reel${i}`).classList.add('win-glow');
-        }
+        // Підсвічуємо всі виграшні барабани
+        winningReels.forEach(idx => {
+            document.getElementById(`reel${idx}`).classList.add('win-glow');
+        });
 
     } else {
         msg.innerText = "СПРОБУЙ ЩЕ РАЗ";
@@ -178,8 +164,29 @@ function checkWin(result, bet) {
     }
 }
 
+// Допоміжна функція: рахує співпадіння в масиві з початку
+function calculateMatch(line) {
+    let first = line[0];
+    let count = 1;
+    let effective = first; // Ефективний символ (якщо перший Wild)
+
+    for (let i = 1; i < line.length; i++) {
+        const current = line[i];
+        
+        if (current === effective || current === WILD_SYMBOL || effective === WILD_SYMBOL) {
+            count++;
+            if (effective === WILD_SYMBOL && current !== WILD_SYMBOL) {
+                effective = current;
+            }
+        } else {
+            break; 
+        }
+    }
+    return { count, symbol: effective };
+}
+
 // ==============================
-// ЛОГІКА РУЛЕТКИ
+// ЛОГІКА РУЛЕТКИ (Без змін)
 // ==============================
 
 let currentRouletteBet = null;
@@ -189,7 +196,6 @@ function setRouletteBet(color) {
     const target = document.getElementById('r-bet-target');
     target.innerText = color.toUpperCase();
     
-    // Фарбуємо текст вибору
     if(color === 'red') target.style.color = '#ef4444';
     if(color === 'black') target.style.color = '#9ca3af';
     if(color === 'green') target.style.color = '#22c55e';
@@ -204,33 +210,27 @@ function spinRoulette() {
 
     if (!currentRouletteBet) {
         msg.innerText = "ОБЕРІТЬ КОЛІР!"; 
-        msg.style.color = "orange";
         tg.HapticFeedback.notificationOccurred('warning');
         return;
     }
     if (balance < bet) {
         msg.innerText = "НЕМАЄ КОШТІВ"; 
-        msg.style.color = "red";
         tg.HapticFeedback.notificationOccurred('error');
         return;
     }
 
     updateBalance(-bet);
     msg.innerText = "КРУТИМО...";
-    msg.style.color = "#aaa";
     
-    // Випадковий кут (мінімум 5 обертів)
     const randomRot = 1800 + Math.floor(Math.random() * 360);
     wheel.style.transform = `rotate(${randomRot}deg)`;
 
     setTimeout(() => {
-        // Логіка визначення кольору (імітація шансів)
         const rand = Math.random();
-        let resultColor = 'black'; // ~47.5%
-        if (rand < 0.05) resultColor = 'green'; // 5%
-        else if (rand < 0.52) resultColor = 'red'; // ~47.5%
+        let resultColor = 'black'; 
+        if (rand < 0.05) resultColor = 'green'; 
+        else if (rand < 0.52) resultColor = 'red'; 
 
-        // Перевірка перемоги
         if (resultColor === currentRouletteBet) {
             const mult = resultColor === 'green' ? 14 : 2;
             const win = bet * mult;
@@ -239,15 +239,12 @@ function spinRoulette() {
             tg.HapticFeedback.notificationOccurred('success');
         } else {
             msg.innerText = `ВИПАЛО ${resultColor.toUpperCase()}. ПРОГРАШ.`;
-            msg.style.color = "#ff4444";
             tg.HapticFeedback.impactOccurred('heavy');
         }
         
-        // Скидання колеса без анімації (щоб можна було крутити знову)
         setTimeout(() => {
             wheel.style.transition = 'none';
             wheel.style.transform = 'rotate(0deg)';
-            // Відновлюємо анімацію через мить
             setTimeout(() => wheel.style.transition = 'transform 4s cubic-bezier(0.1, 0.8, 0.1, 1)', 50);
         }, 2000);
 
