@@ -1,162 +1,282 @@
 :root {
-    --bg-color: #0f172a;
-    --card-bg: #1e293b;
-    --gold: #fbbf24;
-    --accent: #3b82f6;
-    --text: #ffffff;
+    --bg-dark: #121212;
+    --bg-panel: #1e222b;
+    --gold-light: #ffd700;
+    --gold-dark: #b8860b;
+    --neon-win: #00ff88;
+    --shadow-heavy: 0 10px 20px rgba(0,0,0,0.5);
+    --btn-shadow: 0 6px 0 #8b6508; /* Тінь для 3D ефекту */
 }
 
 body {
-    background-color: var(--bg-color);
-    color: var(--text);
+    background: radial-gradient(circle at center, #2b3242 0%, #0f172a 100%);
+    color: white;
     font-family: 'Segoe UI', sans-serif;
     margin: 0;
     padding: 20px;
-    text-align: center;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     overflow-x: hidden;
+    user-select: none; /* Заборона виділення тексту */
 }
 
 /* Header */
 .header {
+    background: linear-gradient(145deg, #2a303c, #1f242d);
+    width: 90%;
+    max-width: 400px;
+    padding: 15px;
+    border-radius: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
-    background: var(--card-bg);
-    border-radius: 12px;
+    box-shadow: 
+        5px 5px 10px #15191f, 
+        -5px -5px 10px #2d3543;
+    border: 1px solid rgba(255,255,255,0.05);
     margin-bottom: 20px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
 .balance-box {
-    color: var(--gold);
-    font-weight: bold;
-    font-size: 1.2rem;
+    background: #000;
+    padding: 8px 15px;
+    border-radius: 50px;
+    color: var(--gold-light);
+    font-weight: 800;
+    border: 1px solid var(--gold-dark);
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+    text-shadow: 0 0 5px var(--gold-light);
 }
 
-/* Screens */
+/* Cards & Screens */
 .screen {
     display: none;
-    animation: fadeIn 0.3s ease;
+    width: 100%;
+    max-width: 400px;
+    animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-.screen.active {
-    display: block;
+.screen.active { display: block; }
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Lobby */
+/* Game Cards (Menu) */
 .games-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-top: 20px;
+    gap: 20px;
 }
 
 .game-card {
-    background: var(--card-bg);
+    background: linear-gradient(180deg, #2c3e50, #000000);
     padding: 20px;
-    border-radius: 15px;
+    border-radius: 20px;
+    text-align: center;
     cursor: pointer;
-    transition: transform 0.1s, border 0.1s;
-    border: 2px solid transparent;
+    border: 2px solid #333;
+    transition: all 0.2s;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
 }
 
 .game-card:active {
     transform: scale(0.95);
+    border-color: var(--gold-light);
 }
 
-.game-card:hover {
-    border-color: var(--gold);
+.game-card .icon {
+    font-size: 3.5rem;
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3));
+    transition: transform 0.3s;
+}
+.game-card:hover .icon { transform: scale(1.1) rotate(5deg); }
+
+/* --- 3D BUTTONS --- */
+.action-btn {
+    background: linear-gradient(to bottom, #ffd700 0%, #daa520 100%);
+    color: #4a3b00;
+    border: none;
+    padding: 15px 0;
+    width: 100%;
+    font-size: 1.2rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    border-radius: 12px;
+    cursor: pointer;
+    position: relative;
+    box-shadow: var(--btn-shadow);
+    transition: all 0.1s;
+    margin-top: 15px;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
 }
 
-.icon { font-size: 3rem; margin-bottom: 10px; }
+.action-btn:active {
+    transform: translateY(6px);
+    box-shadow: 0 0 0 #8b6508;
+}
 
-/* Slots */
+.back-btn {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: #ccc;
+    padding: 8px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+/* --- SLOTS DESIGN --- */
 .slot-machine {
+    background: #111;
+    padding: 20px;
+    border-radius: 15px;
+    border: 4px solid #444;
+    box-shadow: 
+        inset 0 0 20px #000,
+        0 0 0 5px #222;
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin: 30px 0;
-    background: #000;
-    padding: 20px;
+    margin: 20px 0;
+    position: relative;
+}
+
+/* Ефект скла */
+.slot-machine::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(
+        180deg, 
+        rgba(255,255,255,0.1) 0%, 
+        rgba(255,255,255,0) 40%, 
+        rgba(255,255,255,0) 60%, 
+        rgba(255,255,255,0.05) 100%
+    );
     border-radius: 10px;
-    border: 3px solid var(--gold);
+    pointer-events: none;
+    z-index: 10;
 }
 
 .reel {
-    font-size: 3rem;
-    background: #fff;
-    width: 60px;
-    height: 80px;
+    background: linear-gradient(180deg, #f0f0f0 0%, #fff 50%, #dcdcdc 100%);
+    width: 70px;
+    height: 90px;
+    font-size: 3.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 5px;
-    color: #000;
+    border-radius: 8px;
+    border: 2px solid #000;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    color: #333;
+    overflow: hidden;
 }
 
-/* Roulette */
-.roulette-wheel {
+/* Анімація розмиття при обертанні */
+.reel.blur {
+    filter: blur(3px);
+    animation: shake 0.1s infinite;
+}
+
+@keyframes shake {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+    100% { transform: translateY(3px); }
+}
+
+/* --- ROULETTE DESIGN --- */
+.roulette-container {
     position: relative;
-    width: 150px;
-    height: 150px;
-    background: conic-gradient(red 0deg 170deg, green 170deg 190deg, black 190deg 360deg);
-    border-radius: 50%;
+    width: 220px;
+    height: 220px;
     margin: 20px auto;
-    border: 5px solid white;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-    transition: transform 3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    background: #2a1b0a;
+    border-radius: 50%;
+    padding: 10px;
+    box-shadow: inset 0 0 15px #000, 0 10px 20px rgba(0,0,0,0.5);
+    border: 2px solid #5c4013;
 }
 
+.roulette-wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(
+        #e00 0deg 170deg, 
+        #0b0 170deg 190deg, 
+        #111 190deg 360deg
+    );
+    border: 5px solid #d4af37;
+    position: relative;
+    box-shadow: 0 0 15px rgba(0,0,0,0.8);
+    transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1); /* Дуже плавна зупинка */
+}
+
+/* Центр колеса */
 .wheel-inner {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 3rem;
+    width: 60px; height: 60px;
+    background: radial-gradient(circle at 30% 30%, #ffd700, #b8860b);
+    border-radius: 50%;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
 }
 
 .wheel-pointer {
     position: absolute;
-    top: -20px;
+    top: -15px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 2rem;
+    width: 0; 
+    height: 0; 
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 25px solid #fff;
+    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.5));
     z-index: 10;
-    color: var(--gold);
 }
 
-/* Controls */
-.controls { margin-top: 20px; }
-.action-btn {
-    background: linear-gradient(45deg, #f59e0b, #fbbf24);
+/* Ставки */
+.bet-options { display: flex; gap: 8px; margin: 15px 0; }
+.bet-color {
+    flex: 1;
+    padding: 12px;
     border: none;
-    padding: 15px 30px;
-    border-radius: 25px;
-    color: #000;
+    border-radius: 10px;
     font-weight: bold;
-    font-size: 1.1rem;
+    color: white;
     cursor: pointer;
-    width: 100%;
-    margin-top: 10px;
+    transition: transform 0.1s, filter 0.2s;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.3);
 }
+.bet-color:active { transform: translateY(4px); box-shadow: none; }
+.bet-color.selected { border: 2px solid white; filter: brightness(1.2); }
 
-.back-btn {
-    background: transparent;
-    border: 1px solid var(--text);
-    color: var(--text);
-    padding: 5px 15px;
-    border-radius: 8px;
-    float: left;
+.red { background: linear-gradient(to bottom, #ff4444, #cc0000); }
+.black { background: linear-gradient(to bottom, #444, #000); }
+.green { background: linear-gradient(to bottom, #00cc44, #008800); }
+
+/* Win Effects */
+.message {
+    min-height: 24px;
+    font-weight: bold;
+    margin-top: 15px;
+    text-shadow: 0 0 10px rgba(255,255,255,0.2);
 }
-
-.bet-options { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
-.bet-color { padding: 10px; border: none; border-radius: 8px; color: white; cursor: pointer; flex: 1; }
-.bet-color.red { background: #ef4444; }
-.bet-color.black { background: #1f2937; border: 1px solid #555; }
-.bet-color.green { background: #22c55e; }
-
-.message { margin-top: 15px; font-weight: bold; height: 20px; }
+.win-anim {
+    color: var(--neon-win);
+    animation: pulse 0.5s ease-in-out infinite alternate;
+}
+@keyframes pulse { from { text-shadow: 0 0 10px var(--neon-win); transform: scale(1); } to { text-shadow: 0 0 20px var(--neon-win); transform: scale(1.1); } }
