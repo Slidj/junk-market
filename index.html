@@ -3,27 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobile Shooter</title>
+    <title>Survival Shooter</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
     <style>
-        body { margin: 0; padding: 0; background: #000; overflow: hidden; user-select: none; -webkit-user-select: none; }
-        canvas { display: block; touch-action: none; } /* Вимикає зум/скрол браузера */
+        body { 
+            margin: 0; padding: 0; background: #000; overflow: hidden; 
+            user-select: none; -webkit-user-select: none;
+            touch-action: none;
+        }
+        
+        /* Повідомлення про поворот екрану */
+        #rotate-msg {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; color: #fff;
+            z-index: 9999;
+            justify-content: center; align-items: center; text-align: center;
+            font-family: sans-serif; font-size: 20px;
+        }
+
+        /* Показуємо повідомлення тільки у портретному режимі */
+        @media screen and (orientation: portrait) {
+            #rotate-msg { display: flex; }
+        }
     </style>
 </head>
 <body>
+
+<div id="rotate-msg">🔄 Будь ласка, поверніть телефон<br>горизонтально для гри</div>
 
 <script>
     const config = {
         type: Phaser.AUTO,
         width: window.innerWidth,
         height: window.innerHeight,
+        backgroundColor: '#222',
+        scale: {
+            mode: Phaser.Scale.RESIZE, // Авто-розмір на весь екран
+            autoCenter: Phaser.Scale.CENTER_BOTH
+        },
         physics: {
             default: 'arcade',
             arcade: { debug: false }
         },
-        input: {
-            activePointers: 3 // Підтримка мультитачу (2 пальці + миша)
-        },
+        input: { activePointers: 3 }, // Мультитач
         scene: {
             preload: preload,
             create: create,
@@ -33,75 +56,59 @@
 
     const game = new Phaser.Game(config);
 
-    let player;
-    let bullets;
-    let enemies;
+    let player, bullets, enemies;
     let lastFired = 0;
     
-    // Joystick змінні
-    let joyBase, joyStick;
-    let isJoyActive = false;
+    // UI Керування
+    let joyBase, joyStick, fireBtn;
     let joyPointer = null;
-    let joyOrigin = {x: 0, y: 0};
-    const JOY_RADIUS = 50;
-    
-    // Кнопка стрільби
-    let fireBtn;
+    let isJoyActive = false;
     let isFiring = false;
+    
+    // Координати джойстиків (оновлюються при ресайзі)
+    let joyPos = { x: 120, y: 0 }; 
+    let firePos = { x: 0, y: 0 };
 
     function preload() {
-        // --- ЗАВАНТАЖУЄМО СПРАВЖНІ КАРТИНКИ (З інтернету) ---
-        
-        // Текстура землі
-        this.load.image('ground', 'https://labs.phaser.io/assets/tilemaps/tiles/scifi_platform_tiles_32x32.png');
-        
-        // Солдат (вигляд зверху)
-        this.load.image('soldier', 'https://labs.phaser.io/assets/sprites/topdown-player.png');
-        
-        // Куля
-        this.load.image('bullet', 'https://labs.phaser.io/assets/sprites/bullets/bullet7.png');
-        
-        // Зомбі (використаємо іншого персонажа як монстра)
-        this.load.image('zombie', 'https://labs.phaser.io/assets/sprites/beball1.png');
-        
-        // Картинки для інтерфейсу (джойстик)
-        // Генеруємо їх кодом, щоб не качати зайвого
+        // Тут нічого не вантажимо, все малюємо кодом в create()
     }
 
     function create() {
-        // 1. МАПА (Тайлінг)
-        // Створюємо нескінченну землю
-        this.add.tileSprite(0, 0, 4000, 4000, 'ground');
-        this.physics.world.setBounds(0, 0, 2000, 2000);
+        // --- 1. ГЕНЕРАЦІЯ ГРАФІКИ (Щоб не було зелених квадратів) ---
+        generateTextures.call(this);
 
-        // 2. ГРАВЕЦЬ
-        player = this.physics.add.sprite(1000, 1000, 'soldier');
+        // --- 2. СВІТ ---
+        // Плитка землі
+        this.add.tileSprite(0, 0, 4000, 4000, 'ground_tex');
+        this.physics.world.setBounds(0, 0, 3000, 3000);
+
+        // --- 3. ГРАВЕЦЬ ---
+        player = this.physics.add.sprite(1500, 1500, 'soldier_tex');
         player.setCollideWorldBounds(true);
-        // Трохи зменшимо хітбокс, щоб не застрягав
-        player.body.setCircle(15, 0, 0); 
+        player.body.setCircle(20, 12, 12); // Круглий хітбокс
 
-        // 3. КАМЕРА
-        this.cameras.main.setBounds(0, 0, 2000, 2000);
-        this.cameras.main.startFollow(player, true, 0.05, 0.05);
-        this.cameras.main.setZoom(1.2); // Трохи наблизимо
+        // --- 4. КАМЕРА ---
+        this.cameras.main.setBounds(0, 0, 3000, 3000);
+        this.cameras.main.startFollow(player, true, 0.08, 0.08);
+        this.cameras.main.setZoom(1);
 
-        // 4. ВОРОГИ
+        // --- 5. ГРУПИ ОБ'ЄКТІВ ---
+        bullets = this.physics.add.group({ defaultKey: 'bullet_tex', maxSize: 50 });
         enemies = this.physics.add.group();
-        // Спавн ворогів
-        this.time.addEvent({ delay: 800, callback: spawnEnemy, callbackScope: this, loop: true });
 
-        // 5. КУЛІ
-        bullets = this.physics.add.group({
-            defaultKey: 'bullet',
-            maxSize: 20
-        });
+        // Спавнер ворогів
+        this.time.addEvent({ delay: 1000, callback: spawnEnemy, callbackScope: this, loop: true });
 
-        // 6. КОЛІЗІЇ
+        // Колізії
         this.physics.add.collider(bullets, enemies, hitEnemy, null, this);
-        this.physics.add.overlap(player, enemies, hitPlayer, null, this);
+        this.physics.add.collider(player, enemies, hitPlayer, null, this);
 
-        // --- МОБІЛЬНЕ КЕРУВАННЯ (UI) ---
-        createMobileControls.call(this);
+        // --- 6. МОБІЛЬНИЙ UI ---
+        createControls.call(this);
+        updateControlPositions.call(this); // Встановити позиції
+        
+        // Інструкція на старті
+        this.add.text(1500, 1400, 'ЗНИЩУЙ ЗОМБІ!', { fontSize: '32px', fontStyle: 'bold', color: '#fff' }).setOrigin(0.5);
     }
 
     function update() {
@@ -109,125 +116,161 @@
 
         player.body.setVelocity(0);
 
-        // Логіка джойстика (Рух)
+        // --- ЛОГІКА ДЖОЙСТИКА (ЛІВИЙ ПАЛЕЦЬ) ---
         if (isJoyActive && joyPointer) {
-            // Вектор від центру джойстика до пальця
-            let dx = joyPointer.x - joyOrigin.x;
-            let dy = joyPointer.y - joyOrigin.y;
-            
-            // Розрахунок кута
+            let dx = joyPointer.x - joyPos.x;
+            let dy = joyPointer.y - joyPos.y;
             let angle = Math.atan2(dy, dx);
-            
-            // Обмеження радіусу (щоб "грибок" не вилітав за межі)
-            let dist = Math.min(Math.sqrt(dx*dx + dy*dy), JOY_RADIUS);
-            
-            // Рухаємо графіку джойстика
-            joyStick.x = joyBase.x + Math.cos(angle) * dist;
-            joyStick.y = joyBase.y + Math.sin(angle) * dist;
+            let dist = Math.min(Math.sqrt(dx*dx + dy*dy), 60); // Радіус джойстика
 
-            // Рухаємо гравця
-            const speed = 200;
+            // Візуал
+            joyStick.x = joyPos.x + Math.cos(angle) * dist;
+            joyStick.y = joyPos.y + Math.sin(angle) * dist;
+
+            // Рух гравця
+            const speed = 250;
             player.body.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
-            
-            // Повертаємо гравця в бік руху
             player.setRotation(angle);
         } else {
-            // Повертаємо джойстик в центр, якщо відпустили
-            if(joyBase && joyStick) {
-                joyStick.x = joyBase.x;
-                joyStick.y = joyBase.y;
-            }
+            // Повернення джойстика
+            if(joyStick) { joyStick.x = joyPos.x; joyStick.y = joyPos.y; }
         }
 
-        // Логіка стрільби
-        if (isFiring) {
-            fireBullet.call(this);
-        }
+        // --- ЛОГІКА ВОГНЮ (ПРАВИЙ ПАЛЕЦЬ) ---
+        if (isFiring) fireBullet.call(this);
 
-        // Вороги біжать за гравцем
+        // --- AI ВОРОГІВ ---
         enemies.children.iterate((enemy) => {
             if (enemy && enemy.active) {
-                this.physics.moveToObject(enemy, player, 100);
+                this.physics.moveToObject(enemy, player, 120);
                 enemy.setRotation(Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y));
             }
         });
     }
 
-    // --- ФУНКЦІЇ КЕРУВАННЯ ---
-    function createMobileControls() {
-        // Ми малюємо джойстик прямо на екрані
-        // Це UI, тому воно має бути поверх гри (ScrollFactor 0)
-        
-        // 1. Джойстик (Ліворуч)
-        const joyX = 100;
-        const joyY = window.innerHeight - 100;
-        
-        // Основа
-        joyBase = this.add.circle(joyX, joyY, JOY_RADIUS, 0x888888).setAlpha(0.5).setScrollFactor(0).setDepth(100);
-        // Ручка
-        joyStick = this.add.circle(joyX, joyY, 25, 0x00ccff).setAlpha(0.8).setScrollFactor(0).setDepth(101);
+    // --- ГЕНЕРАТОР ТЕКСТУР (МАЛЮЄМО САМІ) ---
+    function generateTextures() {
+        const gfx = this.make.graphics();
 
-        // Зона дотику для джойстика (ліва половина екрану)
-        const joyZone = this.add.rectangle(window.innerWidth / 4, window.innerHeight / 2, window.innerWidth / 2, window.innerHeight, 0x000000, 0)
-            .setScrollFactor(0).setInteractive();
+        // 1. Солдат (Круг + Плечі + Зброя)
+        gfx.clear();
+        gfx.fillStyle(0x0088ff, 1); // Синій шолом
+        gfx.fillCircle(32, 32, 20);
+        gfx.fillStyle(0x004488, 1); // Плечі
+        gfx.fillCircle(20, 32, 15);
+        gfx.fillCircle(44, 32, 15);
+        gfx.fillStyle(0x111111, 1); // Зброя
+        gfx.fillRect(40, 26, 30, 12); 
+        gfx.generateTexture('soldier_tex', 80, 64);
 
-        joyZone.on('pointerdown', (pointer) => {
-            joyPointer = pointer;
-            isJoyActive = true;
-            // Переміщуємо джойстик туди, де натиснули
-            joyBase.x = pointer.x;
-            joyBase.y = pointer.y;
-            joyOrigin = {x: pointer.x, y: pointer.y};
-            joyStick.x = pointer.x;
-            joyStick.y = pointer.y;
+        // 2. Зомбі (Зелений, рваний)
+        gfx.clear();
+        gfx.fillStyle(0x00cc00, 1); // Зелений
+        gfx.fillCircle(32, 32, 22);
+        gfx.fillStyle(0xcc0000, 0.8); // Кров
+        gfx.fillCircle(25, 25, 10);
+        gfx.fillStyle(0x006600, 1); // Руки
+        gfx.fillCircle(10, 20, 12);
+        gfx.fillCircle(10, 44, 12);
+        gfx.generateTexture('zombie_tex', 64, 64);
+
+        // 3. Куля (Яскрава)
+        gfx.clear();
+        gfx.fillStyle(0xffff00, 1);
+        gfx.fillCircle(8, 8, 6);
+        gfx.generateTexture('bullet_tex', 16, 16);
+
+        // 4. Земля (Сітка)
+        gfx.clear();
+        gfx.fillStyle(0x333333, 1);
+        gfx.fillRect(0, 0, 64, 64);
+        gfx.lineStyle(2, 0x444444, 1);
+        gfx.strokeRect(0, 0, 64, 64);
+        gfx.generateTexture('ground_tex', 64, 64);
+
+        gfx.destroy(); // Очищаємо пам'ять
+    }
+
+    // --- КЕРУВАННЯ UI ---
+    function createControls() {
+        // Джойстик (Основа)
+        joyBase = this.add.circle(0, 0, 60, 0xffffff).setAlpha(0.2).setScrollFactor(0).setDepth(100);
+        // Джойстик (Ручка)
+        joyStick = this.add.circle(0, 0, 30, 0x0088ff).setAlpha(0.8).setScrollFactor(0).setDepth(101);
+
+        // Зона джойстика (Ліва половина екрану)
+        let joyZone = this.add.rectangle(0, 0, 100, 100, 0x000000, 0).setScrollFactor(0).setInteractive();
+        
+        // Кнопка вогню
+        fireBtn = this.add.circle(0, 0, 45, 0xff0000).setAlpha(0.6).setScrollFactor(0).setDepth(100).setInteractive();
+        let fireText = this.add.text(0, 0, '🔥', {fontSize: '30px'}).setOrigin(0.5).setScrollFactor(0).setDepth(101);
+
+        // Події Джойстика
+        joyZone.on('pointerdown', (p) => { 
+            joyPointer = p; isJoyActive = true; 
+            // Джойстик стрибає під палець
+            joyPos.x = p.x; joyPos.y = p.y;
+            joyBase.x = p.x; joyBase.y = p.y;
+        });
+        
+        this.input.on('pointerup', (p) => { 
+            if (p === joyPointer) { isJoyActive = false; joyPointer = null; } 
         });
 
-        this.input.on('pointerup', (pointer) => {
-            if (pointer === joyPointer) {
-                isJoyActive = false;
-                joyPointer = null;
-                // Повертаємо джойстик на місце за замовчуванням
-                joyBase.x = joyX;
-                joyBase.y = joyY;
-                joyStick.x = joyX;
-                joyStick.y = joyY;
-            }
-        });
-
-        // 2. Кнопка стрільби (Праворуч)
-        const fireX = window.innerWidth - 80;
-        const fireY = window.innerHeight - 80;
-
-        fireBtn = this.add.circle(fireX, fireY, 40, 0xff0000).setAlpha(0.6).setScrollFactor(0).setDepth(100).setInteractive();
-        
-        // Іконка на кнопці (просто текст)
-        this.add.text(fireX, fireY, 'SHOOT', {fontSize: '14px', fontStyle: 'bold'}).setOrigin(0.5).setScrollFactor(0).setDepth(101);
-
+        // Події Вогню
         fireBtn.on('pointerdown', () => { isFiring = true; fireBtn.setAlpha(1); });
         fireBtn.on('pointerup', () => { isFiring = false; fireBtn.setAlpha(0.6); });
         fireBtn.on('pointerout', () => { isFiring = false; fireBtn.setAlpha(0.6); });
+
+        // Зберігаємо посилання для оновлення позицій
+        this.joyZone = joyZone;
+        this.fireText = fireText;
     }
 
+    function updateControlPositions() {
+        const w = this.scale.width;
+        const h = this.scale.height;
+
+        // Позиція джойстика (Ліворуч знизу) - зона реагування
+        this.joyZone.setPosition(w / 4, h / 2);
+        this.joyZone.setSize(w / 2, h);
+
+        // Позиція за замовчуванням
+        joyPos = { x: 120, y: h - 120 };
+        joyBase.setPosition(joyPos.x, joyPos.y);
+        joyStick.setPosition(joyPos.x, joyPos.y);
+
+        // Позиція кнопки вогню (Праворуч знизу)
+        firePos = { x: w - 100, y: h - 100 };
+        fireBtn.setPosition(firePos.x, firePos.y);
+        this.fireText.setPosition(firePos.x, firePos.y);
+    }
+
+    // Ресайз екрану
+    window.addEventListener('resize', () => {
+        if(game.scene.scenes[0]) {
+            game.scene.scenes[0].scale.resize(window.innerWidth, window.innerHeight);
+            updateControlPositions.call(game.scene.scenes[0]);
+        }
+    });
+
+    // --- ІГРОВА ЛОГІКА ---
     function fireBullet() {
         if (this.time.now < lastFired) return;
-        lastFired = this.time.now + 150;
+        lastFired = this.time.now + 100; // Скорострільність
 
         let bullet = bullets.get(player.x, player.y);
         if (bullet) {
             bullet.setActive(true).setVisible(true);
-            
-            // Куля летить туди, куди дивиться гравець
             let angle = player.rotation;
             
-            // Трохи зміщуємо спавн кулі вперед, щоб не вилітала з центру тіла
-            bullet.x += Math.cos(angle) * 20;
-            bullet.y += Math.sin(angle) * 20;
-
-            bullet.setRotation(angle);
-            this.physics.velocityFromRotation(angle, 800, bullet.body.velocity);
+            // Виліт з "дула"
+            bullet.setPosition(player.x + Math.cos(angle)*40, player.y + Math.sin(angle)*40);
             
-            // Знищити через час
-            this.time.delayedCall(1000, () => {
+            this.physics.velocityFromRotation(angle, 900, bullet.body.velocity);
+            
+            // Знищення через 1.5 сек
+            this.time.delayedCall(1500, () => {
                 if (bullet.active) bullet.setActive(false).setVisible(false);
             });
         }
@@ -236,18 +279,18 @@
     function spawnEnemy() {
         if (!player.active) return;
         
+        // Спавн навколо гравця
         let angle = Math.random() * Math.PI * 2;
-        let distance = 700;
-        let x = player.x + Math.cos(angle) * distance;
-        let y = player.y + Math.sin(angle) * distance;
+        let dist = 800;
+        let x = player.x + Math.cos(angle) * dist;
+        let y = player.y + Math.sin(angle) * dist;
         
-        x = Phaser.Math.Clamp(x, 100, 1900);
-        y = Phaser.Math.Clamp(y, 100, 1900);
+        // Межі світу
+        x = Phaser.Math.Clamp(x, 100, 2900);
+        y = Phaser.Math.Clamp(y, 100, 2900);
 
-        let enemy = enemies.create(x, y, 'zombie');
-        enemy.setTint(0xff0000); // Робимо їх червоними
-        enemy.setScale(0.8);
-        enemy.body.setCircle(12);
+        let enemy = enemies.create(x, y, 'zombie_tex');
+        enemy.setCircle(25);
         enemy.hp = 3;
     }
 
@@ -255,31 +298,24 @@
         if (bullet.active && enemy.active) {
             bullet.setActive(false).setVisible(false);
             enemy.hp--;
-            enemy.setAlpha(0.5); // Блимання при попаданні
-            this.time.delayedCall(50, () => enemy.setAlpha(1));
+            enemy.setTint(0xff0000);
+            this.time.delayedCall(100, () => enemy.clearTint());
 
             if (enemy.hp <= 0) {
-                // Ефект смерті (зменшення)
-                this.tweens.add({
-                    targets: enemy,
-                    scale: 0,
-                    duration: 100,
-                    onComplete: () => enemy.destroy()
+                // Ефект смерті
+                this.add.particles(enemy.x, enemy.y, 'zombie_tex', {
+                    speed: 100, scale: {start:0.5, end:0}, duration: 300, maxParticles: 5
                 });
+                enemy.destroy();
             }
         }
     }
 
     function hitPlayer(player, enemy) {
-        // Простий перезапуск при дотику
-        this.scene.restart();
+        this.physics.pause();
+        player.setTint(0xff0000);
+        this.add.text(player.x, player.y - 100, 'GAME OVER', { fontSize: '40px', color: '#ff0000', fontStyle: 'bold' }).setOrigin(0.5);
     }
-
-    // Ресайз екрану (поворот телефону)
-    window.addEventListener('resize', () => {
-        game.scale.resize(window.innerWidth, window.innerHeight);
-    });
-
 </script>
 </body>
 </html>
