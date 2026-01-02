@@ -2,79 +2,99 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pocket Game Casino</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pocket Casino</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
+    <div class="background-anim"></div>
+
     <div class="header">
-        <div class="user-info">
-            👤 <span id="username">Гравець</span>
+        <div class="user-badge">
+            👤 <span id="username">Guest</span>
         </div>
-        <div class="balance-box">
-            💰 <span id="balance">1000</span>
+        <div class="balance-badge">
+            <span class="coin-icon">🟡</span> <span id="balance">1000</span>
         </div>
     </div>
 
     <div id="screen-lobby" class="screen active">
-        <h1 style="text-align: center; margin-bottom: 5px;">Pocket Game</h1>
-        <p style="text-align: center; color: #888; margin-top: 0;">Твій кишеньковий азарт</p>
+        <div class="logo-area">
+            <h1>NEON<br>SLOTS</h1>
+        </div>
         
-        <div class="games-grid">
-            <div class="game-card" onclick="showScreen('screen-slots')">
+        <div class="menu-grid">
+            <div class="menu-card" onclick="showScreen('screen-slots')">
+                <div class="card-glow"></div>
                 <div class="icon">🎰</div>
-                <h3>Слоти</h3>
+                <div class="title">CYBER SLOTS</div>
+                <div class="desc">5 Reels • Wilds</div>
             </div>
-            <div class="game-card" onclick="showScreen('screen-roulette')">
+            <div class="menu-card" onclick="showScreen('screen-roulette')">
+                <div class="card-glow"></div>
                 <div class="icon">🎡</div>
-                <h3>Рулетка</h3>
+                <div class="title">NEON ROULETTE</div>
+                <div class="desc">Classic x14</div>
             </div>
         </div>
     </div>
 
     <div id="screen-slots" class="screen">
-        <button class="back-btn" onclick="showScreen('screen-lobby')">⬅ Назад</button>
-        <h2 style="text-align: center;">Lucky Slots</h2>
+        <button class="nav-btn" onclick="showScreen('screen-lobby')">🏠 Меню</button>
         
-        <div class="slot-machine">
-            <div class="reel" id="reel1">🍒</div>
-            <div class="reel" id="reel2">🍋</div>
-            <div class="reel" id="reel3">7️⃣</div>
-        </div>
-
-        <div class="controls">
-            <label for="slot-bet" style="color: #888; font-size: 0.9rem;">Ваша ставка:</label>
-            <input type="number" id="slot-bet" value="50" min="10" style="width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; border: none; background: #333; color: white; text-align: center; font-weight: bold;">
-            
-            <button class="action-btn" onclick="spinSlots()">КРУТИТИ</button>
-        </div>
-        <div id="slot-msg" class="message"></div>
-    </div>
-
-    <div id="screen-roulette" class="screen">
-        <button class="back-btn" onclick="showScreen('screen-lobby')">⬅ Назад</button>
-        <h2 style="text-align: center;">Mini Roulette</h2>
-        
-        <div class="roulette-container">
-            <div class="wheel-pointer"></div>
-            <div class="roulette-wheel" id="wheel">
-                <div class="wheel-inner">💎</div>
+        <div class="slot-frame">
+            <div class="win-line"></div> <div class="slot-window">
+                <div class="reel-col"><div class="reel-strip" id="reel1">🍒</div></div>
+                <div class="reel-col"><div class="reel-strip" id="reel2">🍋</div></div>
+                <div class="reel-col"><div class="reel-strip" id="reel3">🍇</div></div>
+                <div class="reel-col"><div class="reel-strip" id="reel4">🍊</div></div>
+                <div class="reel-col"><div class="reel-strip" id="reel5">💎</div></div>
             </div>
         </div>
 
-        <div class="bet-options">
-            <button class="bet-color red" onclick="setRouletteBet('red')">🔴 x2</button>
-            <button class="bet-color black" onclick="setRouletteBet('black')">⚫ x2</button>
-            <button class="bet-color green" onclick="setRouletteBet('green')">🟢 x14</button>
+        <div class="controls-area">
+            <div class="bet-selector">
+                <span class="label">СТАВКА:</span>
+                <div class="bet-buttons">
+                    <button class="chip-btn" onclick="setSlotBet(10)">10</button>
+                    <button class="chip-btn" onclick="setSlotBet(50)">50</button>
+                    <button class="chip-btn" onclick="setSlotBet(100)">100</button>
+                    <input type="number" id="slot-bet-input" value="10">
+                </div>
+            </div>
+
+            <button class="spin-btn" onclick="spinSlots()">
+                <span class="spin-text">SPIN</span>
+            </button>
         </div>
         
-        <div class="controls">
-             <p style="text-align: center; margin: 10px 0;">Ставка на: <span id="current-bet-color" style="font-weight:bold; color:var(--gold-light)">...</span></p>
-             <button class="action-btn" onclick="spinRoulette()">КРУТИТИ (50)</button>
+        <div id="slot-msg" class="status-msg">Удачі!</div>
+    </div>
+
+    <div id="screen-roulette" class="screen">
+        <button class="nav-btn" onclick="showScreen('screen-lobby')">🏠 Меню</button>
+        
+        <div class="roulette-stage">
+            <div class="wheel-pointer">▼</div>
+            <div class="wheel-container" id="wheel">
+                <div class="wheel-center"></div>
+            </div>
         </div>
-        <div id="roulette-msg" class="message" style="text-align: center;"></div>
+
+        <div class="roulette-controls">
+            <div class="color-bets">
+                <button class="r-btn red" onclick="setRouletteBet('red')">RED x2</button>
+                <button class="r-btn black" onclick="setRouletteBet('black')">BLACK x2</button>
+                <button class="r-btn green" onclick="setRouletteBet('green')">ZERO x14</button>
+            </div>
+            <div class="current-bet-info">
+                Ставка: <span id="r-bet-target">...</span> (50 монет)
+            </div>
+            <button class="spin-btn small" onclick="spinRoulette()">START</button>
+        </div>
+        <div id="roulette-msg" class="status-msg"></div>
     </div>
 
     <script src="js/script.js"></script>
