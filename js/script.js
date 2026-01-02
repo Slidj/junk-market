@@ -8,14 +8,14 @@ const WILD_SYMBOL = '💎';
 const SYMBOLS_KEYS = Object.keys(SYMBOL_WEIGHTS);
 const PAYOUTS = { 3: 5, 4: 20, 5: 100 };
 
-// --- UI ---
+// --- UI HELPERS ---
 const balanceEl = document.getElementById('balance');
 const usernameEl = document.getElementById('username');
 if (tg.initDataUnsafe?.user) usernameEl.innerText = tg.initDataUnsafe.user.first_name;
 
 function updateBalance(amount) {
     balance += amount;
-    balanceEl.innerText = Math.floor(balance); // Цілі числа
+    balanceEl.innerText = Math.floor(balance);
     balanceEl.style.transform = 'scale(1.3)';
     balanceEl.style.color = amount >= 0 ? '#4ade80' : '#f87171';
     setTimeout(() => { balanceEl.style.transform = 'scale(1)'; balanceEl.style.color = '#ffd700'; }, 300);
@@ -35,17 +35,38 @@ function getRandomSymbol() {
 function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
-    document.querySelectorAll('.status-text').forEach(e => e.innerText = '');
     
+    // Сховати всі нотифікації
+    document.querySelectorAll('.notification-overlay').forEach(el => {
+        el.classList.remove('visible');
+        el.innerHTML = '';
+    });
+
     if(screenId === 'screen-matrix') drawActiveLines();
-    
-    // Скидаємо стан Міни при вході
     if(screenId === 'screen-mines') {
         minesActive = false;
         initMinesUI();
         document.getElementById('mines-controls-start').style.display = 'block';
         document.getElementById('mines-controls-cashout').style.display = 'none';
     }
+}
+
+// НОВА ФУНКЦІЯ ПОВІДОМЛЕНЬ (ПОВЕРХ ГРИ)
+function showNotification(screenId, text, subtext = '', type = 'win') {
+    // screenId: 'slot-notif', 'matrix-notif', 'mines-notif'
+    const el = document.getElementById(screenId);
+    let colorClass = type === 'loss' ? 'notif-loss' : 'notif-win';
+    
+    let html = `<span class="notif-text ${colorClass}">${text}</span>`;
+    if(subtext) html += `<span class="notif-amount">${subtext}</span>`;
+    
+    el.innerHTML = html;
+    el.classList.add('visible');
+
+    // Ховаємо через 2 секунди
+    setTimeout(() => {
+        el.classList.remove('visible');
+    }, 2000);
 }
 
 // ==============================
@@ -57,11 +78,9 @@ function setSlotBet(amount) {
 }
 function spinSlots() {
     const bet = parseInt(document.getElementById('slot-bet-input').value);
-    const msg = document.getElementById('slot-msg');
-    if (balance < bet) { msg.innerText = "❌ НЕМАЄ КОШТІВ"; return; }
+    if (balance < bet) { showNotification('slot-notif', "❌ БРАКУЄ КОШТІВ", "", "loss"); return; }
 
     updateBalance(-bet);
-    msg.innerText = "КРУТИМО...";
     document.querySelectorAll('.reel').forEach(el => el.classList.remove('win-glow'));
     tg.HapticFeedback.impactOccurred('medium');
 
@@ -87,7 +106,6 @@ function spinSlots() {
     });
 }
 function checkWinBothWays(result, bet) {
-    const msg = document.getElementById('slot-msg');
     const leftWin = calculateMatch(result);
     const rightWin = calculateMatch([...result].reverse());
     let totalWin = 0;
@@ -107,10 +125,10 @@ function checkWinBothWays(result, bet) {
     }
     if (totalWin > 0) {
         updateBalance(totalWin);
-        msg.innerHTML = `🎉 ВИГРАШ! <span style="color:#4ade80">+${totalWin}</span>`;
+        showNotification('slot-notif', "ВИГРАШ!", `+${totalWin}`, "win");
         tg.HapticFeedback.notificationOccurred('success');
         winningReels.forEach(idx => document.getElementById(`reel${idx}`).classList.add('win-glow'));
-    } else { msg.innerText = "СПРОБУЙ ЩЕ РАЗ"; }
+    }
 }
 function calculateMatch(line) {
     let first = line[0], count = 1, effective = first;
@@ -158,11 +176,9 @@ function drawActiveLines() {
 function spinMatrix() {
     const betPerLine = parseInt(document.getElementById('matrix-bet-input').value) || 0;
     const totalBet = activeLines.length * betPerLine;
-    const msg = document.getElementById('matrix-msg');
-    if (balance < totalBet) { msg.innerText = "❌ НЕМАЄ КОШТІВ"; return; }
+    if (balance < totalBet) { showNotification('matrix-notif', "❌ БРАКУЄ КОШТІВ", "", "loss"); return; }
     
     updateBalance(-totalBet);
-    msg.innerText = "КРУТИМО...";
     document.querySelectorAll('.sym').forEach(el => el.classList.remove('win-cell'));
     document.getElementById('lines-svg').style.opacity = '0.2';
     
@@ -203,10 +219,10 @@ function checkMatrixWin(matrix, bet) {
     });
     if(total>0) {
         updateBalance(total);
-        document.getElementById('matrix-msg').innerHTML = `🎉 ВИГРАШ! <span style="color:#4ade80">+${total}</span>`;
+        showNotification('matrix-notif', "СУПЕР!", `+${total}`, "win");
         tg.HapticFeedback.notificationOccurred('success');
         coords.forEach(p => document.getElementById(`m-col${p.c+1}`).children[p.r].classList.add('win-cell'));
-    } else { document.getElementById('matrix-msg').innerText = "ПУСТО..."; }
+    }
 }
 
 // ==============================
@@ -214,9 +230,16 @@ function checkMatrixWin(matrix, bet) {
 // ==============================
 let minesActive = false;
 let minesBet = 0;
-let minesMap = []; // 0 = gem, 1 = bomb
+let minesMap = []; 
 let minesRevealed = 0;
 let currentMultiplier = 1.0;
+let mineDifficulty = 'easy'; // 'easy', 'medium', 'hard'
+
+const MINE_SETTINGS = {
+    'easy': { mines: 3, multInc: 1.15 },
+    'medium': { mines: 5, multInc: 1.30 },
+    'hard': { mines: 10, multInc: 1.80 }
+};
 
 function initMinesUI() {
     const grid = document.getElementById('mines-grid');
@@ -228,24 +251,37 @@ function initMinesUI() {
         cell.id = `mine-${i}`;
         grid.appendChild(cell);
     }
-    // Ми НЕ скидаємо minesActive тут, щоб не ламати гру при старті
 }
+
+function setMineDiff(diff) {
+    mineDifficulty = diff;
+    document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active-easy', 'active-med', 'active-hard'));
+    
+    // Візуальне оновлення кнопок (брудний хак, але працює)
+    document.getElementById('diff-easy').style.opacity = diff==='easy' ? '1' : '0.4';
+    document.getElementById('diff-med').style.opacity = diff==='medium' ? '1' : '0.4';
+    document.getElementById('diff-hard').style.opacity = diff==='hard' ? '1' : '0.4';
+
+    if(diff === 'easy') document.getElementById('diff-easy').classList.add('active-easy');
+    if(diff === 'medium') document.getElementById('diff-med').classList.add('active-med');
+    if(diff === 'hard') document.getElementById('diff-hard').classList.add('active-hard');
+}
+// Ініціалізація кнопок
+setMineDiff('easy');
 
 function startMines() {
     const bet = parseInt(document.getElementById('mines-bet-input').value);
-    if(balance < bet) { document.getElementById('mines-msg').innerText = "❌ НЕМАЄ КОШТІВ"; return; }
+    if(balance < bet) { showNotification('mines-notif', "БРАКУЄ КОШТІВ", "", "loss"); return; }
     
     updateBalance(-bet);
     minesBet = bet;
     
-    // Генеруємо міни (3 міни, 22 діаманти)
-    minesMap = Array(22).fill(0).concat(Array(3).fill(1));
-    minesMap.sort(() => Math.random() - 0.5); // Перемішуємо
+    const settings = MINE_SETTINGS[mineDifficulty];
+    // Генеруємо міни
+    minesMap = Array(25 - settings.mines).fill(0).concat(Array(settings.mines).fill(1));
+    minesMap.sort(() => Math.random() - 0.5);
 
-    // Скидаємо UI (чиста сітка)
     initMinesUI();
-    
-    // АКТИВУЄМО ГРУ
     minesActive = true;
     minesRevealed = 0;
     currentMultiplier = 1.0;
@@ -253,7 +289,7 @@ function startMines() {
     document.getElementById('mines-controls-start').style.display = 'none';
     document.getElementById('mines-controls-cashout').style.display = 'block';
     updateMinesInfo();
-    document.getElementById('mines-msg').innerText = "Відкривай клітинки...";
+    showNotification('mines-notif', "ГРА ПОЧАЛАСЬ!", "Шукай діаманти", "win");
 }
 
 function clickMine(index) {
@@ -264,22 +300,20 @@ function clickMine(index) {
     cell.classList.add('revealed');
     
     if(minesMap[index] === 1) {
-        // БОМБА
-        cell.classList.add('bomb');
-        cell.innerText = '💣';
+        cell.classList.add('bomb'); cell.innerText = '💣';
         tg.HapticFeedback.notificationOccurred('error');
         gameOverMines(false);
     } else {
-        // ДІАМАНТ
-        cell.classList.add('gem');
-        cell.innerText = '💎';
+        cell.classList.add('gem'); cell.innerText = '💎';
         tg.HapticFeedback.impactOccurred('medium');
         minesRevealed++;
-        // Множник росте
-        currentMultiplier *= 1.15; // +15% за кожен крок
+        
+        // Збільшуємо множник
+        currentMultiplier *= MINE_SETTINGS[mineDifficulty].multInc;
         updateMinesInfo();
         
-        if(minesRevealed === 22) gameOverMines(true); // Відкрив усе
+        // Якщо відкрив всі безпечні
+        if(minesRevealed === (25 - MINE_SETTINGS[mineDifficulty].mines)) gameOverMines(true);
     }
 }
 
@@ -293,17 +327,13 @@ function cashoutMines() {
     if(!minesActive) return;
     const win = Math.floor(minesBet * currentMultiplier);
     updateBalance(win);
-    const msg = document.getElementById('mines-msg');
-    msg.innerText = `💰 ЗАБРАВ: ${win}`;
-    msg.style.color = "#4ade80";
+    showNotification('mines-notif', "ЗАБРАНО!", `+${win}`, "win");
     tg.HapticFeedback.notificationOccurred('success');
     gameOverMines(true);
 }
 
 function gameOverMines(win) {
     minesActive = false;
-    
-    // Показуємо всі міни
     minesMap.forEach((val, i) => {
         const cell = document.getElementById(`mine-${i}`);
         if(!cell.classList.contains('revealed')) {
@@ -313,13 +343,8 @@ function gameOverMines(win) {
         }
     });
 
-    if(!win) {
-        const msg = document.getElementById('mines-msg');
-        msg.innerText = "💥 БАБАХ! СТАВКА ЗГОРІЛА";
-        msg.style.color = "#ef4444";
-    }
+    if(!win) showNotification('mines-notif', "БАБАХ!", "Ставка згоріла", "loss");
 
-    // Повертаємо кнопки через 2 секунди
     setTimeout(() => {
         document.getElementById('mines-controls-start').style.display = 'block';
         document.getElementById('mines-controls-cashout').style.display = 'none';
@@ -327,8 +352,6 @@ function gameOverMines(win) {
 }
 
 function exitMines() {
-    if(minesActive) {
-        cashoutMines(); 
-    }
+    if(minesActive) cashoutMines(); 
     showScreen('screen-lobby');
 }
