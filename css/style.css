@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800;900&display=swap');
 
-/* --- 1. GLOBAL & RESET --- */
+/* --- 1. GLOBAL RESET --- */
 * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
@@ -11,9 +11,9 @@
 body {
     margin: 0;
     padding: 0;
-    /* Фон */
-    background-color: #121212;
-    background-image: radial-gradient(circle at 50% 10%, #2a0e38 0%, #000000 100%);
+    background-color: #050505; /* Глибокий чорний */
+    /* Радіальний градієнт для фону */
+    background-image: radial-gradient(circle at 50% 20%, #2a0e38 0%, #000000 80%);
     color: white;
     font-family: 'Montserrat', sans-serif;
     min-height: 100vh;
@@ -23,133 +23,247 @@ body {
     align-items: center;
 }
 
-/* --- 2. HEADER (Виправлено накладання) --- */
+/* --- 2. HEADER (ОПУЩЕНИЙ ЩЕ НИЖЧЕ) --- */
 .header {
-    /* relative - щоб елемент був у потоці і не налізав на верх */
-    position: relative; 
-    
-    /* ВІДСТУП ВІД ВЕРХУ - Опускаємо шапку під кнопки Telegram */
-    margin-top: 60px; 
-    
+    position: relative;
+    /* Опускаємо на 100px від верху екрану */
+    margin-top: 100px; 
     width: 90%;
     max-width: 400px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 30px; /* Відступ до гри */
     z-index: 10;
 }
 
 .badge {
-    background: rgba(30, 30, 40, 0.6);
-    backdrop-filter: blur(10px);
-    padding: 10px 15px;
-    border-radius: 16px;
+    background: rgba(40, 40, 50, 0.8);
+    backdrop-filter: blur(12px);
+    padding: 12px 18px;
+    border-radius: 20px;
     font-weight: 800;
-    font-size: 0.9rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    font-size: 0.95rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     display: flex;
     align-items: center;
     gap: 8px;
+    color: #e0e0e0;
 }
 
-.coin { color: #ffd700; filter: drop-shadow(0 0 5px orange); }
+.coin { color: #ffd700; filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6)); }
 
-/* --- 3. SCREENS & MENU --- */
+/* --- 3. GAME CONTAINER --- */
 .screen {
     display: none;
-    width: 90%;
-    max-width: 400px;
+    width: 92%;
+    max-width: 420px;
     flex-direction: column;
-    gap: 20px;
-    /* Анімація появи знизу */
-    animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    padding-bottom: 40px; /* Відступ знизу для скролу */
+    gap: 25px;
+    animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    padding-bottom: 50px;
 }
 .screen.active { display: flex; }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(40px) scale(0.9); }
+    from { opacity: 0; transform: translateY(50px) scale(0.95); }
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.logo {
-    font-size: 3.5rem;
-    line-height: 0.9;
-    font-weight: 900;
-    text-align: center;
-    text-transform: uppercase;
-    /* Градієнтний текст */
-    background: linear-gradient(180deg, #fff 20%, #b026ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 20px rgba(176, 38, 255, 0.6));
-    margin-bottom: 10px;
-    transform: rotate(-2deg); /* Трохи нахилимо для драйву */
+/* --- 4. MODERN SLOTS (Ніяких рамок 90-х) --- */
+.slot-frame {
+    /* Корпус автомату */
+    background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+    padding: 12px;
+    border-radius: 24px;
+    /* Зовнішнє світіння */
+    box-shadow: 
+        0 20px 50px rgba(0,0,0,0.8),
+        inset 0 1px 1px rgba(255,255,255,0.1); 
+    border: 1px solid #333;
+    position: relative;
 }
 
-/* Картка гри */
-.game-card {
-    background: linear-gradient(145deg, #1e1e24, #101012);
-    border: 1px solid #333;
-    border-radius: 24px;
-    padding: 20px;
+.slot-window {
+    /* Екран з барабанами */
+    background: #000;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    /* Внутрішня тінь для глибини (ніби екран втоплений) */
+    box-shadow: inset 0 0 20px rgba(0,0,0,1);
+    border: 2px solid #222;
+}
+
+/* Блік на склі (Glass reflection) */
+.slot-window::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 40%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.08), transparent);
+    pointer-events: none;
+    z-index: 5;
+}
+
+.slot-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    /* Відступ між барабанами 2px (темна лінія) */
+    gap: 2px; 
+    background: #050505;
+    height: 110px; /* Висота барабанів */
+}
+
+.reel {
+    position: relative;
+    height: 100%;
+    /* Темний фон для кожної смуги */
+    background: linear-gradient(to right, #0a0a0a, #141414 50%, #0a0a0a);
+    overflow: hidden; 
+}
+
+.reel-strip {
+    height: 100%;
     display: flex;
     align-items: center;
-    gap: 20px;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-    transition: transform 0.1s;
+    justify-content: center;
+    font-size: 2.4rem;
+    /* Трохи тіні для символів, щоб вони "висіли" в повітрі */
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.8));
+    transform: translateZ(0); /* Для плавності анімації на iPhone */
 }
 
-.game-card:active { transform: scale(0.96); border-color: #666; }
+/* Анімація спіну (motion blur) */
+.is-spinning .reel-strip {
+    animation: rapidSpin 0.15s linear infinite;
+    filter: blur(4px); /* Сильне розмиття */
+    opacity: 0.7;
+}
 
-.card-icon { font-size: 3rem; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); }
-.card-title { font-size: 1.2rem; font-weight: 800; text-transform: uppercase; margin: 0; color: #fff; }
-.card-desc { font-size: 0.8rem; color: #888; margin-top: 4px; font-weight: 600; }
+@keyframes rapidSpin {
+    0% { transform: translateY(-80px); }
+    100% { transform: translateY(80px); }
+}
 
-/* --- 4. 3D BUTTONS (Соковиті кнопки) --- */
+/* --- 5. 3D BUTTONS (Фізичні кнопки) --- */
 .btn-3d {
     border: none;
-    border-radius: 16px;
+    border-radius: 18px;
+    font-family: 'Montserrat', sans-serif;
     font-weight: 900;
-    font-size: 1rem;
+    text-transform: uppercase;
     color: white;
     cursor: pointer;
     position: relative;
-    text-transform: uppercase;
-    transition: all 0.05s;
-    /* Жорстка тінь знизу для ефекту товщини */
-    box-shadow: 0 6px 0 rgba(0,0,0,1); 
-    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.08s ease-out;
+    /* Тінь "товщини" кнопки */
+    box-shadow: 0 8px 0 rgba(0,0,0,0.5);
+    /* Легка рамка зверху для світла */
+    border-top: 1px solid rgba(255,255,255,0.2);
 }
 
 .btn-3d:active {
-    box-shadow: 0 0 0 rgba(0,0,0,0); /* Прибираємо тінь */
-    transform: translateY(6px); /* Зсуваємо кнопку вниз на розмір тіні */
+    box-shadow: 0 0 0 rgba(0,0,0,0.5);
+    transform: translateY(8px); /* Натискання */
 }
 
-/* Сіра кнопка (Назад / Меню) */
-.btn-gray {
-    background: #2d2d35;
-    box-shadow: 0 5px 0 #151518;
-    font-size: 0.8rem;
-    padding: 10px 20px;
-    align-self: flex-start; /* Притиснути вліво */
+/* Стиль кнопки SPIN */
+.spin-btn {
+    width: 100%;
+    padding: 24px;
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+    margin-top: 20px;
+    /* Градієнт "Золото" */
+    background: linear-gradient(to bottom, #f59e0b, #d97706);
+    box-shadow: 0 8px 0 #92400e, 0 15px 20px rgba(0,0,0,0.4);
+    text-shadow: 0 1px 2px rgba(255,255,255,0.3);
+    color: #451a03;
 }
-.btn-gray:active { box-shadow: 0 0 0 #151518; }
+.spin-btn:active {
+    box-shadow: 0 0 0 #92400e, inset 0 5px 10px rgba(0,0,0,0.2);
+}
 
-/* Фіолетові фішки */
+/* Стиль фіолетових фішок */
 .btn-purple {
-    background: linear-gradient(to bottom, #d946ef, #9333ea);
-    box-shadow: 0 5px 0 #581c87;
+    background: linear-gradient(to bottom, #c026d3, #9333ea);
+    box-shadow: 0 6px 0 #581c87;
+    font-size: 1rem;
     text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 .btn-purple:active { box-shadow: 0 0 0 #581c87; }
 
-/* Головна кнопка SPIN */
-.spin-btn {
+/* Стиль сірої кнопки (Назад) */
+.btn-gray {
+    background: #333338;
+    box-shadow: 0 5px 0 #18181b;
+    font-size: 0.8rem;
+    padding: 12px 20px;
+    align-self: flex-start;
+    color: #aaa;
+}
+.btn-gray:active { box-shadow: 0 0 0 #18181b; }
+
+/* --- 6. CONTROLS PANEL --- */
+.bet-panel {
+    background: #121214;
+    border-radius: 20px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border: 1px solid #2a2a2e;
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.bet-options { display: flex; gap: 8px; }
+.chip { flex: 1; padding: 14px 0; }
+
+.bet-input {
+    background: #000;
+    border: 1px solid #333;
+    color: #ffd700;
+    padding: 14px;
+    border-radius: 14px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 1.2rem;
     width: 100%;
+    /* Прибираємо стандартний вигляд інпуту */
+    appearance: none; 
+}
+
+.status-text {
+    text-align: center;
+    min-height: 24px;
+    margin-top: 10px;
+    font-weight: 700;
+    color: #fcd34d;
+    font-size: 1rem;
+    text-shadow: 0 0 10px rgba(253, 224, 71, 0.3);
+}
+
+/* Menu Cards */
+.logo {
+    font-size: 3rem; font-weight: 900; text-align: center;
+    background: linear-gradient(180deg, #fff, #a855f7);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.5));
+    margin-bottom: 20px;
+}
+
+.game-card {
+    background: linear-gradient(145deg, #1f1f23, #141416);
+    border: 1px solid #333;
+    border-radius: 24px;
+    padding: 24px;
+    display: flex; align-items: center; gap: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+.game-card:active { transform: scale(0.97); }
+.card-icon { font-size: 3.5rem; }
+.card-info h3 { margin: 0; font-size: 1.3rem; text-transform: uppercase; color: #fff; }
+.card-info p { margin: 5px 0 0; color: #888; font-weight: 600; }
