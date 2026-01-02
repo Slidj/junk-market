@@ -4,84 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pocket Casino</title>
-    <link rel="stylesheet" href="css/style.css?v=5">
+    <link rel="stylesheet" href="css/style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
     <div class="header">
-        <div class="badge">👤 <span id="username">You</span></div>
-        <div class="badge"><span class="gold-text">💰</span> <span id="balance" class="gold-text">1000</span></div>
+        <div class="badge">👤 <span id="username">Player</span></div>
+        <div class="badge"><span class="coin">🟡</span> <span id="balance">1000</span></div>
     </div>
 
     <div id="screen-lobby" class="screen active">
-        <div class="logo">POCKET<br>CASINO</div>
+        <div class="logo">POCKET<br>GAME</div>
         
         <div class="game-card" onclick="showScreen('screen-slots')">
             <div class="card-icon">🎰</div>
-            <div class="card-info">
-                <h3>Cyber Slots</h3>
-                <p>5 Барабанів • Wilds</p>
+            <div class="info">
+                <h3 class="card-title">Neon Slots</h3>
+                <p class="card-desc">5 Reels • Big Wins</p>
             </div>
         </div>
 
         <div class="game-card" onclick="showScreen('screen-roulette')">
             <div class="card-icon">🎡</div>
-            <div class="card-info">
-                <h3>Neon Roulette</h3>
-                <p>Класика x2 / x14</p>
+            <div class="info">
+                <h3 class="card-title">Roulette</h3>
+                <p class="card-desc">Classic Style</p>
             </div>
         </div>
     </div>
 
     <div id="screen-slots" class="screen">
-        <button class="nav-btn" onclick="showScreen('screen-lobby')">⬅ Назад в меню</button>
+        <button class="btn-3d btn-gray" onclick="showScreen('screen-lobby')">🏠 MENU</button>
         
-        <div class="slot-machine-frame">
+        <div class="slot-frame">
             <div class="slot-grid">
-                <div class="reel" id="reel1">🍒</div>
-                <div class="reel" id="reel2">🍋</div>
-                <div class="reel" id="reel3">🍇</div>
-                <div class="reel" id="reel4">🔔</div>
-                <div class="reel" id="reel5">💎</div>
+                <div class="reel" id="reel1"><div class="reel-strip">🍒</div></div>
+                <div class="reel" id="reel2"><div class="reel-strip">🍋</div></div>
+                <div class="reel" id="reel3"><div class="reel-strip">🍇</div></div>
+                <div class="reel" id="reel4"><div class="reel-strip">💎</div></div>
+                <div class="reel" id="reel5"><div class="reel-strip">7️⃣</div></div>
             </div>
         </div>
 
         <div class="bet-panel">
-            <div style="font-size: 0.8rem; color: #888; text-align: center;">ОБЕРИ СТАВКУ</div>
-            <div class="bet-buttons">
-                <button class="chip" onclick="setSlotBet(10)">10</button>
-                <button class="chip" onclick="setSlotBet(50)">50</button>
-                <button class="chip" onclick="setSlotBet(100)">100</button>
+            <div class="bet-options">
+                <button class="btn-3d btn-purple chip" onclick="setSlotBet(10)">10</button>
+                <button class="btn-3d btn-purple chip" onclick="setSlotBet(50)">50</button>
+                <button class="btn-3d btn-purple chip" onclick="setSlotBet(100)">100</button>
             </div>
-            <input type="number" id="slot-bet-input" value="10" class="input-bet">
+            <input type="number" id="slot-bet-input" value="50" class="bet-input">
         </div>
 
-        <button class="spin-btn" onclick="spinSlots()">SPIN</button>
-        <div id="slot-msg" class="status"></div>
+        <button class="btn-3d spin-btn" onclick="spinSlots()">SPIN</button>
+        <div id="slot-msg" class="status-text"></div>
     </div>
 
     <div id="screen-roulette" class="screen">
-        <button class="nav-btn" onclick="showScreen('screen-lobby')">⬅ Назад в меню</button>
-
-        <div class="wheel-wrap">
-            <div class="arrow">▼</div>
-            <div class="wheel" id="wheel"></div>
-        </div>
-
-        <div class="bet-panel">
-            <div class="color-picker">
-                <button class="c-btn bg-red" onclick="setRouletteBet('red')">x2</button>
-                <button class="c-btn bg-black" onclick="setRouletteBet('black')">x2</button>
-                <button class="c-btn bg-green" onclick="setRouletteBet('green')">x14</button>
-            </div>
-            <p style="text-align: center; margin:5px;">Вибір: <span id="r-bet-target" style="font-weight:bold;">...</span></p>
-        </div>
-
-        <button class="spin-btn" onclick="spinRoulette()">START (50)</button>
-        <div id="roulette-msg" class="status"></div>
+        <button class="btn-3d btn-gray" onclick="showScreen('screen-lobby')">🏠 MENU</button>
+        <h2 style="text-align: center;">Coming Soon</h2>
     </div>
 
-    <script src="js/script.js?v=5"></script>
+    <script src="js/script.js"></script>
 </body>
 </html>
