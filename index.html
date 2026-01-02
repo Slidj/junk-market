@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pocket Casino</title>
-    <link rel="stylesheet" href="css/style.css?v=25">
+    <link rel="stylesheet" href="css/style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
@@ -20,30 +20,18 @@
 
     <div id="screen-lobby" class="screen active">
         <div class="logo">POCKET<br>GAME</div>
-        
         <div class="games-list">
             <div class="game-card" onclick="showScreen('screen-slots')">
                 <div class="card-icon">🎰</div>
-                <div class="card-info">
-                    <h3>Neon Slots</h3>
-                    <p>Classic 5 Reels</p>
-                </div>
+                <div class="card-info"><h3>Neon Slots</h3><p>Classic 5 Reels</p></div>
             </div>
-
             <div class="game-card" onclick="showScreen('screen-matrix')">
                 <div class="card-icon">🧩</div>
-                <div class="card-info">
-                    <h3>Mega Grid</h3>
-                    <p>5x3 • Lines</p>
-                </div>
+                <div class="card-info"><h3>Mega Grid</h3><p>5x3 • Lines</p></div>
             </div>
-
             <div class="game-card" onclick="showScreen('screen-mines')">
                 <div class="card-icon">💣</div>
-                <div class="card-info">
-                    <h3>Cyber Mines</h3>
-                    <p>Find Gems • Avoid Bombs</p>
-                </div>
+                <div class="card-info"><h3>Cyber Mines</h3><p>Levels • Risk</p></div>
             </div>
         </div>
     </div>
@@ -52,6 +40,8 @@
         <button class="btn-3d btn-gray" onclick="showScreen('screen-lobby')">⬅ МЕНЮ</button>
         <div class="slot-frame">
             <div class="slot-window">
+                <div id="slot-notif" class="notification-overlay"></div>
+                
                 <div class="slot-grid">
                     <div class="reel" id="reel1"><div class="reel-strip">🍒</div></div>
                     <div class="reel" id="reel2"><div class="reel-strip">🍋</div></div>
@@ -70,13 +60,14 @@
             <input type="number" id="slot-bet-input" value="50" class="bet-input" readonly>
         </div>
         <button class="btn-3d spin-btn" onclick="spinSlots()">SPIN</button>
-        <div id="slot-msg" class="status-text"></div>
     </div>
 
     <div id="screen-matrix" class="screen">
         <button class="btn-3d btn-gray" onclick="showScreen('screen-lobby')">⬅ МЕНЮ</button>
         <div class="slot-frame">
             <div class="slot-window matrix-window">
+                <div id="matrix-notif" class="notification-overlay"></div>
+
                 <svg id="lines-svg" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
                 <div class="matrix-grid">
                     <div class="reel-col" id="m-col1"><div class="sym">🍒</div><div class="sym">🍋</div><div class="sym">🍇</div></div>
@@ -107,26 +98,28 @@
             </div>
         </div>
         <button class="btn-3d spin-btn" onclick="spinMatrix()">SPIN GRID</button>
-        <div id="matrix-msg" class="status-text"></div>
     </div>
 
     <div id="screen-mines" class="screen">
         <button class="btn-3d btn-gray" onclick="exitMines()">⬅ МЕНЮ</button>
         
         <div class="mines-container">
-            <div class="mines-grid" id="mines-grid">
-                </div>
+            <div id="mines-notif" class="notification-overlay"></div>
+            
+            <div class="mines-grid" id="mines-grid"></div>
         </div>
 
         <div class="bet-panel">
             <div id="mines-controls-start">
+                <div class="difficulty-selector">
+                    <button class="diff-btn active-easy" onclick="setMineDiff('easy')" id="diff-easy">EASY (3)</button>
+                    <button class="diff-btn" onclick="setMineDiff('medium')" id="diff-med">MED (5)</button>
+                    <button class="diff-btn" onclick="setMineDiff('hard')" id="diff-hard">HARD (10)</button>
+                </div>
+
                 <div class="bet-row">
                     <label>Ставка:</label>
                     <input type="number" id="mines-bet-input" class="bet-input-manual" value="50" min="10">
-                </div>
-                <div class="bet-info-row">
-                    <span>Міни: <b style="color:#ef4444">3 шт</b></span>
-                    <span>Діаманти: <b style="color:#4ade80">22 шт</b></span>
                 </div>
                 <button class="btn-3d spin-btn" onclick="startMines()">ГРАТИ</button>
             </div>
@@ -138,10 +131,8 @@
                 </button>
             </div>
         </div>
-        
-        <div id="mines-msg" class="status-text">Знайди діаманти!</div>
     </div>
 
-    <script src="js/script.js?v=30"></script>
+    <script src="js/script.js"></script>
 </body>
 </html>
